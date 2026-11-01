@@ -10,42 +10,118 @@ rattache_a:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="88Systems : fiabilisation du système d'information.">
+<meta name="description" content="88Systems fiabilise le système d'information des entreprises : diagnostic, automatisations, agents IA et leur exploitation au quotidien.">
 <title>88Systems</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231c2b4a'/%3E%3Ctext x='50' y='68' font-size='52' font-family='Georgia,serif' fill='%23faf8f3' text-anchor='middle'%3E88%3C/text%3E%3C/svg%3E">
-<!--
-  La page de presentation provisoire de 88systems.io, a la racine du site unique (DEC_00179 de PCP046) :
-  Antoine la remplace quand il veut (2026-10-31, PCP049-1031-j : « une page minimale que j'écris (88Systems,
-  une phrase, le contact), que tu remplaces quand tu veux »). La palette et le logo 88 sont ceux du portail.
-  Elle ne nomme aucun client : leurs portails sont sous leur chemin, et ne se listent pas ici.
--->
 <style>
-:root { --marque: #1f4e5f; --nuit: #1c2b4a; --fond: #f4f6f8; --surface: #ffffff; --bord: #e0e4e8; --encre: #1a1a1a; --discret: #6b7280; }
+:root {
+  --marque: #1f4e5f; --nuit: #1c2b4a; --trait: #9fc3ce;
+  --fond: #f4f6f8; --surface: #ffffff; --bord: #e0e4e8; --filet: #eef0f2;
+  --encre: #1a1a1a; --encre2: #4a5459; --discret: #6b7280; --pied: #e9edf0;
+  --s1: .5rem; --s2: .75rem; --s3: 1rem; --s4: 1.5rem; --s5: 2rem; --s6: 3rem;
+}
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; }
-body { display: flex; flex-direction: column; min-height: 100vh; background-color: var(--fond); color: var(--encre);
-       font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
-.carte { width: 100%; max-width: 34rem; padding: 2.2rem 2.4rem; background-color: var(--surface); border: 1px solid var(--bord); border-radius: 14px; }
-.tete { display: flex; align-items: center; gap: .9rem; margin-bottom: 1.4rem; }
-h1 { margin: 0; font-size: 1.6rem; letter-spacing: .01em; }
-p { margin: 0 0 1rem; }
-.discret { color: var(--discret); font-size: .92rem; }
-a { color: var(--marque); }
-footer { padding: 1rem; text-align: center; color: var(--discret); font-size: .78rem; }
+html, body { margin: 0; }
+body { min-height: 100vh; display: flex; flex-direction: column; background-color: var(--fond); color: var(--encre);
+  font: .875rem/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+.large { width: 100%; max-width: 68rem; margin: 0 auto; padding: 0 var(--s4); }
+header { background-color: var(--surface); border-bottom: 1px solid var(--bord); }
+header .large { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+.marque { display: inline-flex; align-items: center; gap: var(--s2); color: var(--encre); text-decoration: none; font-weight: 700; font-size: 1rem; }
+.lien-contact { color: var(--marque); font-weight: 600; text-decoration: none; }
+main { flex: 1; }
+.ouverture { padding: var(--s6) 0 var(--s5); }
+h1 { margin: 0 0 var(--s3); font-size: 1.5rem; line-height: 1.25; letter-spacing: -0.015em; max-width: 34ch; }
+.chapeau { margin: 0; max-width: 68ch; font-size: 1rem; color: var(--encre2); }
+section { padding: var(--s5) 0; }
+h2 { margin: 0 0 var(--s4); font-size: 1rem; line-height: 1.25; letter-spacing: -0.015em; padding-bottom: var(--s1); border-bottom: 1px solid var(--bord); }
+h3 { margin: 0 0 var(--s1); font-size: .875rem; }
+p { margin: 0; max-width: 68ch; }
+.grille { display: grid; gap: var(--s3); grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: stretch; }
+.grille .carte { grid-column: span 2; }
+.grille .carte:nth-child(n+4) { grid-column: span 3; }
+.carte { background-color: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: var(--s4); box-shadow: 0 1px 3px rgba(16,24,40,.08); }
+.carte p { color: var(--encre2); }
+.etapes { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+.etape { display: flex; gap: var(--s3); align-items: flex-start; }
+.num { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 999px;
+  background-color: var(--nuit); color: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; }
+.etape p { color: var(--encre2); }
+.principes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s2) var(--s5); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.principes li { padding-left: var(--s3); border-left: 3px solid var(--trait); color: var(--encre2); max-width: 60ch; }
+.citation { margin: var(--s4) 0 0; font-size: 1rem; color: var(--encre); max-width: 60ch; }
+.contact { background-color: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: var(--s5); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; justify-content: space-between; }
+.bouton { display: inline-flex; align-items: center; height: 2.6rem; padding: 0 var(--s4); border-radius: 10px; background-color: var(--marque); color: #ffffff; font-weight: 600; text-decoration: none; }
+footer { background-color: var(--pied); color: var(--encre2); font-size: .8rem; margin-top: var(--s5); }
+footer .large { display: flex; flex-wrap: wrap; gap: var(--s2); justify-content: space-between; padding-top: var(--s3); padding-bottom: var(--s3); }
+@media (max-width: 860px) { .grille { grid-template-columns: 1fr; } .grille .carte, .grille .carte:nth-child(n+4) { grid-column: auto; } .principes { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .ouverture { padding-top: var(--s5); } .contact { padding: var(--s4); } }
 </style>
 </head>
 <body>
+<header>
+  <div class="large">
+    <a class="marque" href="./">
+      <svg width="32" height="32" viewBox="0 0 100 100" role="img" aria-label="88Systems"><rect width="100" height="100" rx="20" fill="#1c2b4a"/><text x="50" y="68" font-size="52" font-family="Georgia,serif" fill="#faf8f3" text-anchor="middle">88</text></svg>
+      88Systems
+    </a>
+    <a class="lien-contact" href="mailto:antoine.curgy@88systems.io">Nous écrire</a>
+  </div>
+</header>
 <main>
-  <div class="carte">
-    <div class="tete">
-      <svg width="44" height="44" viewBox="0 0 100 100" role="img" aria-label="88Systems"><rect width="100" height="100" rx="20" fill="#1c2b4a"/><text x="50" y="68" font-size="52" font-family="Georgia,serif" fill="#faf8f3" text-anchor="middle">88</text></svg>
-      <h1>88Systems</h1>
+  <div class="large">
+    <div class="ouverture">
+      <h1>Nous rendons fiables les données qui circulent entre vos logiciels.</h1>
+      <p class="chapeau">Quand une même information vit dans plusieurs outils, les équipes la rapprochent à la main, les écarts passent inaperçus et les décisions reposent sur des chiffres qu'on ne peut pas vérifier. 88Systems diagnostique votre système d'information, automatise ce qui le mérite et suit ces automatisations chaque jour.</p>
     </div>
-    <p>Nous fiabilisons le système d'information des entreprises : les données et les traitements qui relient leurs logiciels, contrôlés chaque jour.</p>
-    <p class="discret">Contact : <a href="mailto:antoine.curgy@88systems.io">antoine.curgy@88systems.io</a></p>
+
+    <section aria-labelledby="t-offres">
+      <h2 id="t-offres">Ce que nous faisons</h2>
+      <div class="grille">
+        <div class="carte"><h3>Diagnostic et cartographie du SI</h3><p>Nous cartographions vos logiciels, leurs flux et les processus qu'ils servent, puis nous désignons ce qu'il faut fiabiliser d'abord. Vous gardez les livrables, que vous poursuiviez avec nous ou non.</p></div>
+        <div class="carte"><h3>Déploiement d'automatisations</h3><p>Nous construisons les échanges, les rapprochements et les rapports qui relient vos systèmes, avec des règles écrites et prouvées par des essais.</p></div>
+        <div class="carte"><h3>Déploiement d'agents IA</h3><p>Nous posons des agents spécialisés sur des données déjà fiables, pour enquêter sur une anomalie ou préparer une décision, sous des garde-fous explicites.</p></div>
+        <div class="carte"><h3>Maintenance des automatisations et des agents</h3><p>Nous surveillons chaque passage, traitons les incidents et faisons évoluer ce qui tourne, pour un forfait proportionné à sa complexité.</p></div>
+        <div class="carte"><h3>Expertise SI et pilotage de projet</h3><p>Nous accompagnons vos projets de système d'information comme architecte ou chef de projet, à la journée.</p></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="t-methode">
+      <h2 id="t-methode">Notre façon de travailler</h2>
+      <div class="etapes">
+        <div class="etape"><span class="num">1</span><div><h3>Comprendre</h3><p>Le diagnostic vient avant toute proposition. Il montre où l'information se perd et ce que cela coûte.</p></div></div>
+        <div class="etape"><span class="num">2</span><div><h3>Fiabiliser</h3><p>Nous automatisons les traitements utiles, nous les contrôlons à chaque passage et nous en rendons compte dans un portail.</p></div></div>
+        <div class="etape"><span class="num">3</span><div><h3>Prolonger</h3><p>Une fois les données fiables, des agents IA prennent en charge les enquêtes et les tâches répétitives.</p></div></div>
+      </div>
+      <p class="citation">Notre objectif n'est pas de tout automatiser, mais d'identifier ce qui mérite de l'être.</p>
+    </section>
+
+    <section aria-labelledby="t-principes">
+      <h2 id="t-principes">Ce que nous tenons</h2>
+      <ul class="principes">
+        <li>Une règle écrite pour chaque traitement, reliée à l'essai qui la prouve.</li>
+        <li>Une logique déterministe d'abord ; l'intelligence artificielle seulement là où elle apporte quelque chose.</li>
+        <li>Vos logiciels restent en place : nous les relions, nous ne les remplaçons pas.</li>
+        <li>Une exploitation suivie chaque jour, et chaque anomalie traitée jusqu'à sa cause.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="t-contact">
+      <div class="contact">
+        <div>
+          <h2 id="t-contact" style="border:0;padding:0;margin:0 0 var(--s1)">Parlons de votre système d'information</h2>
+          <p>Décrivez-nous en quelques lignes vos logiciels et ce qui vous coûte du temps.</p>
+        </div>
+        <a class="bouton" href="mailto:antoine.curgy@88systems.io">antoine.curgy@88systems.io</a>
+      </div>
+    </section>
   </div>
 </main>
-<footer>© 2026 88Systems</footer>
+<footer>
+  <div class="large">
+    <span>© 2026 88Systems</span>
+    <span>Fiabilisation du système d'information</span>
+  </div>
+</footer>
 </body>
 </html>
