@@ -155,12 +155,19 @@ function ligneRapport(r, avis) {
   } else {
     nom.textContent = String(r.sujet);
     // une demande sur ce rapport, chez la cellule qui porte son automatisation (DEC_00165, 2026-10-31)
-    nom.append(boutonDemande({ id: r.automatisation, nom: r.sujet, rapport: String(r.sujet) }, "dm-b"));
+    // les boutons d'une ligne restent ensemble, meme quand le nom passe a la ligne
+    const outilsL = el("span", "dm-g");
+    outilsL.append(boutonDemande({ id: r.automatisation, nom: r.sujet, rapport: String(r.sujet) }, "dm-b"));
+    // rafraichir ce seul rapport (Antoine, 2026-11-02, DEC_00379 de PCP001 : « un bouton par ligne, quand on clique
+    // sur un bouton ca raffraichit uniquement ce rapport ») ; absent si le portail ne sait pas le demander
+    if (r.rafraichir) outilsL.append(boutonRafraichir(r, date, avis));
+    nom.append(outilsL);
     const t = tag(etatAffiche(r));
     if (t) etat.append(t);
     // la date et l'heure du dernier passage, a Paris (demande des metiers, 2026-10-08)
     const h = heureDe(r.produit_le);
     date.textContent = r.fige ? FIGE : jourCourt(r.jour) + (h ? " à " + h : "");
+    montrerRafraichissement(r, date, avis);
     if (r.resume) {
       const b = bouton("lien-r", "Voir le résumé");
       b.dataset.ouvrePanneau = "1";
@@ -213,6 +220,64 @@ function ligneRapport(r, avis) {
   }
   tr.append(nom, f, origine, etat, date, resume, notice, action);
   return tr;
+}
+
+// ------------------------------------------------------------------ rafraichir une ligne
+
+const EN_COURS_RAF = ["en_file", "en_cours"];
+let relectureRaf = null;
+
+// L'etat d'un rafraichissement, sous la date : en file ou en cours le temps qu'il tourne ; refuse ou en echec,
+// son motif tel que le lanceur l'ecrit ; fait, rien (la date dit le nouveau passage).
+function montrerRafraichissement(r, date, avis) {
+  const e = r.rafraichir && r.rafraichir.etat;
+  const textes = { en_file: "Rafraîchissement demandé…", en_cours: "Rafraîchissement en cours…",
+                   refuse: "Non rafraîchi", echec: "Rafraîchissement en échec" };
+  if (!textes[e]) return;
+  const p = el("span", "rf-e" + (EN_COURS_RAF.includes(e) ? "" : " rf-k"), textes[e]);
+  // le motif d'un refus ou d'un echec, tel que le lanceur l'ecrit : a la demande, comme le resume
+  if (r.rafraichir.motif && !EN_COURS_RAF.includes(e)) {
+    const v = bouton("lien-r rf-v", "voir pourquoi");
+    v.setAttribute("aria-label", "Pourquoi « " + r.sujet + " » n'a pas été rafraîchi");
+    v.addEventListener("click", () => { avis.textContent = `« ${r.sujet} » : ${r.rafraichir.motif}`; });
+    p.append(" · ", v);
+  }
+  date.append(p);
+  if (EN_COURS_RAF.includes(e)) relireBientot();
+}
+
+function relireBientot() {
+  if (relectureRaf) return;
+  relectureRaf = setTimeout(() => {
+    relectureRaf = null;
+    suivre([SOURCES.rapports], (d, premier) => poser(vueRapports(d), premier));
+  }, 15000);
+}
+
+function boutonRafraichir(r, date, avis) {
+  const b = bouton("dm-b rf-b");
+  b.prepend(ico("rafraichir", 15));
+  b.title = "Rafraîchir ce rapport";
+  b.setAttribute("aria-label", "Rafraîchir " + r.sujet);
+  const occupe = () => EN_COURS_RAF.includes(r.rafraichir && r.rafraichir.etat);
+  if (occupe()) b.setAttribute("aria-disabled", "true");
+  b.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (occupe()) { avis.textContent = `« ${r.sujet} » est déjà en cours de rafraîchissement.`; return; }
+    b.setAttribute("aria-disabled", "true");
+    const { statut, donnees } = await appeler("POST", "/api/rapports/" + encodeURIComponent(r.id) + "/rafraichir");
+    if (statut === 401) return sessionPerdue();
+    if (statut !== 200 || !donnees) {
+      b.removeAttribute("aria-disabled");
+      avis.textContent = `« ${r.sujet} » ne peut pas être rafraîchi : ${(donnees && donnees.erreur) || "service indisponible"}.`;
+      return;
+    }
+    r.rafraichir = donnees;
+    for (const s of date.querySelectorAll(".rf-e")) s.remove();
+    montrerRafraichissement(r, date, avis);
+    avis.textContent = `« ${r.sujet} » sera rafraîchi dans la minute ; la ligne se met à jour seule.`;
+  });
+  return b;
 }
 
 // Le resume n'est jamais mis en cache : c'est le courriel du dernier passage, lu a la demande.

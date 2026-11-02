@@ -418,3 +418,9 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 .dm-f { display: inline-flex; align-items: center; gap: .45rem; }
 .dm-b { display: inline-flex; align-items: center; margin-left: .45rem; padding: .15rem; vertical-align: middle; background-color: transparent; border: 0; border-radius: 4px; color: var(--pale); cursor: pointer; }
 .dm-b:hover, .dm-b:focus-visible { color: var(--marque); background-color: var(--survol); }
+.dm-g { white-space: nowrap; }
+.dm-b.rf-b { margin-left: .2rem; }
+.rf-e .rf-v { font-size: inherit; }
+.dm-b[aria-disabled="true"] { opacity: .45; cursor: default; }
+.rf-e { display: block; margin-top: .15rem; font-family: var(--texte); color: var(--ambre); white-space: normal; }
+.rf-e.rf-k { color: var(--rouge); }
