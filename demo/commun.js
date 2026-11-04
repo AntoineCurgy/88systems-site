@@ -239,7 +239,7 @@ function horsLigne() {
 
 // ------------------------------------------------------------------ session et chrome
 
-const PAGES = ["index.html", "rapports.html", "automatisations.html", "agents.html", "cartographie.html", "parametres.html", "aide.html"];
+const PAGES = ["index.html", "rapports.html", "automatisations.html", "agents.html", "cartographie.html", "parametres.html", "retours.html", "aide.html"];
 
 function pageCourante() {
   const p = location.pathname.split("/").pop() || "index.html";
@@ -270,6 +270,10 @@ function poserMoi() {
   avatar.title = moi.nom ? moi.nom + " · " + adresse : adresse;
   avatar.setAttribute("aria-label", "Connecté : " + (moi.nom || adresse));
   if (!$("maj").textContent) majBandeau(moi.maj);
+  // l'onglet « Retours » n'existe que si le service lit la liste des retours (DEC_00506) ; il remplace alors les bulles
+  const lienRetours = document.querySelector('a[data-page="retours"]');
+  if (lienRetours) lienRetours.hidden = !moi.onglet_retours;
+  document.body.classList.toggle("avec-retours", Boolean(moi.onglet_retours));
   // L'onglet « Agents » reste toujours visible, vide ou non (Antoine, 2026-10-31, PCP049-1031-c : « toujours
   // montrer Agents IA, Automatisations, Rapports et Cartographie », pour donner envie) ; il disparaissait quand
   // la feuille masquait chaque agent (2026-10-16).

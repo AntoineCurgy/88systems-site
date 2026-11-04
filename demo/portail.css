@@ -424,3 +424,21 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 .dm-b[aria-disabled="true"] { opacity: .45; cursor: default; }
 .rf-e { display: block; margin-top: .15rem; font-family: var(--texte); color: var(--ambre); white-space: normal; }
 .rf-e.rf-k { color: var(--rouge); }
+
+/* L'onglet « Retours » (DEC_00506) : le tableau, la barre de la page Rapports, le panneau de detail.
+   Quand il existe, il remplace les bulles « Faire une demande » des Rapports et des Automatisations. */
+.avec-retours .dm-b, .avec-retours .fi-s:has(.dm-f) { display: none; }
+.rt-outils { width: 100%; }
+.rt-sp { flex: 1; }
+.rt-l { cursor: pointer; }
+.rt-l:hover, .rt-l:focus-visible { background-color: var(--survol); }
+.rt-l:focus-visible { outline: 2px solid var(--marque); outline-offset: -2px; }
+
+.rt-tete { display: flex; gap: .4rem; margin: .2rem 0 1rem; }
+.rt-dl { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; margin: 0 0 1.2rem; font-size: .9rem; }
+.rt-dl dt { color: var(--discret); }
+.rt-dl dd { margin: 0; }
+.rt-h { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; font-size: .9rem; }
+.rt-h .mono { color: var(--discret); margin-right: .4rem; }
+.rt-sur { display: grid; gap: .3rem; margin-bottom: .8rem; font-size: .85rem; color: var(--encre2); }
+.rt-sur select { font: inherit; font-size: .9rem; padding: .5rem .6rem; border: 1px solid var(--bord); border-radius: 8px; background-color: #fff; color: var(--encre); }
