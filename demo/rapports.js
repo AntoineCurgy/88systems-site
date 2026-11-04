@@ -66,9 +66,9 @@ function vueRapports([donnees]) {
     b.addEventListener("click", () => { f.e = v; filtrer(); });
     pe.append(b);
   }
-  ligne.append(lab, pe);
-  const outils = el("div", "outils");
-  outils.append(barre, ligne);
+  // les groupes de filtres sur une ligne, la recherche a droite (Antoine, 2026-11-04, DEC_00520, option 5C)
+  ligne.append(barre, pe, el("span", "rt-sp"), lab);
+  const outils = ligne;
 
   // le tableau
   const carte = el("div", "carte gd-c");
@@ -169,7 +169,7 @@ function ligneRapport(r, avis) {
     date.textContent = r.fige ? FIGE : jourCourt(r.jour) + (h ? " à " + h : "");
     montrerRafraichissement(r, date, avis);
     if (r.resume) {
-      const b = bouton("lien-r", "Voir le résumé");
+      const b = bouton("btn btn-s b-resume", "Voir le résumé");   // un bouton blanc borde (DEC_00520, option 7C)
       b.dataset.ouvrePanneau = "1";
       b.setAttribute("aria-label", "Voir le résumé de " + r.sujet);
       b.addEventListener("click", () => ouvrirResume(r, b));

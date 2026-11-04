@@ -16,8 +16,9 @@ const API = (HOTE === "localhost" || HOTE === "127.0.0.1" || HOTE === "")
 const DELAI = 15000;
 const CONTACT = "antoine.curgy@88systems.io";
 // Trois etats (Antoine, 2026-10-05) ; « a_valider » est ramene a « ok » a la lecture.
-const ETATS = { ok: ["fonctionnel", "t-vert"], interrompu: ["interrompu", "t-rouge"], construction: ["en construction", "t-ferme"],
-                illisible: ["illisible", "t-rouge"] };
+// Le mot avec sa majuscule, en police du texte apres un point de couleur (Antoine, 2026-11-04, DEC_00520, option 8C).
+const ETATS = { ok: ["Fonctionnel", "t-vert"], interrompu: ["Interrompu", "t-rouge"], construction: ["En construction", "t-ferme"],
+                illisible: ["Illisible", "t-rouge"] };
 const STATUTS = { ok: "Fonctionnelle", panne: "Interrompue", construction: "En construction" };
 // Une automatisation « Figée » ne tourne plus : ce texte remplace sa date (Antoine, 2026-10-22).
 const FIGE = "Historique figé";
@@ -353,7 +354,11 @@ async function demarrer(charger) {
   }
 }
 
-// ------------------------------------------------------------------ panneau de droite
+// ------------------------------------------------------------------ la fenetre de detail
+// Au centre de l'ecran, sur un voile, a la place du panneau de droite (Antoine, 2026-11-04, DEC_00520,
+// option 4A : tete claire, 760 px, pied de boutons). Le titre de la page (#panneau-titre) monte dans la
+// tete, une rangee d'actions (.r-act) descend dans le pied, a cote de « Fermer ». Elle se ferme comme le
+// panneau : la croix, « Fermer », un clic dehors (sur le voile), Echap ; la page derriere ne defile plus.
 
 let panneauMode = null;
 let declencheur = null;
@@ -364,8 +369,14 @@ function ouvrirPanneau(mode, enfants, depuis) {
   panneauMode = mode;
   declencheur = depuis || document.activeElement;
   p.classList.toggle("large", mode === "resume");
-  $("panneau-corps").replaceChildren(...enfants);
+  const titre = enfants.find((x) => x && x.id === "panneau-titre");
+  const actions = enfants.filter((x) => x && x.classList && x.classList.contains("r-act"));
+  $("panneau-tete").replaceChildren(...(titre ? [titre] : []));
+  $("panneau-corps").replaceChildren(...enfants.filter((x) => x !== titre && !actions.includes(x)));
+  $("panneau-pied").replaceChildren(...actions, $("panneau-fermer-bas"));
+  $("panneau-corps").scrollTop = 0;
   p.hidden = false;
+  document.body.classList.add("fen-ouverte");
   $("panneau-fermer").focus();
 }
 
@@ -373,7 +384,10 @@ function fermerPanneau(rendreFocus = true) {
   const p = $("panneau");
   if (!p || p.hidden) return;
   p.hidden = true;
+  document.body.classList.remove("fen-ouverte");
+  $("panneau-tete").replaceChildren();
   $("panneau-corps").replaceChildren();
+  $("panneau-pied").replaceChildren($("panneau-fermer-bas"));
   const mode = panneauMode;
   panneauMode = null;
   if (auFermer) auFermer(mode);
@@ -383,10 +397,11 @@ function fermerPanneau(rendreFocus = true) {
 
 if ($("panneau")) {
   $("panneau-fermer").addEventListener("click", () => fermerPanneau());
+  $("panneau-fermer-bas").addEventListener("click", () => fermerPanneau());
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") fermerPanneau(); });
   document.addEventListener("click", (e) => {
     const p = $("panneau");
-    if (p.hidden || p.contains(e.target)) return;
+    if (p.hidden || $("panneau-fen").contains(e.target)) return;
     if (e.target.closest && e.target.closest("[data-ouvre-panneau]")) return;
     fermerPanneau(false);
   });
@@ -546,7 +561,10 @@ function ouvrirDemande(cible, depuis) {
   const envoyer = bouton("btn", "Envoyer");
   envoyer.type = "submit";
   pied.append(message, envoyer);
-  fen.append(x, titre, sur, choix, zone, pied);
+  zone.id = "dm-zone";
+  const labZone = el("label", "dm-lab", "Votre message");   // un libelle au-dessus de chaque champ (DEC_00520, option 9B)
+  labZone.htmlFor = "dm-zone";
+  fen.append(x, titre, sur, el("p", "dm-lab", "Nature"), choix, labZone, zone, pied);
   fen.addEventListener("submit", async (e) => {
     e.preventDefault();
     const texte = zone.value.trim();

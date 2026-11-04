@@ -48,7 +48,7 @@ function vueRetours([rets, autos]) {
   const nouveau = bouton("btn rt-n", "＋ Nouveau retour");
   nouveau.addEventListener("click", () => ouvrirNouveau(autos.automatisations, nouveau));
   const outils = el("div", "outils ligne rt-outils");
-  outils.append(barre, lab, el("span", "rt-sp"), nouveau);
+  outils.append(barre, el("span", "rt-sp"), lab, nouveau);   // la recherche a droite (DEC_00520, option 5C)
 
   if (!liste.length) {
     return [el("h1", null, "Retours"), sous, outils, vueVide("Aucun retour pour l'instant",
@@ -184,7 +184,10 @@ function ouvrirNouveau(autos, depuis) {
   const envoyer = bouton("btn", "Envoyer");
   envoyer.type = "submit";
   pied.append(message, envoyer);
-  fen.append(x, titre, labSur, choix, zone, pied);
+  zone.id = "dm-zone";
+  const labZone = el("label", "dm-lab", "Votre retour");   // un libelle au-dessus de chaque champ (DEC_00520, option 9B)
+  labZone.htmlFor = "dm-zone";
+  fen.append(x, titre, labSur, el("p", "dm-lab", "Type"), choix, labZone, zone, pied);
   fen.addEventListener("submit", async (e) => {
     e.preventDefault();
     const texte = zone.value.trim();

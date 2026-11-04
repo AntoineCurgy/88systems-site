@@ -121,7 +121,7 @@ function vueAutomatisations([donnees]) {
   };
   rafraichirFiltres();
   const outils = el("div", "outils ligne");
-  outils.append(lab, barre);
+  outils.append(barre, el("span", "rt-sp"), lab);   // la recherche a droite (DEC_00520, option 5C)
   return [el("h1", null, "Automatisations"), sous, cartes, outils, ...sections, vide];
 }
 
@@ -336,7 +336,7 @@ function ouvrirFiche(id) {
     const li = el("li");
     // le Statut fait autorite : une automatisation en construction montre ses rapports « en construction »
     const etatR = st === "construction" ? "construction" : (r.etat === "a_valider" ? "ok" : r.etat);
-    const t = r.acces ? tag(etatR) : el("span", "tag t-ferme", "accès restreint");
+    const t = r.acces ? tag(etatR) : el("span", "tag t-ferme", "Accès restreint");
     li.append(el("span", null, r.sujet));
     if (t) li.append(t);
     raps.append(li);

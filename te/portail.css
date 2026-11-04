@@ -23,6 +23,11 @@
   --rail-on: #e8f0f2;
   --bande: #f1f3f7;
   --nuit: #1c2b4a;
+  --bord-fort: #cfd6db;   /* le contour des cartes et des boutons blancs, comme la page de pilotage (DEC_00520) */
+  --clair: #cfe1e6;
+  --ombre: 0 1px 2px rgba(29, 40, 73, .06), 0 6px 18px rgba(29, 40, 73, .07);
+  --ombre-fen: 0 18px 50px rgba(22, 21, 15, .25);
+  --voile: rgba(22, 21, 15, .45);
   --texte: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --hb: 4.6rem;
@@ -34,6 +39,7 @@ html { scroll-padding-top: calc(var(--hb) + 1rem); }
 body {
   margin: 0; min-height: 100vh; display: flex; flex-direction: column;
   background-color: var(--fond); color: var(--encre); font: .875rem/1.5 var(--texte);
+  -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3 { margin: 0; line-height: 1.25; }
 p { margin: 0; }
@@ -97,7 +103,7 @@ a { color: var(--marque); }
 .droite { display: flex; flex-direction: column; min-width: 0; min-height: calc(100vh - var(--hb)); }
 .droite > main { flex: 1; }
 .contenu { max-width: 110rem; width: 100%; margin: 0 auto; padding: 1.75rem 2rem 3rem; min-width: 0; display: flex; flex-direction: column; gap: 1.25rem; }
-.contenu h1 { font-size: 1.4rem; }
+.contenu h1 { font-size: 21px; letter-spacing: -.015em; }
 .sous-titre { margin: -.75rem 0 0; color: var(--discret); }
 .chargement { color: var(--discret); }
 .erreur { color: var(--rouge); }
@@ -114,9 +120,10 @@ a { color: var(--marque); }
 .p-h { font-weight: 700; text-transform: uppercase; letter-spacing: .1em; font-size: .72rem; }
 
 /* ------------------------------------------------------------ elements communs */
-.carte { background-color: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: 1.1rem; }
+/* Le contour et l'ombre de la page de pilotage (Antoine, 2026-11-04, DEC_00520, option 10B) */
+.carte { background-color: var(--surface); border: 1.5px solid var(--bord-fort); border-radius: 14px; box-shadow: var(--ombre); padding: 1.1rem; }
 .c-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: .9rem; gap: 1rem; flex-wrap: wrap; }
-.c-h h2 { font-size: 1rem; display: flex; align-items: center; gap: .5rem; }
+.c-h h2 { font-size: 15px; color: var(--marque); display: flex; align-items: center; gap: .5rem; }
 .c-pied { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: .9rem; font-size: .8rem; color: var(--discret); }
 .legende { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .75rem; color: var(--discret); }
 .legende > span { display: inline-flex; align-items: center; gap: .35rem; }
@@ -127,20 +134,27 @@ a { color: var(--marque); }
 .pt.construction { background-color: transparent; border: 1.5px solid var(--pale); }
 .pt.tous { background-image: conic-gradient(var(--vert) calc(var(--ok, 60) * 1%), var(--rouge) 0 calc(var(--hs, 70) * 1%), #d6dbe0 0); }
 
-.tag { display: inline-block; padding: .05rem .45rem; border-radius: 999px; font: 600 .7rem/1.5 var(--mono); vertical-align: middle; }
-.t-vert { background-color: #e3f1e8; color: var(--vert); }
+.tag { display: inline-flex; align-items: center; gap: .35rem; font: 600 .8rem/1.5 var(--texte); vertical-align: middle; }
+/* un point de couleur et le mot, sans fond (Antoine, 2026-11-04, DEC_00520, option 8C) */
+.tag[class*="t-"]::before { content: ""; flex: none; width: .5rem; height: .5rem; border-radius: 50%; background-color: currentColor; }
+.t-vert { color: var(--vert); }
+.tag:not([class*="t-"]) { font-weight: 400; color: var(--encre2); }   /* le type d'un retour : une metadonnee, sans gras */
 .gd .tag { white-space: nowrap; }   /* une etiquette tient sur une ligne (2026-10-08) */
 .gd-date { text-align: left; }
-.t-ambre { background-color: #fbf1df; color: var(--ambre); }
-.t-rouge { background-color: #f6e3e3; color: var(--rouge); }
-.t-ferme { background-color: var(--filet); color: var(--discret); }
+.t-ambre { color: var(--ambre); }
+.t-rouge { color: var(--rouge); }
+.t-ferme { color: var(--discret); }
+.t-ferme::before { background-color: var(--pale); }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .35rem;
-  padding: .45rem .9rem; border: 0; border-radius: 8px; background-color: var(--marque); color: #fff;
+  padding: .45rem .9rem; border: 0; border-radius: 10px; background-color: var(--marque); color: #fff;
   font: inherit; font-weight: 600; font-size: .85rem; text-decoration: none; white-space: nowrap; cursor: pointer;
 }
 .btn.eteint { background-color: var(--surface2); color: var(--pale); cursor: not-allowed; }
+/* le bouton blanc borde de la page de pilotage, pour un geste secondaire (DEC_00520, option 7C) */
+.btn.btn-s { background-color: var(--surface); color: var(--encre); border: 1.5px solid var(--bord-fort); padding: calc(.45rem - 1.5px) calc(.9rem - 1.5px); }
+.btn.btn-s:hover { border-color: var(--encre); }
 .cad { display: inline-flex; vertical-align: -2px; margin-right: .35rem; color: var(--pale); }
 .lien-r { font: inherit; font-size: .8rem; background-color: transparent; border: 0; padding: 0; color: var(--discret); text-decoration: underline; cursor: pointer; white-space: nowrap; }
 /* Telecharger et Notice, cote a cote, la meme largeur ; la notice en bleu nuit avec un livre, le
@@ -154,25 +168,24 @@ a { color: var(--marque); }
 .h.voir { background-color: var(--vert-clair); }
 .h.panne { background-color: var(--rouge); }
 
-/* onglets segmentes, puces */
-.gb-barre { display: inline-flex; flex-wrap: wrap; gap: .2rem; background-color: var(--surface2); border-radius: 10px; padding: .25rem; align-self: flex-start; }
-.gb-o { font: inherit; font-size: .82rem; border: 0; background-color: transparent; border-radius: 8px; padding: .4rem .85rem; cursor: pointer; color: var(--gris-btn); }
-.gb-o span { font: .7rem var(--mono); color: var(--pale); margin-left: .2rem; }
-.gb-o[aria-pressed="true"] { background-color: #fff; color: var(--marque); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, .1); }
+/* les filtres en petits groupes colles, avec leurs comptes, comme l'onglet Sessions de la page de pilotage ;
+   la recherche a droite (Antoine, 2026-11-04, DEC_00520, option 5C) */
+.gb-barre, .pe { display: inline-flex; flex-wrap: wrap; background-color: var(--surface); border: 1.5px solid var(--bord); border-radius: 999px; overflow: hidden; align-self: flex-start; }
+.gb-o, .pe-b { font: inherit; font-size: .82rem; border: 0; background-color: transparent; border-radius: 0; padding: .38rem .9rem; cursor: pointer; color: var(--gris-btn); white-space: nowrap; }
+.gb-o + .gb-o, .pe-b + .pe-b { border-left: 1.5px solid var(--bord); }
+.gb-o:hover, .pe-b:hover { background-color: var(--survol); }
+.gb-o span, .pe-b span { font: .7rem var(--mono); color: var(--pale); margin-left: .2rem; }
+.gb-o[aria-pressed="true"], .pe-b[aria-pressed="true"] { background-color: var(--marque); color: #fff; font-weight: 600; }
+.gb-o[aria-pressed="true"] span, .pe-b[aria-pressed="true"] span { color: var(--clair); }
 .outils { display: flex; flex-direction: column; gap: .75rem; align-items: flex-start; }
-.outils.ligne { flex-direction: row; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; }
-.cherche input { font: inherit; padding: .5rem .85rem; border: 1px solid var(--bord); border-radius: 8px; background-color: #fff; width: 18rem; max-width: 100%; }
-.pe { display: flex; gap: .35rem; flex-wrap: wrap; }
-.pe-b { font: inherit; font-size: .8rem; border: 1px solid var(--bord); background-color: #fff; border-radius: 999px; padding: .3rem .8rem; cursor: pointer; color: var(--gris-btn); }
-.pe-b span { font: .7rem var(--mono); color: var(--pale); }
-.pe-b[aria-pressed="true"] { background-color: var(--marque); border-color: var(--marque); color: #fff; }
-.pe-b[aria-pressed="true"] span { color: #cfe1e6; }
+.outils.ligne { flex-direction: row; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; width: 100%; }
+.cherche input { font: inherit; padding: .5rem .85rem; border: 1.5px solid var(--bord); border-radius: 10px; background-color: #fff; width: 18rem; max-width: 100%; }
 .vide { color: var(--discret); }
 .avis { font-size: .85rem; color: var(--rouge); }
 .avis:empty { display: none; }
 
 /* ------------------------------------------------------------ tableau de bord */
-.ke { display: flex; align-items: center; gap: 1.5rem; background-color: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(16, 24, 40, .08); padding: 1.1rem 1.4rem; flex-wrap: wrap; }
+.ke { display: flex; align-items: center; gap: 1.5rem; background-color: #fff; border: 1.5px solid var(--bord-fort); border-radius: 14px; box-shadow: var(--ombre); padding: 1.1rem 1.4rem; flex-wrap: wrap; }
 .ke-anneau { width: 5.5rem; height: 5.5rem; border-radius: 50%; background-image: conic-gradient(var(--vert) calc(var(--p, 0) * 1%), #f0d5d5 0); display: grid; place-items: center; flex: none; }
 .ke-anneau span { display: grid; place-items: center; width: 4.2rem; height: 4.2rem; border-radius: 50%; background-color: #fff; font: 600 .85rem var(--mono); color: var(--pale); }
 .ke-anneau strong { font-size: 1.3rem; color: var(--vert); }
@@ -208,13 +221,20 @@ a { color: var(--marque); }
 .gd-c { position: relative; padding: .25rem .9rem .5rem; overflow-x: auto; }   /* relative : les .sr du tableau restent dans la zone qui defile */
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: .55rem .5rem; border-bottom: 1px solid var(--filet); font-size: .85rem; vertical-align: middle; }
-thead th { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--discret); font-weight: 500; padding-top: .8rem; }
+/* l'en-tete en casse normale (DEC_00520, option 1B), un filet un peu plus marque sous lui */
+thead th { font-size: 12px; color: var(--discret); font-weight: 600; padding-top: .8rem; border-bottom: 1.5px solid var(--bord); }
+/* Retouches du tableau (option 6A retouchee, DEC_00520) : une hauteur de ligne egale, le survol sur toute la
+   ligne, les chiffres et les dates en colonnes, pas de filet sous la derniere ligne (la carte la borde deja) */
+.gd tbody:not(.gd-b) > tr > * { height: 3.5rem; }
+.gd tbody:not(.gd-b) > tr:hover > * { background-color: var(--survol); }
+.gd tbody:last-child > tr:last-child > * { border-bottom: 0; }
+.gd .mono, .gd-date { font-variant-numeric: tabular-nums; }
 tbody th { font-weight: 500; }
 .gd { table-layout: fixed; min-width: 74rem; }
 .gd th { overflow-wrap: anywhere; }
 .gd .c, .td-f { text-align: center; }
 .td-f { font-size: .8rem; color: var(--marque); }
-.gd-b th { background-color: var(--bande); color: var(--nuit); font-size: .8rem; font-weight: 500; padding: .45rem .6rem; border-bottom: 0; }
+.gd-b th { background-color: var(--bande); color: var(--nuit); font-size: .8rem; font-weight: 500; padding: .45rem .5rem; border-bottom: 0; }   /* .5rem : le texte de la bande tombe sur celui des lignes (6A) */
 .gd-b span { font-weight: 400; color: var(--discret); margin-left: .5rem; }
 .gd tbody + tbody .gd-b th { border-top: .6rem solid #fff; }
 .act { text-align: right; white-space: nowrap; }
@@ -226,8 +246,9 @@ tbody th { font-weight: 500; }
 
 /* ------------------------------------------------------------ automatisations */
 .grp-c { margin-top: .25rem; }
-.grp { font-size: 1rem; margin: 0 0 .5rem; display: flex; align-items: center; gap: .5rem; }
-.g-cpt { font: 600 .72rem var(--mono); background-color: var(--surface2); border-radius: 999px; padding: .05rem .5rem; }
+/* le titre d'un groupe en bleu canard sur son filet, comme la page de pilotage (DEC_00520, option 1B) */
+.grp { font-size: 15px; color: var(--marque); margin: 0 0 .5rem; padding-bottom: .45rem; border-bottom: 2px solid var(--trait); display: flex; align-items: center; gap: .5rem; }
+.g-cpt { font: 400 .72rem var(--mono); background-color: var(--rail-on); color: var(--marque); border-radius: 999px; padding: .05rem .5rem; }
 .lb {
   display: flex; align-items: center; gap: .5rem; width: 100%; padding: .6rem .25rem;
   border: 0; border-top: 1px solid var(--filet); background-color: transparent;
@@ -255,37 +276,39 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 .la-d { font-size: .72rem; color: var(--discret); text-align: right; white-space: nowrap; }
 .la-d.alerte, .fi-s .alerte { color: var(--rouge); font-weight: 600; }   /* une surveillance qui signale un rate (2026-10-09) */
 
-/* ------------------------------------------------------------ panneau de droite */
-.tiroir {
-  position: fixed; top: var(--hb); right: 0; bottom: 0; z-index: 20;
-  width: min(36rem, 94vw); padding: 1.75rem 1.75rem 2rem; overflow: auto;
-  background-color: #fff; box-shadow: -8px 0 30px rgba(16, 24, 40, .15);
-}
-.tiroir.large { width: min(46rem, 96vw); }
-.tiroir-x { position: absolute; top: .8rem; right: 1rem; font-size: 1.6rem; line-height: 1; background-color: transparent; border: 0; cursor: pointer; color: var(--discret); }
-@media (prefers-reduced-motion: no-preference) {
-  .tiroir:not([hidden]) { animation: glisse .18s ease-out; }
-  @keyframes glisse { from { transform: translateX(100%); } to { transform: none; } }
-}
-.r-sur { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--pale); }
+/* ------------------------------------------------------------ la fenetre de detail */
+/* Au centre de l'ecran, sur un voile ; tete claire, corps qui defile seul, pied de boutons ; 760 px
+   (Antoine, 2026-11-04, DEC_00520, option 4A ; elle remplace le panneau qui glissait de la droite). */
+.fen-voile { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 1rem; background-color: var(--voile); }
+.fen { display: flex; flex-direction: column; width: min(760px, 94vw); max-height: 86vh; background-color: var(--surface); border: 1.5px solid var(--bord); border-radius: 14px; box-shadow: var(--ombre-fen); overflow: hidden; }
+.fen-t { flex: none; display: flex; align-items: center; gap: .75rem; padding: 1rem 1.5rem; background-color: var(--surface2); border-bottom: 1.5px solid var(--bord); }
+.fen-tt { flex: 1; min-width: 0; }
+.fen-tt h2, .fen-tt .r-titre, .fen-tt .fi-nom { margin: 0; font-size: 15px; line-height: 1.35; }
+.fen-x { flex: none; font-size: 1.4rem; line-height: 1; padding: 0 .2rem; background-color: transparent; border: 0; cursor: pointer; color: var(--discret); }
+.fen-x:hover { color: var(--encre); }
+.fen-c { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 1.25rem 1.5rem; }
+.fen-p { flex: none; display: flex; justify-content: flex-end; align-items: center; gap: .6rem; padding: .75rem 1.5rem; border-top: 1.5px solid var(--bord); }
+.fen-p .r-act { margin: 0; }
+body.fen-ouverte { overflow: hidden; }
+.r-sur { font-size: 12.5px; font-weight: 600; color: var(--discret); margin-bottom: .6rem; }
 .r-titre { font-size: 1.25rem; margin: .3rem 0 .8rem; }
 .r-act { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; font-size: .8rem; }
-.r-cadre { display: block; width: 100%; height: calc(100vh - var(--hb) - 12rem); border: 0; background-color: #fff; }
+.r-cadre { display: block; width: 100%; height: 58vh; border: 0; background-color: #fff; }
 
-.fi-st { display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem; font-weight: 600; padding: .2rem .65rem; border-radius: 999px; background-color: var(--filet); color: var(--discret); }
-.fi-st.ok { background-color: #e3f1e8; color: var(--vert); }
-.fi-st.panne { background-color: #f6e3e3; color: var(--rouge); }
+.fi-st { display: inline-flex; align-items: center; gap: .4rem; font-size: .85rem; font-weight: 600; color: var(--discret); margin: 0 0 .3rem; }   /* sans fond (8C) */
+.fi-st.ok { color: var(--vert); }
+.fi-st.panne { color: var(--rouge); }
 .fi-nom { font-size: 1.35rem; margin: .6rem 0 .15rem; }
 .fi-flux { margin: 0 0 1rem; color: var(--marque); }
 .fi-flux .mono { color: var(--pale); font-size: .75rem; margin-left: .4rem; }
 .fi-s { border-top: 1px solid var(--bord); padding: .9rem 0; }
-.fi-s h3 { margin: 0 0 .4rem; font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--pale); font-weight: 600; }
+.fi-s h3 { margin: 0 0 .4rem; font-size: 12.5px; color: var(--discret); font-weight: 600; }   /* casse normale (1B) */
 .fi-box { margin-top: .5rem; padding: .6rem .75rem; background-color: var(--fond); border-radius: 8px; font-size: .75rem; line-height: 1.5; overflow-wrap: anywhere; }
 .fi-r { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
 .fi-r li { display: flex; justify-content: space-between; gap: 1rem; align-items: center; font-size: .88rem; }
 
 /* ------------------------------------------------------------ parametres */
-.pa thead th { font-size: .7rem; padding-top: .55rem; }
+.pa thead th { padding-top: .55rem; }
 .pa th:first-child { width: 36%; }
 .pa .c { text-align: center; }
 .pa input[type="checkbox"] { accent-color: var(--marque); }
@@ -335,7 +358,7 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 /* ------------------------------------------------------------ connexion */
 .vue-connexion { flex: 1; display: flex; flex-direction: column; }
 .c1 { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
-.carte-c { width: min(28rem, 100%); background-color: #fff; border: 1px solid var(--bord); border-radius: 16px; padding: 2rem; }
+.carte-c { width: min(28rem, 100%); background-color: #fff; border: 1.5px solid var(--bord-fort); border-radius: 16px; box-shadow: var(--ombre); padding: 2rem; }
 .etapes { list-style: none; margin: 0 0 1.5rem; padding: 0; display: flex; gap: 1.5rem; font-size: .85rem; color: var(--pale); }
 .etapes li { display: flex; align-items: center; gap: .5rem; }
 .etapes span { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 1.5px solid currentColor; font-weight: 700; font-size: .75rem; }
@@ -343,13 +366,13 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 .etapes li.on span { background-color: var(--marque); border-color: var(--marque); color: #fff; }
 .carte-c form { display: flex; flex-direction: column; gap: .7rem; }
 .carte-c label { font-weight: 600; font-size: .88rem; }
-.champ { font: inherit; padding: .75rem .9rem; border: 1px solid #cfd6db; border-radius: 10px; background-color: #fff; color: var(--encre); }
+.champ { font: inherit; padding: .75rem .9rem; border: 1.5px solid var(--bord-fort); border-radius: 10px; background-color: #fff; color: var(--encre); }
 .champ:focus-visible, .case-c:focus-visible { outline: 3px solid var(--marque); outline-offset: 1px; }
 .btn.plein { padding: .75rem 1rem; font-size: .95rem; border-radius: 10px; }
 .lien { font: inherit; font-size: .85rem; background-color: transparent; border: 0; color: var(--marque); text-decoration: underline; cursor: pointer; align-self: flex-start; padding: 0; }
 .envoye { margin: 0 0 .5rem; font-size: .88rem; overflow-wrap: anywhere; }
 .cases { display: flex; gap: .45rem; }
-.case-c { width: 3rem; min-width: 0; height: 3.4rem; text-align: center; font: 600 1.4rem var(--mono); border: 1px solid #cfd6db; border-radius: 10px; background-color: #fff; color: var(--encre); }
+.case-c { width: 3rem; min-width: 0; height: 3.4rem; text-align: center; font: 600 1.4rem var(--mono); border: 1.5px solid var(--bord-fort); border-radius: 10px; background-color: #fff; color: var(--encre); }
 .petit { font-size: .78rem; color: var(--discret); }
 .message { min-height: 1.2rem; margin-top: .7rem; font-size: .85rem; color: var(--marque); }
 .message.erreur { color: var(--rouge); }
@@ -386,12 +409,13 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 
 /* ------------------------------------------------------------ la documentation d'une automatisation */
 /* Une fenetre au centre, quatre pieces a telecharger, un bandeau vert ou orange (Antoine, 2026-10-22, option B). */
-.doc-b { background-color: var(--surface); color: var(--encre); border: 1px solid var(--bord); margin: .2rem 0 1rem; }
+.doc-b { background-color: var(--surface); color: var(--encre); border: 1.5px solid var(--bord-fort); margin: .2rem 0 1rem; }
 .doc-b.eteint { background-color: var(--surface2); color: var(--pale); border-color: var(--surface2); }
-.doc-voile { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; background-color: rgba(28, 43, 74, .55); }
-.doc-fen { position: relative; width: 480px; max-width: 100%; padding: 1.3rem 1.4rem; background-color: var(--surface); border-radius: 12px; box-shadow: 0 18px 50px rgba(0, 0, 0, .25); }
-.doc-fen h2 { margin: 0 0 .9rem; font-size: 1.1rem; }
-.doc-x { position: absolute; top: .6rem; right: .8rem; font-size: 1.5rem; line-height: 1; background-color: transparent; border: 0; cursor: pointer; color: var(--discret); }
+.doc-voile { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; background-color: var(--voile); }
+.doc-fen { position: relative; width: 480px; max-width: 100%; padding: 0 1.4rem 1.3rem; background-color: var(--surface); border: 1.5px solid var(--bord); border-radius: 14px; box-shadow: var(--ombre-fen); overflow: hidden; }
+/* la tete claire de la fenetre de detail (DEC_00520, option 4A) */
+.doc-fen > h2 { margin: 0 -1.4rem 1rem; padding: 1rem 3rem 1rem 1.4rem; font-size: 15px; background-color: var(--surface2); border-bottom: 1.5px solid var(--bord); }
+.doc-x { position: absolute; top: .75rem; right: 1rem; font-size: 1.5rem; line-height: 1; background-color: transparent; border: 0; cursor: pointer; color: var(--discret); }
 .doc-bandeau { margin: 0; padding: .6rem .8rem; font-size: .82rem; line-height: 1.6; border-left: 4px solid var(--pale); border-radius: 0 8px 8px 0; background-color: var(--filet); }
 .doc-bandeau.vert { border-left-color: var(--vert); background-color: #e3f1e8; }
 .doc-bandeau.orange { border-left-color: var(--ambre); background-color: #fbf1df; }
@@ -405,12 +429,15 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 .ca .discret { margin: 0 0 .5rem; }
 .ca-b { display: inline-flex; align-items: center; gap: .45rem; text-decoration: none; }
 /* la fenetre « Faire une demande » (DEC_00165, 2026-10-31) : celle de la documentation, avec un formulaire */
-.dm-sur { margin: -.4rem 0 .9rem; color: var(--discret); font-size: .85rem; }
+.dm-sur { margin: 0 0 .9rem; color: var(--discret); font-size: .85rem; }
 .dm-n { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .8rem; }
-.dm-n label { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .7rem; border: 1px solid var(--bord); border-radius: 999px; font-size: .82rem; cursor: pointer; }
-.dm-n label:has(input:checked) { border-color: var(--marque); background-color: var(--rail-on); color: var(--marque); font-weight: 600; }
+.dm-n label { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .7rem; border: 1.5px solid var(--bord); border-radius: 999px; font-size: .82rem; cursor: pointer; }
+/* le choix fait, plein, comme la page de pilotage (DEC_00520, option 9B) */
+.dm-n label:has(input:checked) { border-color: var(--marque); background-color: var(--marque); color: #fff; font-weight: 600; }
+.dm-n label:has(input:focus-visible) { outline: 3px solid var(--marque); outline-offset: 2px; }
+.dm-lab { display: block; margin: 0 0 .3rem; font-size: 12.5px; font-weight: 600; color: var(--discret); }
 .dm-n input { margin: 0; accent-color: var(--marque); }
-.dm-t { display: block; width: 100%; box-sizing: border-box; padding: .6rem .7rem; border: 1px solid var(--bord); border-radius: 8px; font: inherit; font-size: .88rem; resize: vertical; }
+.dm-t { display: block; width: 100%; box-sizing: border-box; padding: .6rem .7rem; border: 1.5px solid var(--bord); border-radius: 10px; font: inherit; font-size: .88rem; resize: vertical; }
 .dm-t:focus { outline: 2px solid var(--marque); outline-offset: 1px; }
 .dm-pied { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .8rem; }
 .dm-pied .message { margin: 0; }
@@ -440,5 +467,5 @@ div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offs
 .rt-dl dd { margin: 0; }
 .rt-h { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; font-size: .9rem; }
 .rt-h .mono { color: var(--discret); margin-right: .4rem; }
-.rt-sur { display: grid; gap: .3rem; margin-bottom: .8rem; font-size: .85rem; color: var(--encre2); }
-.rt-sur select { font: inherit; font-size: .9rem; padding: .5rem .6rem; border: 1px solid var(--bord); border-radius: 8px; background-color: #fff; color: var(--encre); }
+.rt-sur { display: grid; gap: .3rem; margin-bottom: .8rem; font-size: 12.5px; font-weight: 600; color: var(--discret); }
+.rt-sur select { font: inherit; font-size: .9rem; font-weight: 400; padding: .5rem .6rem; border: 1.5px solid var(--bord); border-radius: 10px; background-color: #fff; color: var(--encre); }
