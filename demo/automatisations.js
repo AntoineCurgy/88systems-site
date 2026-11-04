@@ -34,7 +34,7 @@ function vueAutomatisations([donnees]) {
   const n = compter(autos);
   const f = filtres;
 
-  const sous = el("p", "sous-titre", `Ce que chacune fait, quand elle tourne, et ses derniers passages. ${phraseEtat(n)}.`);
+  // le sous-titre est retire (Antoine, 2026-11-04) : les comptes vivent sur les filtres d'etat
 
   const cartes = cartesSystemes(donnees, (s) => {
     const b = bouton("");
@@ -120,9 +120,9 @@ function vueAutomatisations([donnees]) {
     vide.hidden = total > 0;
   };
   rafraichirFiltres();
-  const outils = el("div", "outils ligne");
+  const outils = el("div", "outils ligne");   // non figee : voulu par Antoine (2026-11-04 : « Dans automatisations, j'ai décidé de ne pas figer, c'est voulu »)
   outils.append(barre, el("span", "rt-sp"), lab);   // la recherche a droite (DEC_00520, option 5C)
-  return [el("h1", null, "Automatisations"), sous, cartes, outils, ...sections, vide];
+  return [el("h1", null, "Automatisations"), cartes, outils, ...sections, vide];
 }
 
 function ligneAuto(a) {
@@ -161,125 +161,7 @@ function ligneAuto(a) {
   return b;
 }
 
-// ------------------------------------------------------------------ la documentation
-// Une fenetre, quatre pieces, un bandeau vert si la documentation suit la version en service,
-// orange sinon ; le bouton reste grise tant qu'aucune piece n'est publiee (Antoine, 2026-10-22).
-// Le script ne se telecharge plus (Antoine, 2026-10-30) ; pour le remettre :
-// ["script", "Script", "texte"], et "script" dans api.PIECES_SERVIES.
-const PIECES_DOC = [["documentation", "Documentation", "PDF"], ["classeur", "Dossier de l'automatisation", "Excel"],
-  ["historique", "Historique des versions", "Excel"]];
-const COULEUR_DOC = { vert: "var(--vert)", orange: "var(--ambre)" };
-let fenetreDoc = null;
-
-function dateLongue(iso) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : "";
-}
-
-function ligneVersion(nom, v) {
-  if (!v) return `${nom} : pas encore publiée`;
-  const d = dateLongue(v.date);
-  return `${nom} : version ${v.version}` + (d ? `, mise à jour le ${d}` : "");
-}
-
-function boutonDocumentation(a) {
-  const d = a.documentation || {};
-  const pieces = d.pieces || {};
-  const dispo = PIECES_DOC.some(([k]) => pieces[k]) || a.notice === "publiee";
-  const b = bouton("btn doc-b" + (dispo ? "" : " eteint"));
-  const pt = el("span", "pt");
-  pt.style.backgroundColor = dispo ? (COULEUR_DOC[d.etat] || "var(--pale)") : "var(--pale)";
-  b.append(pt, "Documentation");
-  if (!dispo) {
-    b.setAttribute("aria-disabled", "true");
-    b.title = "Pas encore disponible";
-  }
-  b.addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (dispo) ouvrirDocumentation(a, b);
-  });
-  return b;
-}
-
-function fermerDocumentation() {
-  if (!fenetreDoc) return;
-  const { voile, depuis } = fenetreDoc;
-  fenetreDoc = null;
-  voile.remove();
-  if (depuis && document.contains(depuis)) depuis.focus();
-}
-
-function ouvrirDocumentation(a, depuis) {
-  fermerDocumentation();
-  const d = a.documentation || {};
-  const pieces = d.pieces || {};
-  const voile = el("div", "doc-voile");
-  voile.setAttribute("role", "dialog");
-  voile.setAttribute("aria-modal", "true");
-  voile.setAttribute("aria-labelledby", "doc-titre");
-  const fen = el("div", "doc-fen");
-  const x = bouton("doc-x", "×");
-  x.setAttribute("aria-label", "Fermer");
-  x.addEventListener("click", fermerDocumentation);
-  const titre = el("h2", null, "Documentation");
-  titre.id = "doc-titre";
-  const bandeau = el("p", "doc-bandeau" + (d.etat ? " " + d.etat : ""));
-  bandeau.append(ligneVersion("Automatisation", d.en_service), el("br"), ligneVersion("Documentation", d.documentee));
-  const liste = el("ul", "doc-l");
-  for (const [cle, nom, format] of PIECES_DOC) {
-    const li = el("li");
-    const n = el("span", null, nom);
-    n.append(el("span", "f", " · " + format));
-    li.append(n);
-    if (pieces[cle]) {
-      const lien = el("a", "btn", "Télécharger");
-      lien.href = API + "/api/automatisations/" + encodeURIComponent(a.id) + "/documentation/" + cle;
-      lien.setAttribute("aria-label", "Télécharger " + nom);
-      if (cle === "documentation") { lien.target = "_blank"; lien.rel = "noopener"; }
-      li.append(lien);
-    } else {
-      li.append(el("span", "absent", "pas encore disponible"));
-    }
-    liste.append(li);
-  }
-  // La notice, quatrieme document (Antoine, 2026-10-30) : une page, dans un nouvel onglet, comme
-  // dans l'onglet Rapports ; elle ne s'ouvre qu'a qui a le droit sur l'automatisation.
-  if (a.notice) {
-    const li = el("li");
-    const n = el("span", null, "Notice");
-    n.append(el("span", "f", " · page"));
-    li.append(n);
-    if (a.notice === "publiee") {
-      const lien = el("a", "btn", "Ouvrir");
-      lien.href = API + "/api/automatisations/" + encodeURIComponent(a.id) + "/notice";
-      lien.target = "_blank";
-      lien.rel = "noopener";
-      lien.setAttribute("aria-label", "Ouvrir la notice (nouvel onglet)");
-      li.append(lien);
-    } else {
-      li.append(el("span", "absent", a.notice === "restreinte" ? "réservée aux destinataires du rapport" : "pas encore disponible"));
-    }
-    liste.append(li);
-  }
-  fen.append(x, titre, bandeau, liste);
-  voile.append(fen);
-  // un clic dans la fenetre ne ferme pas le panneau ; un clic sur le voile ferme la fenetre seule
-  voile.addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (!fen.contains(e.target)) fermerDocumentation();
-  });
-  document.body.append(voile);
-  fenetreDoc = { voile, depuis };
-  x.focus();
-}
-
-// Echap ferme d'abord la fenetre, et seulement elle
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && fenetreDoc) {
-    e.stopImmediatePropagation();
-    fermerDocumentation();
-  }
-}, true);
+// la documentation (le bouton et sa fenetre) vit dans commun.js : l'onglet Rapports l'ouvre aussi (Antoine, 2026-11-04)
 
 function section(titre, ...enfants) {
   const s = el("section", "fi-s");

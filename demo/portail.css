@@ -225,17 +225,26 @@ th, td { text-align: left; padding: .55rem .5rem; border-bottom: 1px solid var(-
 thead th { font-size: 12px; color: var(--discret); font-weight: 600; padding-top: .8rem; border-bottom: 1.5px solid var(--bord); }
 /* Retouches du tableau (option 6A retouchee, DEC_00520) : une hauteur de ligne egale, le survol sur toute la
    ligne, les chiffres et les dates en colonnes, pas de filet sous la derniere ligne (la carte la borde deja) */
-.gd tbody:not(.gd-b) > tr > * { height: 3.5rem; }
-.gd tbody:not(.gd-b) > tr:hover > * { background-color: var(--survol); }
+.gd tbody > tr:not(.gd-b) > * { height: 3.5rem; }
+.gd tbody > tr:not(.gd-b):hover > * { background-color: var(--survol); }
 .gd tbody:last-child > tr:last-child > * { border-bottom: 0; }
 .gd .mono, .gd-date { font-variant-numeric: tabular-nums; }
 tbody th { font-weight: 500; }
-.gd { table-layout: fixed; min-width: 74rem; }
+.gd { table-layout: fixed; min-width: 72rem; }
+/* Tout se fige jusqu'a l'en-tete du tableau (Antoine, 2026-11-04 : « Tout figer jsuqu'a : Rapport Systemes Systeme
+   d'origine Etat Date ») : la tete de la page sous le bandeau, l'en-tete des colonnes sous elle (--tete, commun.js).
+   L'en-tete ne se fige que si le tableau tient dans la largeur : sinon sa carte defile de cote, et le navigateur
+   ne fige rien dans une zone qui defile. */
+.tete-fixe { position: sticky; top: var(--hb); z-index: 15; display: flex; flex-direction: column; gap: 1.25rem; margin: -1.75rem -2rem 0; padding: 1.75rem 2rem 1rem; background-color: var(--fond); }
+@media (min-width: 85rem) {
+  .gd-c { overflow-x: visible; }
+  .gd thead th { position: sticky; top: calc(var(--hb) + var(--tete, 0px)); z-index: 5; background-color: var(--surface); border-bottom: 0; box-shadow: inset 0 -1.5px 0 var(--bord); }
+}
 .gd th { overflow-wrap: anywhere; }
 .gd .c, .td-f { text-align: center; }
 .td-f { font-size: .8rem; color: var(--marque); }
-.gd-b th { background-color: var(--bande); color: var(--nuit); font-size: .8rem; font-weight: 500; padding: .45rem .5rem; border-bottom: 0; }   /* .5rem : le texte de la bande tombe sur celui des lignes (6A) */
-.gd-b span { font-weight: 400; color: var(--discret); margin-left: .5rem; }
+/* le titre d'un groupe, a la forme exacte de ceux de l'onglet Automatisations, « Depuis Even 17 » (Antoine, 2026-11-04) */
+.gd-b th { background-color: transparent; color: var(--marque); font-size: 15px; font-weight: 700; padding: 1rem .5rem .45rem; border-bottom: 2px solid var(--trait); }
 .gd tbody + tbody .gd-b th { border-top: .6rem solid #fff; }
 .act { text-align: right; white-space: nowrap; }
 .gd-resume { white-space: nowrap; }
@@ -266,7 +275,7 @@ div.lb.ouverte { background-color: var(--rail-on); }
 .lb-o::after { content: ""; position: absolute; inset: 0; }
 .lb-o:focus-visible { outline: none; }
 div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offset: -2px; }
-.la .doc-b { position: relative; z-index: 1; margin: 0; padding: .3rem .65rem; font-size: .78rem; }
+.la .doc-b, .gd .doc-b { position: relative; z-index: 1; margin: 0; padding: .3rem .65rem; font-size: .78rem; }   /* le meme bouton dans Rapports (2026-11-04) */
 .la-id { color: var(--pale); font-size: .75rem; }
 .la-nom { display: flex; flex-direction: column; gap: .05rem; line-height: 1.3; }
 .la-nom strong { font-weight: 400; font-size: .92rem; }

@@ -22,8 +22,7 @@ function tagRetour(etat) {
 function vueRetours([rets, autos]) {
   majBandeau(rets.genere_le);
   const liste = rets.retours;
-  const sous = el("p", "sous-titre", "Vos demandes, anomalies et améliorations, et où elles en sont · "
-    + pluriel(liste.length, "retour", "retours"));
+  // le sous-titre est retire (Antoine, 2026-11-04) : le compte vit sur « Tous »
   const avis = el("p", "avis");
   avis.setAttribute("aria-live", "polite");
 
@@ -51,7 +50,7 @@ function vueRetours([rets, autos]) {
   outils.append(barre, el("span", "rt-sp"), lab, nouveau);   // la recherche a droite (DEC_00520, option 5C)
 
   if (!liste.length) {
-    return [el("h1", null, "Retours"), sous, outils, vueVide("Aucun retour pour l'instant",
+    return [el("h1", null, "Retours"), outils, vueVide("Aucun retour pour l'instant",
       "Signalez une anomalie, proposez une amélioration ou faites une demande : elle arrive à l'équipe qui suit l'automatisation, et son état s'affiche ici.")];
   }
 
@@ -105,7 +104,9 @@ function vueRetours([rets, autos]) {
     carte.hidden = total === 0;
   }
   filtrer();
-  return [el("h1", null, "Retours"), sous, outils, avis, carte, vide];
+  const tete = el("div", "tete-fixe");
+  tete.append(el("h1", null, "Retours"), outils, avis);
+  return [figerTete(tete), carte, vide];
 }
 
 // Le panneau d'un retour : son detail, puis son historique (la creation, chaque version publiee qui le cite).

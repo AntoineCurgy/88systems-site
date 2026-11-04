@@ -17,7 +17,8 @@ function ordreDomaines(raps) {
 
 function urlRapport(r) { return API + "/api/rapports/" + encodeURIComponent(r.id); }
 
-function vueRapports([donnees]) {
+function vueRapports([donnees, autos]) {
+  const autosParId = new Map(((autos && autos.automatisations) || []).map((a) => [String(a.id), a]));
   majBandeau(donnees.maj);
   const raps = donnees.rapports.filter(rapportMontre).sort((a, b) => String(a.sujet).localeCompare(String(b.sujet), "fr"));
   if (!raps.length) {
@@ -29,8 +30,10 @@ function vueRapports([donnees]) {
   const avis = el("p", "avis");
   avis.setAttribute("aria-live", "polite");
 
-  const sous = el("p", "sous-titre", `Dernière version de chaque rapport · ${pluriel(raps.length, "rapport", "rapports")}`);
-  if (restreints) sous.append(" · ", cadenas(14), `${restreints} en accès restreint`);
+  // le sous-titre est retire (Antoine, 2026-11-04) : le compte vit sur « Tous » ; seul le compte des acces restreints, qu'aucun
+  // filtre ne porte, reste, et seulement s'il y en a
+  const sous = restreints ? el("p", "sous-titre") : null;
+  if (sous) sous.append(cadenas(14), `${restreints} en accès restreint`);
 
   // domaines
   const domaines = ordreDomaines(raps);
@@ -74,14 +77,14 @@ function vueRapports([donnees]) {
   const carte = el("div", "carte gd-c");
   const table = el("table", "gd");
   const cg = el("colgroup");
-  for (const w of ["", "9rem", "9.5rem", "8.5rem", "8.5rem", "6.75rem", "9.75rem", "9.75rem"]) {
+  for (const w of ["", "8.5rem", "8.75rem", "8rem", "8rem", "8.5rem", "8.5rem", "9.5rem"]) {   // Resume et Documentation tiennent leur bouton (2026-11-04)
     const c = el("col");
     if (w) c.style.width = w;
     cg.append(c);
   }
   const thead = el("thead");
   const tr = el("tr");
-  for (const [texte, classe, cache] of [["Rapport"], ["Systèmes", "c"], ["Système d'origine"], ["État"], ["Date"], ["Résumé", null, true], ["Notice", null, true], ["Télécharger", null, true]]) {
+  for (const [texte, classe, cache] of [["Rapport"], ["Systèmes", "c"], ["Système d'origine"], ["État"], ["Date"], ["Résumé", null, true], ["Documentation", null, true], ["Télécharger", null, true]]) {
     const th = el("th", classe);
     th.scope = "col";
     if (cache) th.append(el("span", "sr", texte)); else th.textContent = texte;
@@ -94,14 +97,17 @@ function vueRapports([donnees]) {
     const liste = raps.filter((r) => (r.domaine || "Autres") === g);
     const tb = el("tbody");
     const bande = el("tr", "gd-b");
+    // le titre du groupe a la forme de ceux de l'onglet Automatisations, « Depuis Even 17 » (Antoine, 2026-11-04)
     const th = el("th", null, g);
     th.colSpan = 8;
     th.scope = "rowgroup";
-    th.append(" ", el("span", null, pluriel(liste.length, "rapport", "rapports")));
+    const cpt = el("span", "g-cpt", liste.length);
+    cpt.append(el("span", "sr", liste.length > 1 ? " rapports" : " rapport"));
+    th.append(" ", cpt);
     bande.append(th);
     tb.append(bande);
     for (const r of liste) {
-      const l = ligneRapport(r, avis);
+      const l = ligneRapport(r, avis, autosParId.get(String(r.automatisation)));
       lignes.push([l, r, g]);
       tb.append(l);
     }
@@ -126,10 +132,12 @@ function vueRapports([donnees]) {
     avis.textContent = "";
   }
   filtrer();
-  return [el("h1", null, "Rapports"), sous, outils, avis, carte, vide];
+  const tete = el("div", "tete-fixe");
+  tete.append(...[el("h1", null, "Rapports"), sous, outils, avis].filter(Boolean));
+  return [figerTete(tete), carte, vide];
 }
 
-function ligneRapport(r, avis) {
+function ligneRapport(r, avis, auto) {
   const tr = el("tr");
   tr.dataset.r = "1";
   const nom = el("th");
@@ -138,11 +146,12 @@ function ligneRapport(r, avis) {
   const origine = el("td", "discret", r.origine || "");
   const etat = el("td");
   const date = el("td", "la-d mono gd-date");   // le style de la date des automatisations, sur une ligne
-  const notice = el("td", "act");
+  const notice = el("td", "act");   // la colonne Documentation (ex-Notice)
   const resume = el("td", "gd-resume");   // a gauche, comme l'etat et la date : trois departs a pas egal (2026-10-23)
   const action = el("td", "act");
   if (!r.acces) {
     tr.className = "restreint";
+    if (auto) notice.append(boutonDocumentation(auto));   // comme dans l'onglet Automatisations, ou chacun la voit
     nom.append(cadenas(14), String(r.sujet));
     const b = bouton("btn eteint");
     b.setAttribute("aria-disabled", "true");
@@ -175,26 +184,9 @@ function ligneRapport(r, avis) {
       b.addEventListener("click", () => ouvrirResume(r, b));
       resume.append(b);
     }
-    // La notice utilisateur du rapport, dans sa colonne a gauche de Telecharger (Antoine, 2026-10-23 :
-    // « a cote de telechargement [...] bouton exactement pareil [...] meme largeur », un detail subtil
-    // qui les differencie : le bleu nuit et un livre, une fleche sur Telecharger) ; une page a part, dans un nouvel onglet ; grisee tant qu'elle
-    // n'est pas publiee.
-    if (r.notice === "publiee") {
-      const n = el("a", "btn b-l b-notice");
-      n.append(ico("livre", 15), "Notice");
-      n.href = API + "/api/automatisations/" + encodeURIComponent(r.automatisation) + "/notice";
-      n.target = "_blank";
-      n.rel = "noopener";
-      n.setAttribute("aria-label", "Ouvrir la notice de " + r.sujet + " (nouvel onglet)");
-      notice.append(n);
-    } else if (r.notice === "absente") {
-      const n = bouton("btn b-l b-notice eteint");
-      n.append(ico("livre", 15), "Notice");
-      n.setAttribute("aria-disabled", "true");
-      n.setAttribute("aria-label", "Notice de " + r.sujet + " (pas encore publiée)");
-      n.addEventListener("click", () => { avis.textContent = `La notice de « ${r.sujet} » n'est pas encore publiée.`; });
-      notice.append(n);
-    }
+    // « Notice » devient « Documentation » : le bouton et la fenetre de l'onglet Automatisations, la notice
+    // y est la quatrieme piece (Antoine, 2026-11-04) ; la couleur de Notice (2026-10-30) tombe avec lui.
+    if (auto) notice.append(boutonDocumentation(auto));
     if (r.livrable === "interface" || r.construction) {
       // Decisions d'Antoine : une interface depose dans un autre systeme (2026-10-04) ; un
       // rapport d'une automatisation en construction ne se telecharge pas (2026-10-08).
@@ -250,7 +242,7 @@ function relireBientot() {
   if (relectureRaf) return;
   relectureRaf = setTimeout(() => {
     relectureRaf = null;
-    suivre([SOURCES.rapports], (d, premier) => poser(vueRapports(d), premier));
+    suivre([SOURCES.rapports, SOURCES.autos], (d, premier) => poser(vueRapports(d), premier));
   }, 15000);
 }
 
@@ -313,4 +305,4 @@ async function ouvrirResume(r, depuis) {
   etat.replaceWith(cadre);
 }
 
-demarrer(() => suivre([SOURCES.rapports], (d, premier) => poser(vueRapports(d), premier)));
+demarrer(() => suivre([SOURCES.rapports, SOURCES.autos], (d, premier) => poser(vueRapports(d), premier)));
