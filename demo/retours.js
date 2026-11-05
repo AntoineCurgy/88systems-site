@@ -6,8 +6,14 @@
 
 const ETATS_RETOUR = { recu: ["Reçu", "t-ferme"], en_cours: ["En cours", "t-ambre"], corrige: ["Corrigé", "t-vert"],
                        referme: ["Refermé", "t-ferme"] };
-const TYPES_RETOUR = [["anomalie", "Une anomalie"], ["amelioration", "Une amélioration"], ["demande", "Une demande"]];
-const MOT_TYPE = { anomalie: "Anomalie", amelioration: "Amélioration", demande: "Demande" };
+// Les mots de la fenetre « Nouveau retour » (depot d'Antoine du 2026-11-05, recommandations de PCP049-1105-c). Un nouveau
+// besoin ne porte sur rien d'existant : il part sans liste. Un retour passe classe « demande » porte sur une
+// automatisation existante : il se lit « Amelioration ».
+const TYPES_RETOUR = [["anomalie", "Anomalie"], ["amelioration", "Amélioration"], ["demande", "Nouveau besoin"]];
+const MOT_TYPE = { anomalie: "Anomalie", amelioration: "Amélioration", demande: "Amélioration" };
+const EXEMPLES = { anomalie: "Dans le rapport de ce matin, la ligne… affiche… alors que…",
+                   amelioration: "J'aimerais ajouter dans le rapport une colonne…",
+                   demande: "J'aimerais recevoir chaque semaine un contrôle sur…" };
 // la barre : Tous, Ouverts (recu et en cours), Corriges, Refermes
 const GROUPES = [["", "Tous", () => true], ["ouverts", "Ouverts", (r) => r.etat === "recu" || r.etat === "en_cours"],
                  ["corriges", "Corrigés", (r) => r.etat === "corrige"], ["refermes", "Refermés", (r) => r.etat === "referme"]];
@@ -77,7 +83,7 @@ function vueRetours([rets, autos]) {
     l.setAttribute("aria-label", `${r.objet}, ${(ETATS_RETOUR[r.etat] || ETATS_RETOUR.recu)[0]} : voir le détail`);
     const e = el("td");
     e.append(tagRetour(r.etat));
-    l.append(el("td", "mono gd-date", r.date), e, el("td", null, MOT_TYPE[r.type] || "Demande"),
+    l.append(el("td", "mono gd-date", r.date), e, el("td", null, MOT_TYPE[r.type] || "Amélioration"),
              el("td", null, r.nom), el("td", "rt-o", r.objet), el("td", "discret", r.de || ""));
     // le clic ne remonte pas au document, qui fermerait aussitot le panneau ouvert (commun.js)
     l.addEventListener("click", (ev) => { ev.stopPropagation(); ouvrirDetail(r, l); });
@@ -114,7 +120,7 @@ function ouvrirDetail(r, depuis) {
   const titre = el("h2", null, r.objet);
   titre.id = "panneau-titre";
   const tete = el("p", "rt-tete");
-  tete.append(tagRetour(r.etat), " ", el("span", "tag", MOT_TYPE[r.type] || "Demande"));
+  tete.append(tagRetour(r.etat), " ", el("span", "tag", MOT_TYPE[r.type] || "Amélioration"));
   const dl = el("dl", "rt-dl");
   for (const [mot, valeur] of [["Automatisation", r.nom], ["Date", r.date], ["De", r.de || "—"]]) {
     dl.append(el("dt", null, mot), el("dd", null, valeur));
@@ -150,19 +156,17 @@ function ouvrirNouveau(autos, depuis, choisi) {
   const titre = el("h2", null, "Nouveau retour");
   titre.id = "dm-titre";
   const labSur = el("label", "rt-sur");
-  labSur.append(el("span", null, "Sur quoi"));
+  labSur.append(el("span", null, "Sélectionner le rapport"));
   const sur = el("select");
   // seulement ce que l'utilisateur a le droit de voir (Antoine, 2026-11-05 : « borné à ce qui est visible par utilisateur »)
   const permises = autos.filter((a) => a.acces !== false);   // une API pas encore deployee ne dit rien : la liste reste entiere
   for (const a of [...permises].sort((p, q) => String(p.nom).localeCompare(String(q.nom), "fr"))) {
-    const o = el("option", null, a.nom);
+    const o = el("option", null, a.flux ? `${a.nom} · ${a.flux}` : a.nom);   // des noms se repetent d'un systeme a l'autre
     o.value = a.id;
     sur.append(o);
   }
-  const general = el("option", null, "Un besoin général");
-  general.value = "GENERAL";
-  sur.append(general);
-  if (choisi) sur.value = permises.some((a) => String(a.id) === choisi) ? choisi : "GENERAL";   // sans droit sur elle : le besoin general
+  const connue = Boolean(choisi) && permises.some((a) => String(a.id) === choisi);
+  if (connue) sur.value = choisi;
   labSur.append(sur);
   const choix = el("div", "dm-n");
   choix.setAttribute("role", "radiogroup");
@@ -173,14 +177,14 @@ function ouvrirNouveau(autos, depuis, choisi) {
     r.type = "radio";
     r.name = "nature";
     r.value = cle;
-    r.checked = cle === "anomalie";
+    // sans droit sur l'automatisation du lien, ou sans aucune, il reste le nouveau besoin
+    r.checked = cle === ((choisi && !connue) || !permises.length ? "demande" : "anomalie");
     l.append(r, mot);
     choix.append(l);
   }
   const zone = el("textarea", "dm-t");
   zone.rows = 6;
   zone.maxLength = TEXTE_DEMANDE_MAX;
-  zone.placeholder = "Ce que vous voyez, ce que vous attendez.";
   zone.setAttribute("aria-label", "Votre retour");
   const pied = el("div", "dm-pied");
   const message = el("p", "message");
@@ -189,9 +193,18 @@ function ouvrirNouveau(autos, depuis, choisi) {
   envoyer.type = "submit";
   pied.append(message, envoyer);
   zone.id = "dm-zone";
-  const labZone = el("label", "dm-lab", "Votre retour");   // un libelle au-dessus de chaque champ (DEC_00520, option 9B)
+  const labZone = el("label", "dm-lab", "Décrivez ici");   // un libelle au-dessus de chaque champ (DEC_00520, option 9B)
   labZone.htmlFor = "dm-zone";
-  fen.append(x, titre, labSur, el("p", "dm-lab", "Type"), choix, labZone, zone, pied);
+  // l'ordre suit le geste : le type d'abord, puis le rapport s'il en faut un, puis le texte
+  const natureChoisie = () => (fen.querySelector("input[name=nature]:checked") || {}).value || "demande";
+  const accorder = () => {
+    const n = natureChoisie();
+    labSur.hidden = n === "demande";
+    zone.placeholder = EXEMPLES[n];
+  };
+  fen.append(x, titre, el("p", "dm-lab", "Type"), choix, labSur, labZone, zone, pied);
+  choix.addEventListener("change", accorder);
+  accorder();
   fen.addEventListener("submit", async (e) => {
     e.preventDefault();
     const texte = zone.value.trim();
@@ -204,8 +217,8 @@ function ouvrirNouveau(autos, depuis, choisi) {
     envoyer.disabled = true;
     message.className = "message";
     message.textContent = "Envoi…";
-    const nature = (fen.querySelector("input[name=nature]:checked") || {}).value || "demande";
-    const r = await appeler("POST", "/api/demandes", { id: sur.value, rapport: "", nature, texte });
+    const nature = natureChoisie();
+    const r = await appeler("POST", "/api/demandes", { id: nature === "demande" ? "GENERAL" : sur.value, rapport: "", nature, texte });
     if (r.statut === 200) {
       fen.replaceChildren(x, titre, el("p", "dm-ok",
         "Votre retour est transmis. Il apparaîtra dans ce tableau, avec son état, à la prochaine mise à jour."));
