@@ -136,7 +136,7 @@ function ouvrirDetail(r, depuis) {
 
 // La fenetre « Nouveau retour » : sur quoi, le type, le texte ; elle part par note a l'equipe qui suit
 // l'automatisation (`POST /api/demandes`), ou au pilote du client pour un besoin general.
-function ouvrirNouveau(autos, depuis) {
+function ouvrirNouveau(autos, depuis, choisi) {
   fermerDemande();
   const voile = el("div", "doc-voile");
   voile.setAttribute("role", "dialog");
@@ -152,7 +152,9 @@ function ouvrirNouveau(autos, depuis) {
   const labSur = el("label", "rt-sur");
   labSur.append(el("span", null, "Sur quoi"));
   const sur = el("select");
-  for (const a of [...autos].sort((p, q) => String(p.nom).localeCompare(String(q.nom), "fr"))) {
+  // seulement ce que l'utilisateur a le droit de voir (Antoine, 2026-11-05 : « borné à ce qui est visible par utilisateur »)
+  const permises = autos.filter((a) => a.acces !== false);   // une API pas encore deployee ne dit rien : la liste reste entiere
+  for (const a of [...permises].sort((p, q) => String(p.nom).localeCompare(String(q.nom), "fr"))) {
     const o = el("option", null, a.nom);
     o.value = a.id;
     sur.append(o);
@@ -160,6 +162,7 @@ function ouvrirNouveau(autos, depuis) {
   const general = el("option", null, "Un besoin général");
   general.value = "GENERAL";
   sur.append(general);
+  if (choisi) sur.value = permises.some((a) => String(a.id) === choisi) ? choisi : "GENERAL";   // sans droit sur elle : le besoin general
   labSur.append(sur);
   const choix = el("div", "dm-n");
   choix.setAttribute("role", "radiogroup");
@@ -225,11 +228,26 @@ function ouvrirNouveau(autos, depuis) {
   sur.focus();
 }
 
+// Le bouton des courriels de rapport ouvre `retours.html?nouveau=<AUT_…>` : la fenetre « Nouveau retour » sur cette
+// automatisation, apres la connexion s'il le faut (Antoine, 2026-11-05 : « Donnons le lien directement de l'onglet
+// faire une demande », note de PCP001). Le parametre part de l'adresse : un rechargement ne rouvre rien.
+function ouvrirDepuisLien(autos) {
+  const q = new URLSearchParams(location.search);
+  const cible = q.get("nouveau");
+  if (cible === null) return;
+  q.delete("nouveau");
+  history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : ""));
+  ouvrirNouveau(autos, document.querySelector(".rt-n"), cible);
+}
+
 demarrer(async () => {
   if (!moi.onglet_retours) {
     poser([el("h1", null, "Retours"), vueVide("Les retours arrivent bientôt",
       "Vous pourrez signaler ici une anomalie, proposer une amélioration ou faire une demande, et suivre son état.")], true);
     return;
   }
-  await suivre([SOURCE_RETOURS, SOURCES.autos], (d, premier) => poser(vueRetours(d), premier));
+  await suivre([SOURCE_RETOURS, SOURCES.autos], (d, premier) => {
+    poser(vueRetours(d), premier);
+    if (premier) ouvrirDepuisLien(d[1].automatisations);
+  });
 });
