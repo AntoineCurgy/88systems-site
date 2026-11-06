@@ -275,6 +275,9 @@ function poserMoi() {
   const lienRetours = document.querySelector('a[data-page="retours"]');
   if (lienRetours) lienRetours.hidden = !moi.onglet_retours;
   document.body.classList.toggle("avec-retours", Boolean(moi.onglet_retours));
+  // l'onglet « Courriels envoyes » n'existe que pour l'administrateur du portail (DEC_00598, DEC_00606)
+  const lienEnvois = document.querySelector('a[data-page="envois"]');
+  if (lienEnvois) lienEnvois.hidden = !moi.onglet_envois;
   // L'onglet « Agents » reste toujours visible, vide ou non (Antoine, 2026-10-31, PCP049-1031-c : « toujours
   // montrer Agents IA, Automatisations, Rapports et Cartographie », pour donner envie) ; il disparaissait quand
   // la feuille masquait chaque agent (2026-10-16).
