@@ -38,8 +38,10 @@ h2 { margin: 0 0 var(--s4); font-size: 1rem; line-height: 1.25; letter-spacing: 
 h3 { margin: 0 0 var(--s1); font-size: .875rem; }
 p { margin: 0; max-width: 68ch; }
 .grille { display: grid; gap: var(--s3); grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: stretch; }
-.grille .carte { grid-column: span 2; }
-.grille .carte:nth-child(n+4) { grid-column: span 3; }
+.grille .carte { grid-column: span 3; }
+.grille .carte.vedette { grid-column: 1 / -1; border-left: 4px solid var(--marque); }
+.vedette p + p { margin-top: var(--s2); }
+.vitesse { margin: var(--s3) 0 0; max-width: 68ch; font-size: 1rem; color: var(--encre2); padding-left: var(--s3); border-left: 3px solid var(--trait); }
 .carte { background-color: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: var(--s4); box-shadow: 0 1px 3px rgba(16,24,40,.08); }
 .carte p { color: var(--encre2); }
 .etapes { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
@@ -47,14 +49,14 @@ p { margin: 0; max-width: 68ch; }
 .num { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 999px;
   background-color: var(--nuit); color: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; }
 .etape p { color: var(--encre2); }
-.principes { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s2) var(--s5); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.principes { margin: 0; padding: 0; list-style: none; display: grid; align-items: start; gap: var(--s2) var(--s5); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .principes li { padding-left: var(--s3); border-left: 3px solid var(--trait); color: var(--encre2); max-width: 60ch; }
 .citation { margin: var(--s4) 0 0; font-size: 1rem; color: var(--encre); max-width: 60ch; }
 .contact { background-color: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: var(--s5); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; justify-content: space-between; }
 .bouton { display: inline-flex; align-items: center; height: 2.6rem; padding: 0 var(--s4); border-radius: 10px; background-color: var(--marque); color: #ffffff; font-weight: 600; text-decoration: none; }
 footer { background-color: var(--pied); color: var(--encre2); font-size: .8rem; margin-top: var(--s5); }
 footer .large { display: flex; flex-wrap: wrap; gap: var(--s2); justify-content: space-between; padding-top: var(--s3); padding-bottom: var(--s3); }
-@media (max-width: 860px) { .grille { grid-template-columns: 1fr; } .grille .carte, .grille .carte:nth-child(n+4) { grid-column: auto; } .principes { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .grille { grid-template-columns: 1fr; } .grille .carte, .grille .carte.vedette { grid-column: auto; } .principes { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .ouverture { padding-top: var(--s5); } .contact { padding: var(--s4); } }
 </style>
 </head>
@@ -73,12 +75,17 @@ footer .large { display: flex; flex-wrap: wrap; gap: var(--s2); justify-content:
     <div class="ouverture">
       <h1>Nous rendons fiables les données qui circulent entre vos logiciels.</h1>
       <p class="chapeau">Quand une même information vit dans plusieurs outils, les équipes la rapprochent à la main, les écarts passent inaperçus et les décisions reposent sur des chiffres qu'on ne peut pas vérifier. 88Systems diagnostique votre système d'information, automatise ce qui le mérite et suit ces automatisations chaque jour.</p>
+      <p class="vitesse"><strong>Plus vite qu'un cabinet, au même niveau d'exigence.</strong> Un diagnostic en quatre à huit semaines, là où un audit classique prend souvent trois mois. Nos outils produisent la carte et la documentation ; nos experts passent leur temps avec vos équipes, pas à rédiger.</p>
     </div>
 
     <section aria-labelledby="t-offres">
       <h2 id="t-offres">Ce que nous faisons</h2>
       <div class="grille">
-        <div class="carte"><h3>Diagnostic et cartographie du SI</h3><p>Nous cartographions vos logiciels, leurs flux et les processus qu'ils servent, puis nous désignons ce qu'il faut fiabiliser d'abord. Vous gardez les livrables, que vous poursuiviez avec nous ou non.</p></div>
+        <div class="carte vedette">
+          <p><strong>Le Diagnostic : voir clair en quatre à huit semaines.</strong> Nous cartographions vos logiciels, vos flux et vos processus, nous qualifions ce qui coince et pourquoi, et nous vous remettons une feuille de route chiffrée : pour chaque solution, son coût, son délai et son risque. Vous restez libre de la mettre en œuvre avec nous, avec un autre, ou pas du tout.</p>
+          <p><strong>Ce que vous recevez</strong> : la carte de vos systèmes et de vos flux, consultable en ligne ; les fiches de vos processus ; les irritants qualifiés ; la feuille de route chiffrée ; une restitution à votre direction.</p>
+          <p><strong>Le prix</strong> : au forfait, à partir de 16 000 € HT, selon la taille de votre système d'information, fixé après un premier entretien d'une heure, offert. Si vous poursuivez avec nous dans les trois mois, le prix du Diagnostic est déduit de la suite.</p>
+        </div>
         <div class="carte"><h3>Déploiement d'automatisations</h3><p>Nous construisons les échanges, les rapprochements et les rapports qui relient vos systèmes, avec des règles écrites et prouvées par des essais.</p></div>
         <div class="carte"><h3>Déploiement d'agents IA</h3><p>Nous posons des agents spécialisés sur des données déjà fiables, pour enquêter sur une anomalie ou préparer une décision, sous des garde-fous explicites.</p></div>
         <div class="carte"><h3>Maintenance des automatisations et des agents</h3><p>Nous surveillons chaque passage, traitons les incidents et faisons évoluer ce qui tourne, pour un forfait proportionné à sa complexité.</p></div>
@@ -102,6 +109,7 @@ footer .large { display: flex; flex-wrap: wrap; gap: var(--s2); justify-content:
         <li>Une règle écrite pour chaque traitement, reliée à l'essai qui la prouve.</li>
         <li>Une logique déterministe d'abord ; l'intelligence artificielle seulement là où elle apporte quelque chose.</li>
         <li>Vos logiciels restent en place : nous les relions, nous ne les remplaçons pas.</li>
+        <li><strong>Gardez vos logiciels plus longtemps.</strong> Un logiciel vieillissant n'est pas forcément à remplacer : souvent, il fait bien son métier, mais il communique mal avec les autres. Nous le relions, nous contrôlons ce qu'il produit et nous comblons ce qui lui manque. Vous repoussez un remplacement coûteux de plusieurs années, et vous le préparez sereinement quand il devient vraiment utile.</li>
         <li>Une exploitation suivie chaque jour, et chaque anomalie traitée jusqu'à sa cause.</li>
       </ul>
     </section>
