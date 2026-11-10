@@ -41,6 +41,8 @@ p { margin: 0; max-width: 68ch; }
 .grille .carte { grid-column: span 3; }
 .grille .carte.vedette { grid-column: 1 / -1; border-left: 4px solid var(--marque); }
 .vedette p + p { margin-top: var(--s2); }
+.garanties { margin: var(--s1) 0 0; padding-left: 1.2rem; color: var(--encre2); max-width: 68ch; }
+.garanties li + li { margin-top: var(--s1); }
 .vitesse { margin: var(--s3) 0 0; max-width: 68ch; font-size: 1rem; color: var(--encre2); padding-left: var(--s3); border-left: 3px solid var(--trait); }
 .carte { background-color: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: var(--s4); box-shadow: 0 1px 3px rgba(16,24,40,.08); }
 .carte p { color: var(--encre2); }
@@ -85,6 +87,12 @@ footer .large { display: flex; flex-wrap: wrap; gap: var(--s2); justify-content:
           <p><strong>Le Diagnostic : voir clair en quatre à huit semaines.</strong> Nous cartographions vos logiciels, vos flux et vos processus, nous qualifions ce qui coince et pourquoi, et nous vous remettons une feuille de route chiffrée : pour chaque solution, son coût, son délai et son risque. Vous restez libre de la mettre en œuvre avec nous, avec un autre, ou pas du tout.</p>
           <p><strong>Ce que vous recevez</strong> : la carte de vos systèmes et de vos flux, consultable en ligne ; les fiches de vos processus ; les irritants qualifiés ; la feuille de route chiffrée ; une restitution à votre direction.</p>
           <p><strong>Le prix</strong> : au forfait, à partir de 16 000 € HT, selon la taille de votre système d'information, fixé après un premier entretien d'une heure, offert.</p>
+          <p><strong>Nos garanties.</strong></p>
+          <ul class="garanties">
+            <li><strong>Diagnostic</strong> : si la feuille de route que nous vous remettons ne compte pas au moins trois solutions chiffrées que votre direction retient, vous ne payez pas le solde.</li>
+            <li><strong>Automatisations</strong> : chacune est vérifiée par vos équipes sur des cas réels avant d'être acceptée ; tant qu'elle ne passe pas, nous la reprenons sans frais.</li>
+            <li><strong>Exploitation</strong> : sans engagement de durée, résiliable chaque mois ; vous gardez vos automatisations et leur documentation.</li>
+          </ul>
         </div>
         <div class="carte"><h3>Déploiement d'automatisations</h3><p>Nous construisons les échanges, les rapprochements et les rapports qui relient vos systèmes, avec des règles écrites et prouvées par des essais.</p></div>
         <div class="carte"><h3>Déploiement d'agents IA</h3><p>Nous posons des agents spécialisés sur des données déjà fiables, pour enquêter sur une anomalie ou préparer une décision, sous des garde-fous explicites.</p></div>
