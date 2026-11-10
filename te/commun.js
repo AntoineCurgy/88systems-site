@@ -14,7 +14,7 @@ const API = (HOTE === "localhost" || HOTE === "127.0.0.1" || HOTE === "")
   ? "http://localhost:8790"
   : "https://api-portail-terres-et-eaux.88systems.io";
 const DELAI = 15000;
-const CONTACT = "acurgy-ext@compagniedephalsbourg.com";
+const CONTACT = "antoine.curgy@88systems.io";
 // Trois etats (Antoine, 2026-10-05) ; « a_valider » est ramene a « ok » a la lecture.
 // Le mot avec sa majuscule, en police du texte apres un point de couleur (Antoine, 2026-11-04, DEC_00520, option 8C).
 const ETATS = { ok: ["Fonctionnel", "t-vert"], interrompu: ["Interrompu", "t-rouge"], construction: ["En construction", "t-ferme"],

@@ -1,31 +1,33 @@
-/* Portail des rapports : le rendu de la maquette v14, ecrit une fois. */
+/* Portail des rapports : le rendu de la maquette v14, ecrit une fois. Les couleurs et la typographie facon Tesla depuis le
+   2026-11-10 (DEC_00755, option B de la planche v2 du coup d'oeil) : encre #171a20, gris neutres, fond #f4f4f4, cartes sans
+   contour ni ombre, graisse 500 ; la mise en page ne change pas (DEC_00753). */
 
 :root {
   --marque: #1f4e5f;
   --trait: #9fc3ce;
-  --fond: #f4f6f8;
+  --fond: #f4f4f4;
   --surface: #ffffff;
   --surface2: #e6e9ec;
-  --bord: #e0e4e8;
-  --filet: #eef0f2;
-  --survol: #f7f9fa;
-  --encre: #1a1a1a;
-  --encre2: #4a5459;
-  --gris-btn: #3a454b;
-  --discret: #6b7280;
+  --bord: #e8e8e8;
+  --filet: #eeeeee;
+  --survol: #f7f7f7;
+  --encre: #171a20;
+  --encre2: #393c41;
+  --gris-btn: #393c41;
+  --discret: #5c5e62;
   --pale: #8a9296;
   --vert: #1e7a4b;
   --vert-clair: #8cc7a6;
   --rouge: #9b2c2c;
   --ambre: #b7791f;
-  --pied: #e9edf0;
-  --rail-t: #56636a;
+  --pied: #eeeeee;
+  --rail-t: #5c5e62;
   --rail-on: #e8f0f2;
-  --bande: #f1f3f7;
+  --bande: #f4f4f4;
   --nuit: #1c2b4a;
-  --bord-fort: #cfd6db;   /* le contour des cartes et des boutons blancs, comme la page de pilotage (DEC_00520) */
+  --bord-fort: transparent;   /* plus de contour de carte : la peau facon Tesla (DEC_00755) ; les boutons blancs gardent le leur, plus bas */
   --clair: #cfe1e6;
-  --ombre: 0 1px 2px rgba(29, 40, 73, .06), 0 6px 18px rgba(29, 40, 73, .07);
+  --ombre: none;
   --ombre-fen: 0 18px 50px rgba(22, 21, 15, .25);
   --voile: rgba(22, 21, 15, .45);
   --texte: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -480,3 +482,19 @@ body.fen-ouverte { overflow: hidden; }
 .rt-sur select { font: inherit; font-size: .9rem; font-weight: 400; padding: .5rem .6rem; border: 1.5px solid var(--bord); border-radius: 10px; background-color: #fff; color: var(--encre); }
 /* l'onglet « Courriels envoyes » (DEC_00606) : une adresse par ligne dans la fenetre */
 .rt-dl dd.ev-a { white-space: pre-line; font-family: var(--mono); font-size: .82rem; }
+
+/* ------------------------------------------------------------ la peau facon Tesla (DEC_00755) */
+/* Ecrite apres le reste, elle l'emporte : moins de gras, les chiffres en police du texte a chasse egale, des rayons de 12 px.
+   Les valeurs de Tesla viennent de reconstitutions publiques de tesla.com, lues le 2026-11-10 (planche v2). */
+body { letter-spacing: .005em; }
+h1 { font-weight: 500; font-size: 1.6rem; letter-spacing: -.01em; }
+h2, h3, .ke-titre, .b-t2, .p-h, thead th { font-weight: 500; }
+.carte, .ke { border-radius: 12px; }
+.btn, .gb-o[aria-pressed="true"], .pe-b[aria-pressed="true"], .tag, .rail a[aria-current="page"], .avatar { font-weight: 500; }
+.btn.btn-s { border-color: #d0d1d2; }
+.mono, .gd-date, .case, .ke-anneau span, .ke-d strong, .g-cpt { font-family: var(--texte); font-variant-numeric: tabular-nums; }
+.ke-anneau strong { font-weight: 500; font-size: 1.5rem; }
+.ke-d strong { font-weight: 500; font-size: 1.3rem; }
+.case { font-weight: 500; background-color: #f4f4f4; }
+.bas { border-top-color: #e2e2e2; }
+.champ, .case-c, .doc-b { border-color: #d0d1d2; }   /* un champ a remplir garde son contour, meme sans contour de carte */
