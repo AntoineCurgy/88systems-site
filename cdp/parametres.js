@@ -71,7 +71,7 @@ function vueParametres([donnees]) {
       c.checked = possible && inter.checked && Array.isArray(l.jours) && l.jours.includes(j);
       c.disabled = !possible || !inter.checked;
       if (!possible) c.setAttribute("aria-disabled", "true");
-      c.setAttribute("aria-label", `${(JOURS[j] || [j, j])[1]} : ${l.nom}` + (possible ? "" : " (elle ne tourne pas ce jour-là)"));
+      c.setAttribute("aria-label", `${(JOURS[j] || [j, j])[1]} : ${l.nom}` + (possible ? "" : " (pas de passage ce jour-là)"));
       td.append(c);
       ligne.append(td);
       if (possible) casesJ[j] = c;

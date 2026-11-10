@@ -509,7 +509,7 @@ function ouvrirDocumentation(a, depuis) {
   // dans l'onglet Rapports ; elle ne s'ouvre qu'a qui a le droit sur l'automatisation.
   if (a.notice) {
     const li = el("li");
-    const n = el("span", null, "Notice");
+    const n = el("span", null, "Détails");   // « "Notice" devient "Détails" » (Antoine, 2026-11-10)
     n.append(el("span", "f", " · page"));
     li.append(n);
     if (a.notice === "publiee") {
@@ -517,7 +517,7 @@ function ouvrirDocumentation(a, depuis) {
       lien.href = API + "/api/automatisations/" + encodeURIComponent(a.id) + "/notice";
       lien.target = "_blank";
       lien.rel = "noopener";
-      lien.setAttribute("aria-label", "Ouvrir la notice (nouvel onglet)");
+      lien.setAttribute("aria-label", "Ouvrir les détails (nouvel onglet)");
       li.append(lien);
     } else {
       li.append(el("span", "absent", a.notice === "restreinte" ? "réservée aux destinataires du rapport" : "pas encore disponible"));
@@ -636,6 +636,58 @@ function carres(passages) {
 // ------------------------------------------------------------------ faire une demande
 // Une demande, un retour ou une correction sur une automatisation ou l'un de ses rapports (DEC_00165,
 // Antoine, 2026-10-31) : l'API la depose en note chez la cellule qui porte l'automatisation.
+// ------------------------------------------------------------------ rafraichir une ligne
+// Le bouton « Rafraichir » d'une ligne, dans Rapports (DEC_00379 de PCP001, 2026-11-02) et dans Automatisations
+// (Antoine, 2026-11-10, PCP049-1110-p : « bouton rafraichir sur ligne onglet rapport ET automatisation ») ; les deux
+// deposent la meme demande, celle de l'automatisation. `cible.rafraichir` porte l'etat que l'API rend.
+
+const EN_COURS_RAF = ["en_file", "en_cours"];
+
+// L'etat d'un rafraichissement, sous la date : en file ou en cours le temps qu'il tourne ; refuse ou en echec,
+// son motif tel que le lanceur l'ecrit ; fait, rien (la date dit le nouveau passage).
+function montrerRafraichissement(cible, nom, date, avis, relire) {
+  const e = cible.rafraichir && cible.rafraichir.etat;
+  const textes = { en_file: "Rafraîchissement demandé…", en_cours: "Rafraîchissement en cours…",
+                   refuse: "Non rafraîchi", echec: "Rafraîchissement en échec" };
+  if (!textes[e]) return;
+  const p = el("span", "rf-e" + (EN_COURS_RAF.includes(e) ? "" : " rf-k"), textes[e]);
+  // le motif d'un refus ou d'un echec, tel que le lanceur l'ecrit : a la demande, comme le resume
+  if (cible.rafraichir.motif && !EN_COURS_RAF.includes(e)) {
+    const v = bouton("lien-r rf-v", "voir pourquoi");
+    v.setAttribute("aria-label", "Pourquoi « " + nom + " » n'a pas été rafraîchi");
+    v.addEventListener("click", (ev) => { ev.stopPropagation(); avis.textContent = `« ${nom} » : ${cible.rafraichir.motif}`; });
+    p.append(" · ", v);
+  }
+  date.append(p);
+  if (EN_COURS_RAF.includes(e)) relire();
+}
+
+function boutonRafraichir(cible, nom, chemin, date, avis, relire, titre) {
+  const b = bouton("dm-b rf-b");
+  b.prepend(ico("rafraichir", 15));
+  b.title = titre;
+  b.setAttribute("aria-label", "Rafraîchir " + nom);
+  const occupe = () => EN_COURS_RAF.includes(cible.rafraichir && cible.rafraichir.etat);
+  if (occupe()) b.setAttribute("aria-disabled", "true");
+  b.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (occupe()) { avis.textContent = `« ${nom} » est déjà en cours de rafraîchissement.`; return; }
+    b.setAttribute("aria-disabled", "true");
+    const { statut, donnees } = await appeler("POST", chemin);
+    if (statut === 401) return sessionPerdue();
+    if (statut !== 200 || !donnees) {
+      b.removeAttribute("aria-disabled");
+      avis.textContent = `« ${nom} » ne peut pas être rafraîchi : ${(donnees && donnees.erreur) || "service indisponible"}.`;
+      return;
+    }
+    cible.rafraichir = donnees;
+    for (const s of date.querySelectorAll(".rf-e")) s.remove();
+    montrerRafraichissement(cible, nom, date, avis, relire);
+    avis.textContent = `« ${nom} » sera rafraîchi dans la minute ; la ligne se met à jour seule.`;
+  });
+  return b;
+}
+
 const NATURES_DEMANDE = [["demande", "Une demande"], ["retour", "Un retour"], ["correction", "Une correction"]];
 const TEXTE_DEMANDE_MAX = 4000;
 let fenetreDemande = null;

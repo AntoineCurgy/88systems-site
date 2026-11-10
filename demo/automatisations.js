@@ -8,6 +8,9 @@ let donneesAutos = null;
 let lignesAutos = [];
 let groupesAutos = [];
 let rafraichirFiltres = () => {};
+// la ligne ou s'annonce un rafraichissement demande depuis une ligne (PCP049-1110-p), comme dans Rapports
+const avisAutos = el("p", "avis");
+avisAutos.setAttribute("aria-live", "polite");
 
 function params() { return new URLSearchParams(location.search); }
 
@@ -122,7 +125,8 @@ function vueAutomatisations([donnees]) {
   rafraichirFiltres();
   const outils = el("div", "outils ligne");   // non figee : voulu par Antoine (2026-11-04 : « Dans automatisations, j'ai décidé de ne pas figer, c'est voulu »)
   outils.append(barre, el("span", "rt-sp"), lab);   // la recherche a droite (DEC_00520, option 5C)
-  return [el("h1", null, "Automatisations"), cartes, outils, ...sections, vide];
+  avisAutos.textContent = "";
+  return [el("h1", null, "Automatisations"), cartes, outils, avisAutos, ...sections, vide];
 }
 
 function ligneAuto(a) {
@@ -151,14 +155,43 @@ function ligneAuto(a) {
   pt.removeAttribute("aria-hidden");
   pt.setAttribute("role", "img");
   pt.setAttribute("aria-label", STATUTS[st]);
-  la.append(pt, el("span", "la-id mono", a.court || String(a.id).slice(-2)), nom, boutonDocumentation(a), histo, d);
+  const outils = el("span", "la-o");
+  // la demande vivait dans la fiche ; la fiche ne s'ouvre plus quand les details existent : elle passe sur la ligne
+  outils.append(boutonDocumentation(a), boutonDemande({ id: a.id, nom: a.nom }, "dm-b"));
+  // rafraichir cette automatisation, comme la ligne de son rapport (Antoine, 2026-11-10, PCP049-1110-p) ; absent si
+  // le portail ne sait pas le demander, ou sans droit
+  if (a.rafraichir) outils.append(boutonRafraichir(a, a.nom, "/api/automatisations/" + encodeURIComponent(a.id) + "/rafraichir",
+                                                   d, avisAutos, relireAutosBientot, "Rafraîchir cette automatisation"));
+  la.append(pt, el("span", "la-id mono", a.court || String(a.id).slice(-2)), nom, outils, histo, d);
+  montrerRafraichissement(a, a.nom, d, avisAutos, relireAutosBientot);
   b.append(la, ico("chevron", 16));
+  if (String(a.id) === derniereOuverte) b.classList.add("ouverte");
   ouvrir.addEventListener("click", () => {
     const id = String(a.id);
+    // Antoine, 2026-11-10 : la fenetre de detail « disparait » ; « a la place, ceci s'ouvre dans un nouvel onglet »,
+    // la page Details de l'automatisation. Sans page publiee, la fiche reste : rien ne disparait sans remplacant.
+    if (a.notice === "publiee") {
+      marquerOuverte(id);
+      window.open(API + "/api/automatisations/" + encodeURIComponent(id) + "/notice", "_blank", "noopener");
+      return;
+    }
     if (params().get("id") !== id) history.pushState(null, "", adresseAvec((q) => q.set("id", id)));
     ouvrirFiche(id);
   });
   return b;
+}
+
+let relectureAutos = null;
+function relireAutosBientot() {
+  if (relectureAutos) return;
+  relectureAutos = setTimeout(() => {
+    relectureAutos = null;
+    suivre([SOURCES.autos], (dd, premier) => {
+      const ouverte = panneauMode === "fiche";
+      poser(vueAutomatisations(dd), premier);
+      if (premier || ouverte) suivreAdresse();
+    });
+  }, 15000);
 }
 
 // la documentation (le bouton et sa fenetre) vit dans commun.js : l'onglet Rapports l'ouvre aussi (Antoine, 2026-11-04)
@@ -169,6 +202,16 @@ function section(titre, ...enfants) {
   return s;
 }
 
+// La derniere automatisation ouverte reste en surbrillance (Antoine, 2026-11-10 : « quand on est sur un item, il doit
+// etre en surbrillance ») ; gardee le temps de l'onglet, pour la retrouver au retour.
+let derniereOuverte = (() => { try { return sessionStorage.getItem("auto-ouverte") || ""; } catch (_) { return ""; } })();
+
+function marquerOuverte(id) {
+  derniereOuverte = id;
+  try { sessionStorage.setItem("auto-ouverte", id); } catch (_) { /* stockage refuse : la surbrillance vit le temps de la page */ }
+  for (const [r, x] of lignesAutos) r.classList.toggle("ouverte", String(x.id) === id);
+}
+
 function ouvrirFiche(id) {
   if (!donneesAutos) return;
   // un lien enregistre avant la bascule du 2026-10-15 porte l'ancien identifiant : il mene au nouveau
@@ -176,6 +219,7 @@ function ouvrirFiche(id) {
   if (!a) return fermerPanneau(false);
   if (String(a.id) !== id) history.replaceState(null, "", adresseAvec((q) => q.set("id", String(a.id))));
   const st = statutDe(a);
+  marquerOuverte(String(a.id));
   const ligne = lignesAutos.find(([, x]) => x === a);
   const rangee = ligne ? ligne[0] : null;
   const depuis = rangee ? rangee.querySelector(".lb-o") : null;
@@ -225,8 +269,8 @@ function ouvrirFiche(id) {
   }
 
   ouvrirPanneau("fiche", [etiquette, nom, fl,
-    section("Ce qu'elle fait", objectif),
-    section("Quand elle tourne", quand),
+    section("Rôle", objectif),
+    section("Planification", quand),
     section("Dernier passage", ...dernier),
     section("Huit derniers passages", huit),
     section("Rapports produits", raps),
@@ -237,8 +281,8 @@ function ouvrirFiche(id) {
 // Fermer la fiche retire `?id` de l'adresse, sans ajouter d'etape a l'historique.
 auFermer = (mode) => {
   if (mode !== "fiche") return;
-  for (const [r] of lignesAutos) {
-    r.classList.remove("ouverte");
+  for (const [r, x] of lignesAutos) {
+    r.classList.toggle("ouverte", String(x.id) === derniereOuverte);   // la surbrillance reste, la fiche ferme
     r.querySelector(".lb-o").setAttribute("aria-expanded", "false");
   }
   if (params().has("id")) history.replaceState(null, "", adresseAvec((q) => q.delete("id")));
