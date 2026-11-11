@@ -37,7 +37,7 @@
   --rouge-p: #fdf7f7;            /* et son fond, plus pale que celui d'un etat */
   --sur-marque: rgba(255, 255, 255, .32);   /* filet blanc sur le bandeau */
   /* sept tailles (DEC_00827 ; 11 px a rejoint 12 px, DEC_00842, 2A) */
-  --t-champ: 16px;   /* le texte d'un champ sur telephone, seul : sans lui Safari zoome au toucher (composant « le confort du telephone et du clavier », DEC_00850 de PCP056) */
+  --champ-tel: 16px;   /* le texte d un champ sur telephone : hors des tailles de la charte, le controle des pages porte l exception (NTE de PCP051, 2026-11-11) */
   --t-menu: 11px;   /* le libelle du menu de gauche seul, comme avant la charte (DEC_00853, choix 3A d'Antoine) */
   --t-meta: 12px;
   --t-petit: 13px;
@@ -482,7 +482,7 @@ body.fen-ouverte { overflow: hidden; }
   .ke-d { border-left: 0; padding-left: 0; }
 }
 @media (max-width: 40rem) {
-  input, select, textarea { font-size: var(--t-champ); }   /* 16 px dans tout champ sur telephone (DEC_00850 de PCP056) */
+  input, select, textarea { font-size: var(--champ-tel); }   /* 16 px dans tout champ sur telephone (DEC_00850 de PCP056) */
   .b-in { gap: var(--s1); padding: 0 var(--s3); }
   .b-op, .b-barre, .b-m { display: none; }
   .aide-dl { grid-template-columns: 1fr; }
