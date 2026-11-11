@@ -7,8 +7,8 @@
 // la date d'un retour en « 04/11 », comme les autres listes (Antoine, 2026-11-11, DEC_00835, choix 5A)
 const jourCourtRetour = (iso) => { const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}` : (iso || ""); };
 
-const ETATS_RETOUR = { recu: ["Reçu", "t-ferme"], en_cours: ["En cours", "t-ambre"], corrige: ["Corrigé", "t-vert"],
-                       referme: ["Refermé", "t-ferme"] };
+const ETATS_RETOUR = { recu: ["Reçu", "t-ferme"], en_cours: ["En cours", "t-ambre"], corrige: ["Traité", "t-vert"],
+                       referme: ["Sans suite", "t-ferme"] };   // les mots choisis par Antoine le 2026-11-11 (PCP049-1111-x, A)
 // Les mots de la fenetre « Nouveau retour » (depot d'Antoine du 2026-11-05, recommandations de PCP049-1105-c). Un nouveau
 // besoin ne porte sur rien d'existant : il part sans liste. Un retour passe classe « demande » porte sur une
 // automatisation existante : il se lit « Amelioration ».
@@ -17,9 +17,9 @@ const MOT_TYPE = { anomalie: "Anomalie", amelioration: "Amélioration", demande:
 const EXEMPLES = { anomalie: "Dans le rapport de ce matin, la ligne… affiche… alors que…",
                    amelioration: "J'aimerais ajouter dans le rapport une colonne…",
                    demande: "J'aimerais recevoir chaque semaine un contrôle sur…" };
-// la barre : Tous, Ouverts (recu et en cours), Corriges, Refermes
+// la barre : Tous, Ouverts (recu et en cours), Traites, Sans suite
 const GROUPES = [["", "Tous", () => true], ["ouverts", "Ouverts", (r) => r.etat === "recu" || r.etat === "en_cours"],
-                 ["corriges", "Corrigés", (r) => r.etat === "corrige"], ["refermes", "Refermés", (r) => r.etat === "referme"]];
+                 ["corriges", "Traités", (r) => r.etat === "corrige"], ["refermes", "Sans suite", (r) => r.etat === "referme"]];
 const SOURCE_RETOURS = { chemin: "/api/retours", verifier: (d) => Array.isArray(d.retours) };
 const filtres = { g: "", q: "" };
 
@@ -136,10 +136,10 @@ function ouvrirDetail(r, depuis) {
   for (const h of r.historique || []) {
     const li = el("li");
     li.append(el("span", "mono", h.date), " ", h.quoi === "publie"
-      ? `Corrigé, dans la version ${h.version} de l'automatisation` : "Reçu par l'équipe qui suit l'automatisation");
+      ? `Traité, dans la version ${h.version} de l'automatisation` : "Reçu par l'équipe qui suit l'automatisation");
     ol.append(li);
   }
-  if (r.etat === "referme") ol.append(el("li", "discret", "Refermé : l'équipe ne donne pas suite."));
+  if (r.etat === "referme") ol.append(el("li", "discret", "L'équipe n'y donne pas suite."));
   histo.append(el("h3", null, "Historique"), ol);
   ouvrirPanneau("retour", [titre, tete, dl, demande, histo], depuis);
 }
