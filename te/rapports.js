@@ -77,14 +77,15 @@ function vueRapports([donnees, autos]) {
   const carte = el("div", "carte gd-c");
   const table = el("table", "gd");
   const cg = el("colgroup");
-  for (const w of ["", "8.5rem", "8.75rem", "8rem", "8rem", "8.5rem", "8.5rem", "9.5rem"]) {   // Resume et Documentation tiennent leur bouton (2026-11-04)
+  for (const w of ["", "8.5rem", "8rem", "8rem", "8.5rem", "8.5rem", "9.5rem"]) {   // sept colonnes depuis le retrait de « Système d'origine » (2026-11-11)
+    // Resume et Documentation tiennent leur bouton (2026-11-04)
     const c = el("col");
     if (w) c.style.width = w;
     cg.append(c);
   }
   const thead = el("thead");
   const tr = el("tr");
-  for (const [texte, classe, cache] of [["Rapport"], ["Systèmes", "c"], ["Système d'origine"], ["État"], ["Date"], ["Résumé", null, true], ["Documentation", null, true], ["Télécharger", null, true]]) {
+  for (const [texte, classe, cache] of [["Rapport"], ["Systèmes", "c"], ["État"], ["Date"], ["Résumé", null, true], ["Documentation", null, true], ["Télécharger", null, true]]) {
     const th = el("th", classe);
     th.scope = "col";
     if (cache) th.append(el("span", "sr", texte)); else th.textContent = texte;
@@ -99,7 +100,7 @@ function vueRapports([donnees, autos]) {
     const bande = el("tr", "gd-b");
     // le titre du groupe a la forme de ceux de l'onglet Automatisations, « Depuis Even 17 » (Antoine, 2026-11-04)
     const th = el("th", null, g);
-    th.colSpan = 8;
+    th.colSpan = 7;
     th.scope = "rowgroup";
     const cpt = el("span", "g-cpt", liste.length);
     cpt.append(el("span", "sr", liste.length > 1 ? " rapports" : " rapport"));
@@ -143,7 +144,6 @@ function ligneRapport(r, avis, auto) {
   const nom = el("th");
   nom.scope = "row";
   const f = el("td", "td-f", flux(r.flux));
-  const origine = el("td", "discret", r.origine || "");
   const etat = el("td");
   const date = el("td", "la-d mono gd-date");   // le style de la date des automatisations, sur une ligne
   const notice = el("td", "act");   // la colonne Documentation (ex-Notice)
@@ -211,7 +211,7 @@ function ligneRapport(r, avis, auto) {
       action.append(b);
     }
   }
-  tr.append(nom, f, origine, etat, date, resume, notice, action);
+  tr.append(nom, f, etat, date, resume, notice, action);   // sans « Système d'origine », redondant avec Systèmes (Antoine, 2026-11-11)
   return tr;
 }
 

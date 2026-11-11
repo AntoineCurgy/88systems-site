@@ -24,6 +24,7 @@ const duree = (s) => {
   return n < 60 ? `${n} s` : `${Math.floor(n / 60)} min ${String(n % 60).padStart(2, "0")}`;
 };
 
+// « Description », jamais « Ce qui s'est passé » (Antoine, 2026-11-11, DEC_00832)
 function ouvrirPassage(p, d, depuis) {
   const titre = el("h2", null, p.nom);
   titre.id = "panneau-titre";
@@ -31,7 +32,7 @@ function ouvrirPassage(p, d, depuis) {
   tete.append(tagPassage(p.resultat), " ", el("span", "mono discret", p.id));
   const dl = el("dl", "rt-dl");
   for (const [mot, v] of [["Quand", `${jourLisibleJ(p.date)}, ${(p.heure || "").slice(0, 5)}`], ["Durée", duree(p.duree)],
-                          ["Ce qui s'est passé", p.detail || "—"], ["Version du code", p.version || "—"], ["Machine", p.machine || "—"]])
+                          ["Description", p.detail || "—"], ["Version du code", p.version || "—"], ["Machine", p.machine || "—"]])
     dl.append(el("dt", null, mot), el("dd", null, v));
   const enfants = [titre, tete, dl];
   const inc = (d.incidents || []).filter((i) => i.id === p.id);
@@ -79,7 +80,7 @@ function vue(d) {
   for (const w of ["6rem", "17rem", "10rem", "6rem", ""]) { const c = el("col"); if (w) c.style.width = w; cg.append(c); }
   const thead = el("thead");
   const tr = el("tr");
-  for (const t of ["Heure", "Automatisation", "Résultat", "Durée", "Ce qui s'est passé"]) tr.append(el("th", null, t));
+  for (const t of ["Heure", "Automatisation", "Résultat", "Durée", "Description"]) tr.append(el("th", null, t));
   thead.append(tr);
   table.append(cg, thead);
   const groupes = [];
