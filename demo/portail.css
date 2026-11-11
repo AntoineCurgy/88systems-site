@@ -49,6 +49,8 @@ a { color: var(--marque); }
 :focus-visible { outline: 3px solid var(--marque); outline-offset: 2px; }
 [tabindex="-1"]:focus { outline: none; }
 [hidden] { display: none !important; }
+/* les onglets Retours et Emails, selon la session : la classe est posee des le <head> depuis le cache (commun.js) */
+html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"] { display: none !important; }
 .mono { font-family: var(--mono); }
 .discret { color: var(--discret); }
 .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -182,7 +184,14 @@ a { color: var(--marque); }
 .gb-o[aria-pressed="true"] span, .pe-b[aria-pressed="true"] span { color: var(--clair); }
 .outils { display: flex; flex-direction: column; gap: .75rem; align-items: flex-start; }
 .outils.ligne { flex-direction: row; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; width: 100%; }
-.cherche input { font: inherit; padding: .5rem .85rem; border: 1.5px solid var(--bord); border-radius: 10px; background-color: #fff; width: 18rem; max-width: 100%; }
+/* Les champs de recherche, plus petits et plus nets (Antoine, 2026-11-11 : « un peu trop gros […] un design un peu plus
+   Tesla, un peu plus comme le reste maintenant, un peu plus sharp ») : la hauteur des barres de filtres, un trait fin, une
+   loupe discrete, le trait plus fonce au focus, sans halo. */
+.cherche input { font: inherit; font-size: .82rem; height: 2.05rem; box-sizing: border-box; padding: 0 .75rem 0 2rem; border: 1px solid #d0d1d2; border-radius: 6px; width: 15rem; max-width: 100%; color: var(--encre);
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c5e62' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat .7rem center; }
+.cherche input::placeholder { color: var(--pale); }
+.cherche input:hover { border-color: #a9abad; }
+.cherche input:focus { outline: none; border-color: var(--encre2); }
 .vide { color: var(--discret); }
 .avis { font-size: .85rem; color: var(--rouge); }
 .avis:empty { display: none; }
@@ -484,8 +493,19 @@ body.fen-ouverte { overflow: hidden; }
 .rt-h .mono { color: var(--discret); margin-right: .4rem; }
 .rt-sur { display: grid; gap: .3rem; margin-bottom: .8rem; font-size: 12.5px; font-weight: 600; color: var(--discret); }
 .rt-sur select { font: inherit; font-size: .9rem; font-weight: 400; padding: .5rem .6rem; border: 1.5px solid var(--bord); border-radius: 10px; background-color: #fff; color: var(--encre); }
-/* l'onglet « Courriels envoyes » (DEC_00606) : une adresse par ligne dans la fenetre */
-.rt-dl dd.ev-a { white-space: pre-line; font-family: var(--mono); font-size: .82rem; }
+/* La fenetre d'un email de l'onglet « Emails » (Antoine, 2026-11-11) : la moitie de l'ecran, les champs en tete comme le
+   brouillon de la page de pilotage (une ligne par champ, les adresses a la suite), puis le message. */
+.fen-voile.fen-mail .fen { width: min(max(50vw, 640px), 96vw); height: 82vh; max-height: 82vh; }
+.fen-mail .fen-c { display: flex; flex-direction: column; gap: .9rem; }
+.ml-t { display: grid; grid-template-columns: max-content 1fr; gap: .4rem 1rem; margin: 0; padding-bottom: .9rem; border-bottom: 1px solid var(--filet); font-size: .86rem; }
+.ml-t dt { color: var(--discret); }
+.ml-t dd { margin: 0; overflow-wrap: anywhere; }
+.ml-e { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .9rem; margin: 0; font-size: .82rem; color: var(--discret); }
+.ml-e .ml-r { color: var(--rouge); }
+.ml-c { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.ml-cadre { flex: 1 1 auto; width: 100%; min-height: 50vh; border: 1px solid var(--filet); border-radius: 6px; background-color: #fff; }
+.ml-texte { white-space: pre-line; line-height: 1.55; font-size: .9rem; }
+.ml-n { margin: .8rem 0 0; font-size: .78rem; color: var(--discret); }
 
 /* ------------------------------------------------------------ la peau facon Tesla (DEC_00755) */
 /* Ecrite apres le reste, elle l'emporte : moins de gras, les chiffres en police du texte a chasse egale, des rayons de 12 px.

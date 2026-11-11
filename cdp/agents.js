@@ -49,6 +49,13 @@ const AGENTS = [
 ].map(([id, nom, domaine, mission, outils, actions]) => ({ id, nom, domaine, mission, outils, actions, etape: 0 }));
 
 const filtres = { statut: "" };
+// La page ne garde de /api/automatisations que ce qu'elle montre, sous sa propre cle de cache : le reste (passages,
+// rafraichissements, documentation) change a chaque passage d'une automatisation et la faisait se redessiner apres
+// le rendu du cache, sans rien changer a l'ecran (audit du 2026-11-11, « ca flash un peu bizarrement »).
+const SOURCE_AUTOS_AGENTS = { chemin: "/api/automatisations", cle: "/api/automatisations#agents",
+  verifier: (d) => Array.isArray(d.automatisations),
+  normaliser: (d) => ({ maj: d.maj, agents_masques: d.agents_masques || [],
+    automatisations: d.automatisations.map((x) => ({ id: x.id, nom: x.nom, flux: x.flux, statut: x.statut })) }) };
 let autosParId = new Map();
 // Les agents que la feuille laisse affiches (« Affiché dans portail », Antoine, 2026-10-16).
 let agents = AGENTS;
@@ -230,7 +237,7 @@ function suivreAdresse() {
 
 window.addEventListener("popstate", suivreAdresse);
 
-demarrer(() => suivre([SOURCES.autos], (d, premier) => {
+demarrer(() => suivre([SOURCE_AUTOS_AGENTS], (d, premier) => {
   const ouverte = panneauMode === "fiche";
   poser(vueAgents(d), premier);
   if (premier || ouverte) suivreAdresse();

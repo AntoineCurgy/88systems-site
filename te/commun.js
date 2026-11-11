@@ -212,7 +212,8 @@ function viderCache() {
 
 let moi = null;
 
-function cleDe(source) { return (moi ? moi.adresse : "?") + ":" + source.chemin; }
+// la cle du cache d'une source : son chemin, ou sa propre cle quand une page ne garde qu'une partie de la reponse
+function cleDe(source) { return (moi ? moi.adresse : "?") + ":" + (source.cle || source.chemin); }
 
 // `rendre(donnees, premier)` recoit une valeur par source, dans l'ordre. Elle est appelee
 // une fois avec le cache s'il est complet, puis une fois avec le frais s'il differe.
@@ -240,7 +241,7 @@ function horsLigne() {
 
 // ------------------------------------------------------------------ session et chrome
 
-const PAGES = ["index.html", "rapports.html", "automatisations.html", "agents.html", "cartographie.html", "parametres.html", "retours.html", "aide.html"];
+const PAGES = ["index.html", "rapports.html", "automatisations.html", "agents.html", "cartographie.html", "parametres.html", "retours.html", "envois.html", "aide.html"];
 
 function pageCourante() {
   const p = location.pathname.split("/").pop() || "index.html";
@@ -271,16 +272,21 @@ function poserMoi() {
   avatar.title = moi.nom ? moi.nom + " · " + adresse : adresse;
   avatar.setAttribute("aria-label", "Connecté : " + (moi.nom || adresse));
   if (!$("maj").textContent) majBandeau(moi.maj);
-  // l'onglet « Retours » n'existe que si le service lit la liste des retours (DEC_00506) ; il remplace alors les bulles
-  const lienRetours = document.querySelector('a[data-page="retours"]');
-  if (lienRetours) lienRetours.hidden = !moi.onglet_retours;
+  // l'onglet « Retours » n'existe que si le service lit la liste des retours (DEC_00506) ; il remplace alors les bulles ;
+  // l'onglet « Emails » n'existe que pour l'administrateur du portail (DEC_00598, DEC_00606). Les deux se montrent par
+  // une classe de <html>, posee des le <head> depuis le cache (le script en ligne de chaque page) : le rail ne
+  // clignote plus a chaque page, le temps que ce script tourne (audit du 2026-11-11, « ca flash un peu bizarrement »).
+  ongletsDuRail(moi);
   document.body.classList.toggle("avec-retours", Boolean(moi.onglet_retours));
-  // l'onglet « Courriels envoyes » n'existe que pour l'administrateur du portail (DEC_00598, DEC_00606)
-  const lienEnvois = document.querySelector('a[data-page="envois"]');
-  if (lienEnvois) lienEnvois.hidden = !moi.onglet_envois;
   // L'onglet « Agents » reste toujours visible, vide ou non (Antoine, 2026-10-31, PCP049-1031-c : « toujours
   // montrer Agents IA, Automatisations, Rapports et Cartographie », pour donner envie) ; il disparaissait quand
   // la feuille masquait chaque agent (2026-10-16).
+}
+
+function ongletsDuRail(m) {
+  const c = document.documentElement.classList;
+  c.toggle("sans-retours", !m.onglet_retours);
+  c.toggle("sans-envois", !m.onglet_envois);
 }
 
 // Un onglet vide le dit, et dit ce qu'il pourrait porter (PCP049-1031-c, 2026-10-31).
@@ -382,7 +388,7 @@ function ouvrirPanneau(mode, enfants, depuis) {
   const p = $("panneau");
   panneauMode = mode;
   declencheur = depuis || document.activeElement;
-  p.classList.toggle("large", mode === "resume");
+  p.classList.toggle("fen-mail", mode === "envoi");   // la fenetre d'un email, plus grande (2026-11-11)
   const titre = enfants.find((x) => x && x.id === "panneau-titre");
   const actions = enfants.filter((x) => x && x.classList && x.classList.contains("r-act"));
   $("panneau-tete").replaceChildren(...(titre ? [titre] : []));

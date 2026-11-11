@@ -1,4 +1,5 @@
-// L'onglet « Courriels envoyes » (DEC_00598, DEC_00600 de PCP049) : tous les courriels automatiques envoyes aux
+// L'onglet « Emails » (ex « Courriels envoyes », renomme par Antoine le 2026-11-11 : « j'aime pas le mot courriel […]
+// juste l'appeler email ») (DEC_00598, DEC_00600 de PCP049) : tous les emails automatiques envoyes aux
 // equipes du client, lus dans le registre des envois (OUT_00399) par /api/envois, pour l'administrateur seul. La forme
 // est la maquette A choisie par Antoine le 2026-11-06 (DEC_00606) : un tableau groupe par jour, la barre segmentee et
 // la recherche des autres onglets, le detail dans la fenetre centree du portail ; aucune phrase sous le titre.
@@ -44,8 +45,10 @@ function aQui(e) {
   return a.length === 1 ? a[0].split("@")[0] : `${a.length} destinataires`;
 }
 
-const jourEnvoi = (e) => String(e.le || "").slice(0, 10);
-const heureEnvoi = (e) => String(e.le || "").slice(11, 16);
+// le jour et l'heure a Paris : le registre ecrit l'heure de la machine qui envoie (UTC sur le serveur), que l'API rend
+// en ISO strict ; lus tels quels, ils donnaient l'heure UTC (audit du 2026-11-11)
+const jourEnvoi = (e) => jourDe(e.le) || String(e.le || "").slice(0, 10);
+const heureEnvoi = (e) => { const p = parties(e.le); return p ? `${p.hour}:${p.minute}` : String(e.le || "").slice(11, 16); };
 
 function jourLisible(iso) {
   const d = new Date(iso + "T12:00:00");
@@ -55,10 +58,10 @@ function jourLisible(iso) {
 }
 
 function vueEnvois(d) {
-  const titre = el("h1", null, "Courriels envoyés");
+  const titre = el("h1", null, "Emails");
   if (d.registre === "absent" || !d.envois.length) {
-    return [titre, vueVide("Aucun courriel enregistré pour l'instant",
-      "Chaque courriel automatique envoyé aux équipes s'inscrira ici : à qui, quand, pourquoi, et s'il est parti.")];
+    return [titre, vueVide("Aucun email enregistré pour l'instant",
+      "Chaque email automatique envoyé aux équipes s'inscrira ici : à qui, quand, pourquoi, et s'il est parti.")];
   }
   const liste = d.envois;
   const barre = el("div", "gb-barre");
@@ -72,10 +75,10 @@ function vueEnvois(d) {
     barre.append(b);
   }
   const lab = el("label", "cherche");
-  lab.append(el("span", "sr", "Rechercher un courriel"));
+  lab.append(el("span", "sr", "Rechercher un email"));
   const champ = el("input");
   champ.type = "search";
-  champ.placeholder = "Rechercher un objet, une adresse…";
+  champ.placeholder = "Rechercher un email…";
   champ.value = filtresEnvois.q;
   champ.addEventListener("input", () => { filtresEnvois.q = champ.value.trim().toLowerCase(); filtrer(); });
   lab.append(champ);
@@ -108,7 +111,7 @@ function vueEnvois(d) {
     th.colSpan = 5;
     th.scope = "rowgroup";
     const cpt = el("span", "g-cpt", duJour.length);
-    cpt.append(el("span", "sr", duJour.length > 1 ? " courriels" : " courriel"));
+    cpt.append(el("span", "sr", duJour.length > 1 ? " emails" : " email"));
     th.append(" ", cpt);
     bande.append(th);
     tb.append(bande);
@@ -130,7 +133,7 @@ function vueEnvois(d) {
     groupes.push([tb, cpt, lignes]);
   }
   carte.append(table);
-  const vide = el("p", "vide", "Aucun courriel ne correspond.");
+  const vide = el("p", "vide", "Aucun email ne correspond.");
   vide.hidden = true;
 
   function filtrer() {
@@ -158,34 +161,50 @@ function vueEnvois(d) {
   return [figerTete(tete), carte, vide];
 }
 
-// La fenetre d'un courriel : quand, pourquoi, comment, a qui, le resultat, l'apercu du texte (le code de connexion
-// y est masque par le registre et par l'API).
+// La fenetre d'un email, a la maniere du brouillon de la page de pilotage (Antoine, 2026-11-11 : « une fenetre pop-up un
+// peu plus grande […] Pas plein ecran, mais on va dire 50% de l'ecran » ; « il y a les adresses mail qui sont les unes
+// en dessous des autres ») : les champs en tete (De, A, Copie, Objet, Envoye), une ligne d'etat, puis le message ; son
+// HTML dans un cadre isole (sandbox sans script) quand le registre le garde, sinon l'apercu du texte. Le code de
+// connexion y est masque par le registre et par l'API.
 function ouvrirEnvoi(e, depuis) {
   const titre = el("h2", null, e.objet || "Sans objet");
   titre.id = "panneau-titre";
-  const tete = el("p", "rt-tete");
-  tete.append(tagEnvoi(e));
-  const dl = el("dl", "rt-dl");
+  const champs = el("dl", "ml-t");
   const copie = adresses(e.copie);
-  const lignes = [["Quand", `${jourLisible(jourEnvoi(e))}, ${heureEnvoi(e)}`],
-                  ["Pourquoi", (motifSansClient(e).charAt(0).toUpperCase() + motifSansClient(e).slice(1)) || "—"],
-                  ["Comment", [e.canal === "outlook" ? "Outlook" : "courriel", e.boite, e.appelant].filter(Boolean).join(" · ")],
-                  ["À qui", adresses(e.destinataires).join("\n") || "—"]];
-  if (copie.length) lignes.push(["En copie", copie.join("\n")]);
-  lignes.push(["Pièces jointes", String(e.pieces || 0)]);
-  if (e.raison) lignes.push(["Raison", e.raison]);
-  for (const [mot, valeur] of lignes) {
-    const dd = el("dd", mot === "À qui" || mot === "En copie" ? "ev-a" : null, valeur);
-    dl.append(el("dt", null, mot), dd);
-  }
-  const apercu = el("section", "fi-s");
-  apercu.append(el("h3", null, "Aperçu du texte"), el("p", null, e.apercu || "—"));
-  ouvrirPanneau("envoi", [titre, tete, dl, apercu], depuis);
+  const lignes = [["De", e.boite || (e.canal === "outlook" ? "Outlook" : "—")],
+                  ["À", adresses(e.destinataires).join(", ") || "—"]];
+  if (copie.length) lignes.push(["Copie", copie.join(", ")]);
+  lignes.push(["Objet", e.objet || "Sans objet"], ["Envoyé", `${jourLisible(jourEnvoi(e))} à ${heureEnvoi(e)}`]);
+  for (const [mot, valeur] of lignes) champs.append(el("dt", null, mot), el("dd", null, valeur));
+  const etat = el("p", "ml-e");
+  const pq = motifSansClient(e);
+  etat.append(tagEnvoi(e), el("span", null, (pq.charAt(0).toUpperCase() + pq.slice(1)) || e.appelant || "—"));
+  if (e.pieces) etat.append(el("span", null, pluriel(Number(e.pieces), "pièce jointe", "pièces jointes")));
+  if (e.raison) etat.append(el("span", "ml-r", e.raison));
+  const corps = el("div", "ml-c");
+  const attente = el("p", "chargement", "Chargement du message…");
+  corps.append(attente);
+  ouvrirPanneau("envoi", [titre, champs, etat, corps], depuis);
+  appeler("GET", "/api/envois/" + encodeURIComponent(e.id) + "/corps").then(({ statut, donnees }) => {
+    if (panneauMode !== "envoi" || !document.contains(attente)) return;   // fenetre fermee ou remplacee entre-temps
+    if (statut === 401) return sessionPerdue();
+    const html = statut === 200 && donnees && donnees.corps_html;
+    if (html) {
+      const cadre = el("iframe", "ml-cadre");
+      cadre.setAttribute("sandbox", "");
+      cadre.title = "Le message : " + (e.objet || "Sans objet");
+      cadre.srcdoc = (/<head(\s[^>]*)?>/i.test(html) ? "" : "<style>body{margin:0}</style>") + html;
+      attente.replaceWith(cadre);
+      return;
+    }
+    const texte = el("div", "ml-texte", e.apercu || "—");
+    attente.replaceWith(texte, el("p", "ml-n", "Aperçu du texte : le message mis en forme n'est pas gardé pour cet email."));
+  });
 }
 
 demarrer(async () => {
   if (!moi.onglet_envois) {
-    poser([el("h1", null, "Courriels envoyés"), vueVide("Onglet réservé",
+    poser([el("h1", null, "Emails"), vueVide("Onglet réservé",
       "Cet onglet est réservé à l'administrateur du portail.")], true);
     return;
   }
