@@ -118,7 +118,8 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
   /* la colonne blanche du rail descend jusqu'en bas, a cote du pied */
   background-image: linear-gradient(to right, var(--surface) calc(var(--rail) - 1px), var(--bord) calc(var(--rail) - 1px), var(--bord) var(--rail), transparent var(--rail));
 }
-.rail { position: sticky; top: var(--hb); align-self: start; height: calc(100vh - var(--hb)); display: flex; flex-direction: column; padding: .9rem .4rem; background-color: var(--surface); }
+/* la colonne garde la hauteur de l'ecran ; plus haute que lui, elle defile en elle-meme, jamais sous le pied de page (Antoine, 2026-11-11) */
+.rail { position: sticky; top: var(--hb); align-self: start; height: calc(100vh - var(--hb)); display: flex; flex-direction: column; padding: .9rem .4rem; background-color: var(--surface); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .rail nav { display: flex; flex-direction: column; gap: .35rem; }
 .m-bas { display: flex; flex-direction: column; margin-top: auto; }
 .rail a, .rail button {

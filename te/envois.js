@@ -171,7 +171,7 @@ function ouvrirEnvoi(e, depuis) {
   titre.id = "panneau-titre";
   const champs = el("dl", "ml-t");
   const copie = adresses(e.copie);
-  const lignes = [["De", e.boite || (e.canal === "outlook" ? "Outlook" : "—")],
+  const lignes = [["De", e.expediteur || e.boite || "—"],
                   ["À", adresses(e.destinataires).join(", ") || "—"]];
   if (copie.length) lignes.push(["Copie", copie.join(", ")]);
   lignes.push(["Objet", e.objet || "Sans objet"], ["Envoyé", `${jourLisible(jourEnvoi(e))} à ${heureEnvoi(e)}`]);
@@ -198,7 +198,7 @@ function ouvrirEnvoi(e, depuis) {
       return;
     }
     const texte = el("div", "ml-texte", e.apercu || "—");
-    attente.replaceWith(texte, el("p", "ml-n", "Aperçu du texte : le message mis en forme n'est pas gardé pour cet email."));
+    attente.replaceWith(texte, el("p", "ml-n", "Parti avant le 11 novembre à 13 h : seul son texte a été gardé, sans sa mise en forme."));
   });
 }
 
