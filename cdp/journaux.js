@@ -28,7 +28,6 @@ const duree = (s) => {
 // resultat et sa date, puis la description a la ligne (« faut juste un petit "entrée" avant ») ; depuis quand ; la
 // chronologie des sept jours ; les faits de l'automatisation, lus dans /api/automatisations. « Description », jamais
 // « Ce qui s'est passé » (DEC_00832).
-const MOT_FICHE = { "échec": "Erreur", "écarts": "Écarts", alerte: "Alerte", "à voir": "À vérifier", ok: "Réussi" };
 const COULEUR_FICHE = { "échec": "var(--rouge)", alerte: "var(--ambre)", "à voir": "var(--ambre)", ok: "var(--vert)" };
 const STATUT_FICHE = { ok: "Fonctionnelle", panne: "Interrompue", construction: "En construction" };
 let faitsAutos = null;   // les automatisations, lues une fois a la premiere fiche
@@ -57,17 +56,12 @@ async function ouvrirPassage(p, d, depuis) {
   const a = await faitsDe(p.id);
   const hist = (d.passages || []).filter((x) => x.id === p.id);
   const inc = (d.incidents || []).filter((i) => i.id === p.id);
-  const titre = el("h2", null, p.nom);
+  // le titre porte le numero et le flux sur sa ligne ; aucune redite dans la fiche : le dernier passage est le premier
+  // de la liste (Antoine, 2026-11-11 : « on arrête avec les redondance dans une meme fiche »)
+  const titre = el("h2", "jx-titre");
   titre.id = "panneau-titre";
-  const sous = el("p", "jx-sous", `${String(p.id).replace("AUT_", "")} · ${fluxLisibleJ(a.flux) || "—"}`);
-  const lead = el("p", "jx-lead");
-  lead.style.setProperty("--c", COULEUR_FICHE[p.resultat] || "var(--encre)");
-  lead.append(el("b", null, `${MOT_FICHE[p.resultat] || p.resultat}, le ${jourLisibleJ(p.date).toLowerCase()} à ${heureJ(p)}.`),
-              el("br"), p.detail || "—");
-  const memes = hist.filter((x) => x.resultat === p.resultat).length;
-  const dep = el("p", "jx-depuis", inc.length
-    ? `Incident ouvert depuis le ${depuisLeJ(inc[0])} : ${inc[0].passages} passages au même résultat.`
-    : `${MOT_FICHE[p.resultat] || p.resultat} : ${memes} sur ${hist.length} passages ces sept derniers jours.`);
+  titre.append(el("span", null, p.nom), el("span", "jx-ref", `${String(p.id).replace("AUT_", "")} · ${fluxLisibleJ(a.flux) || "—"}`));
+  const dep = inc.length ? el("p", "jx-depuis", `Incident ouvert depuis le ${depuisLeJ(inc[0])} : ${inc[0].passages} passages au même résultat.`) : null;
   const ol = el("ol", "jx-ch");
   hist.forEach((x, n) => {
     const li = el("li");
@@ -77,15 +71,16 @@ async function ouvrirPassage(p, d, depuis) {
               el("span", "jx-m", n > 0 && x.detail === hist[n - 1].detail ? "même description que la veille" : (x.detail || "—")));
     ol.append(li);
   });
-  const chrono = el("section", "jx-b");
-  chrono.append(el("h3", null, "Les sept derniers jours"), ol);
+  const chrono = el("section", "jx-b jx-premier");
+  chrono.append(ol);
   const faits = el("dl", "jx-dl");
-  for (const [mot, v] of [["Ce qu'elle fait", a.objectif || "—"], ["Quand elle tourne", a.jours ? `${joursLisibles(a.jours)}, à ${a.heure || "—"}` : "—"],
-                          ["Son état", STATUT_FICHE[a.statut] || "—"], ["Version du code", p.version || "—"], ["Machine", p.machine || "—"]])
+  // un libelle nomme la chose, jamais par un pronom (« Ce qu'elle fait », « Son état » : refuses le 2026-11-11)
+  for (const [mot, v] of [["Objectif", a.objectif || "—"], ["Fréquence", a.jours ? `${joursLisibles(a.jours)}, à ${a.heure || "—"}` : "—"],
+                          ["État", STATUT_FICHE[a.statut] || "—"], ["Version du code", p.version || "—"], ["Machine", p.machine || "—"]])
     faits.append(el("dt", null, mot), el("dd", null, v));
   const auto = el("section", "jx-b");
   auto.append(el("h3", null, "L'automatisation"), faits);
-  ouvrirPanneau("envoi", [titre, sous, lead, dep, chrono, auto], depuis);
+  ouvrirPanneau("envoi", [titre, dep, chrono, auto].filter(Boolean), depuis);
   const voile = document.querySelector(".fen-voile");
   if (voile) voile.classList.add("fen-mail");   // la fenetre large des emails : la chronologie s'y lit
 }

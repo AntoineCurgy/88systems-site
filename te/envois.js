@@ -199,7 +199,8 @@ function ouvrirEnvoi(e, depuis) {
       return;
     }
     const texte = el("div", "ml-texte", e.apercu || "—");
-    attente.replaceWith(texte, el("p", "ml-n", "Parti avant le 11 novembre à 13 h : seul son texte a été gardé, sans sa mise en forme."));
+    // tous les emails du registre ont leur corps depuis la reprise du 2026-11-11 (lignes jusqu'a 84) : ce cas ne vient plus que d'une absence imprevue
+    attente.replaceWith(texte, el("p", "ml-n", "Seul le texte de cet email a été gardé, sans sa mise en forme."));
   });
 }
 

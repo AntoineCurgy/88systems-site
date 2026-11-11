@@ -180,9 +180,9 @@ function ouvrirFiche(id) {
   ETAPES.forEach((e, i) => frise.append(el("li", i <= a.etape ? "fait" : "", e)));
 
   ouvrirPanneau("fiche", [etiquette, nom, dom,
-    section("Ce qu'il fera", el("p", null, a.mission)),
-    section("Ses outils FSI", outils, el("p", "discret", `${prets} sur ${a.outils.length} déjà fonctionnelles.`)),
-    section("Ses actions prévues", actions),
+    section("Objectif", el("p", null, a.mission)),
+    section("Outils FSI", outils, el("p", "discret", `${prets} sur ${a.outils.length} déjà fonctionnelles.`)),
+    section("Actions prévues", actions),
     section("Avancement", frise)], depuis);
   if (depuis) depuis.scrollIntoView({ block: "nearest" });
 }

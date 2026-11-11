@@ -296,7 +296,7 @@ tbody th { font-weight: 500; }
 /* ------------------------------------------------------------ automatisations */
 .grp-c { margin-top: var(--s0); }
 /* le titre d'un groupe en bleu canard sur son filet, comme la page de pilotage (DEC_00520, option 1B) */
-.grp { font-size: var(--t-titre-carte); color: var(--marque); margin: 0 0 var(--s1); padding-bottom: var(--s1); border-bottom: 2px solid var(--trait); display: flex; align-items: center; gap: var(--s1); }
+.grp { font-size: var(--t-titre-carte); font-weight: 600; color: var(--marque); margin: 0 0 var(--s1); padding-bottom: var(--s1); border-bottom: 2px solid var(--trait); display: flex; align-items: center; gap: var(--s1); }
 .g-cpt { font: 400 var(--t-meta) var(--mono); background-color: var(--rail-on); color: var(--marque); border-radius: var(--r-pilule); padding: var(--s00) var(--s1); }
 .lb {
   display: flex; align-items: center; gap: var(--s1); width: 100%; padding: var(--s1) var(--s0);
@@ -558,11 +558,11 @@ h2, h3, .ke-titre, .b-t2, .p-h, thead th { font-weight: 500; }
 .champ, .case-c, .doc-b { border-color: var(--bord-champ); }   /* un champ a remplir garde son contour, meme sans contour de carte */
 
 /* la fiche d'un passage, en recit (DEC_00835, 4C) */
-.jx-sous { margin: var(--s00) 0 0; font-size: var(--t-corps); color: var(--encre2); }
-.jx-lead { font-size: var(--t-titre-carte); line-height: 1.5; margin: var(--s1) 0 var(--s1); color: var(--encre); }
-.jx-lead b { color: var(--c); }
+.fen-tt .jx-titre { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--s3); }
+.jx-ref { font-size: var(--t-corps); font-weight: 400; color: var(--encre2); }
 .jx-depuis { margin: 0 0 var(--s1); color: var(--encre2); }
 .jx-b { border-top: 1px solid var(--bord); padding: var(--s3) 0; }
+.jx-b.jx-premier { border-top: 0; padding-top: 0; }
 .jx-b h3 { margin: 0 0 var(--s1); font-size: var(--t-titre-carte); color: var(--encre); font-weight: 600; }
 .jx-ch { list-style: none; margin: 0 0 0 var(--s1); padding: 0; border-left: 2px solid var(--bord); }
 .jx-ch li { position: relative; padding: var(--s00) 0 var(--s2) var(--s3); }
