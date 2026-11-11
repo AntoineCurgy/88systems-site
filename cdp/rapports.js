@@ -15,15 +15,6 @@ function ordreDomaines(raps) {
   });
 }
 
-// les systemes que touche l'automatisation d'un rapport : ceux que l'API donne pour elle, sinon lus dans son flux
-const TOUS_SYSTEMES = "Tous les systèmes";
-function systemesDuRapport(r, auto) {
-  if (auto && Array.isArray(auto.systemes) && auto.systemes.length) return auto.systemes;
-  const f = String(r.flux || "").trim();
-  if (/^tous/i.test(f)) return [TOUS_SYSTEMES];
-  return f.split(/\s*(?:<>|>|→|↔|,|\+)\s*/).filter(Boolean);
-}
-
 function urlRapport(r) { return API + "/api/rapports/" + encodeURIComponent(r.id); }
 
 function vueRapports([donnees, autos]) {
@@ -35,7 +26,6 @@ function vueRapports([donnees, autos]) {
       "Un rapport vous donne chaque jour, dans un classeur et par courriel, l'état d'un contrôle entre vos logiciels.")];
   }
   const f = filtres;
-  if (f.g && !raps.some((r) => systemesDuRapport(r, autosParId.get(String(r.automatisation))).includes(f.g))) f.g = "";   // un ancien filtre par domaine
   const restreints = raps.filter((r) => !r.acces).length;
   const avis = el("p", "avis");
   avis.setAttribute("aria-live", "polite");
@@ -45,26 +35,9 @@ function vueRapports([donnees, autos]) {
   const sous = restreints ? el("p", "sous-titre") : null;
   if (sous) sous.append(cadenas(14), `${restreints} en accès restreint`);
 
-  // le filtre par systeme, un seul nom par bouton, et un rapport sous chaque systeme que son automatisation touche
-  // (Antoine, 2026-11-11, DEC_00835 : « juste laisser un nom de systeme a chaque fois donc sage, yooz, yardi, etc... et
-  // si un systeme est impliqué dans lautomatisation alors il apparait ») ; les groupes du tableau restent par domaine
+  // le filtre par systeme est retire (Antoine, 2026-11-11 : « dans l'onglet Rapport tu peux enlever carrément tout ca ») ;
+  // les groupes du tableau restent par domaine
   const domaines = ordreDomaines(raps);
-  const systemesDe = new Map(raps.map((r) => [r, systemesDuRapport(r, autosParId.get(String(r.automatisation)))]));
-  const tousSystemes = [...new Set([...systemesDe.values()].flat().filter((x) => x !== TOUS_SYSTEMES))];
-  for (const [r, l] of systemesDe) if (l.includes(TOUS_SYSTEMES)) systemesDe.set(r, tousSystemes);   // une automatisation de tous les systemes les touche tous
-  const compte = (s) => raps.filter((r) => systemesDe.get(r).includes(s)).length;
-  const systemes = tousSystemes.sort((a, b) => compte(b) - compte(a) || a.localeCompare(b, "fr"));
-  const barre = el("div", "gb-barre");
-  barre.setAttribute("role", "group");
-  barre.setAttribute("aria-label", "Systèmes");
-  const choix = [["", "Tous", raps.length], ...systemes.map((s) => [s, s, compte(s)])];
-  for (const [v, texte, n] of choix) {
-    const b = bouton("gb-o", texte);
-    b.append(" ", el("span", null, n));
-    b.dataset.v = v;
-    b.addEventListener("click", () => { f.g = v; filtrer(); });
-    barre.append(b);
-  }
 
   // recherche et etats
   const ligne = el("div", "outils ligne");
@@ -76,18 +49,18 @@ function vueRapports([donnees, autos]) {
   champ.value = f.q;
   champ.addEventListener("input", () => { f.q = champ.value.trim().toLowerCase(); filtrer(); });
   lab.append(champ);
-  const pe = el("div", "pe");
+  const pe = el("div", "gb-barre");   // le meme composant que les filtres des autres onglets (2026-11-11)
   pe.setAttribute("role", "group");
   pe.setAttribute("aria-label", "État");
   for (const [v, texte] of [["", "Tous"], ["ok", "Fonctionnels"], ["interrompu", "Interrompus"], ["construction", "En construction"]]) {
-    const b = bouton("pe-b", texte);
+    const b = bouton("gb-o", texte);
     b.append(" ", el("span", null, v ? raps.filter((r) => etatAffiche(r) === v).length : raps.length));
     b.dataset.v = v;
     b.addEventListener("click", () => { f.e = v; filtrer(); });
     pe.append(b);
   }
   // les groupes de filtres sur une ligne, la recherche a droite (Antoine, 2026-11-04, DEC_00520, option 5C)
-  ligne.append(barre, pe, el("span", "rt-sp"), lab);
+  ligne.append(pe, el("span", "rt-sp"), lab);
   const outils = ligne;
 
   // le tableau
@@ -136,11 +109,10 @@ function vueRapports([donnees, autos]) {
   vide.hidden = true;
 
   function filtrer() {
-    for (const b of barre.children) b.setAttribute("aria-pressed", String(b.dataset.v === f.g));
     for (const b of pe.children) b.setAttribute("aria-pressed", String(b.dataset.v === f.e));
     let total = 0;
     for (const [l, r] of lignes) {
-      const ok = (!f.g || systemesDe.get(r).includes(f.g)) && (!f.e || etatAffiche(r) === f.e) && (!f.q || String(r.sujet).toLowerCase().includes(f.q));
+      const ok = (!f.e || etatAffiche(r) === f.e) && (!f.q || String(r.sujet).toLowerCase().includes(f.q));
       l.hidden = !ok;
       total += ok ? 1 : 0;
     }

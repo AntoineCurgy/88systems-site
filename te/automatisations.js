@@ -1,9 +1,9 @@
 // La page des automatisations : la liste par systeme d'origine, la fiche dans le panneau.
-// L'adresse fait foi : `?sys=Even` filtre, `?id=AUT_0019` ouvre la fiche. Ouvrir une
+// L'adresse fait foi : `?id=AUT_0019` ouvre la fiche ; `?sys=Even` (les cartes de l'accueil) remplit la recherche. Ouvrir une
 // fiche ajoute une etape a l'historique (le bouton Retour la referme) ; filtrer, non.
 "use strict";
 
-const filtres = { statut: "", q: "" };   // l'etat et la recherche ; le systeme vit dans l'adresse
+const filtres = { statut: "", q: "" };   // l'etat et la recherche
 let donneesAutos = null;
 let lignesAutos = [];
 let groupesAutos = [];
@@ -39,15 +39,7 @@ function vueAutomatisations([donnees]) {
 
   // le sous-titre est retire (Antoine, 2026-11-04) : les comptes vivent sur les filtres d'etat
 
-  const cartes = cartesSystemes(donnees, (s) => {
-    const b = bouton("");
-    b.dataset.sys = s;
-    b.addEventListener("click", () => {
-      history.replaceState(null, "", adresseAvec((q) => { if (s) q.set("sys", s); else q.delete("sys"); }));
-      rafraichirFiltres();
-    });
-    return b;
-  });
+  // le bloc des systemes connectes est retire (Antoine, 2026-11-11 : « tu peux aussi enlever ca dans l'onglet automatisation »)
 
   // la recherche, comme dans l'onglet Rapports (Antoine, 2026-10-22)
   const lab = el("label", "cherche");
@@ -55,7 +47,14 @@ function vueAutomatisations([donnees]) {
   const champ = el("input");
   champ.type = "search";
   champ.placeholder = "Rechercher une automatisation…";
-  champ.value = f.q;
+  // une carte de systeme de l'accueil arrive par `?sys=Even` : le systeme passe dans la recherche, qui lit aussi le flux
+  // (le filtre par systeme est retire le 2026-11-11), puis quitte l'adresse
+  const sysAdresse = params().get("sys");
+  if (sysAdresse) {
+    f.q = sysAdresse.trim().toLowerCase();
+    history.replaceState(null, "", adresseAvec((q) => q.delete("sys")));
+  }
+  champ.value = sysAdresse || f.q;
   champ.addEventListener("input", () => { f.q = champ.value.trim().toLowerCase(); rafraichirFiltres(); });
   lab.append(champ);
 
@@ -104,12 +103,10 @@ function vueAutomatisations([donnees]) {
   vide.hidden = true;
 
   rafraichirFiltres = () => {
-    const sys = params().get("sys") || "";
     for (const b of barre.children) b.setAttribute("aria-pressed", String(b.dataset.v === f.statut));
-    for (const c of cartes.querySelectorAll("[data-sys]")) c.setAttribute("aria-pressed", String(c.dataset.sys === sys));
     let total = 0;
     for (const [b, a] of lignesAutos) {
-      const ok = (!f.statut || statutDe(a) === f.statut) && (!sys || (Array.isArray(a.systemes) && a.systemes.includes(sys)))
+      const ok = (!f.statut || statutDe(a) === f.statut)
         && (!f.q || [a.id, a.court, a.nom, a.flux, a.objectif, ...(a.anciens || [])].join(" ").toLowerCase().includes(f.q));
       b.hidden = !ok;
       total += ok ? 1 : 0;
@@ -123,10 +120,15 @@ function vueAutomatisations([donnees]) {
     vide.hidden = total > 0;
   };
   rafraichirFiltres();
-  const outils = el("div", "outils ligne");   // non figee : voulu par Antoine (2026-11-04 : « Dans automatisations, j'ai décidé de ne pas figer, c'est voulu »)
+  // la tete figee comme dans Rapports, Retours, Emails et Journaux (Antoine, 2026-11-11 : « fixe la partie filtre de
+  // automatisation comme celle de rapport, retours, emails, journal […] que ca soit coéhrent et similaire, standardisé ») ;
+  // elle n'etait pas figee depuis le 2026-11-04, quand le bloc des systemes la precedait
+  const outils = el("div", "outils ligne");
   outils.append(barre, el("span", "rt-sp"), lab);   // la recherche a droite (DEC_00520, option 5C)
   avisAutos.textContent = "";
-  return [el("h1", null, "Automatisations"), cartes, outils, avisAutos, ...sections, vide];
+  const tete = el("div", "tete-fixe");
+  tete.append(el("h1", null, "Automatisations"), outils, avisAutos);
+  return [figerTete(tete), ...sections, vide];
 }
 
 function ligneAuto(a) {
