@@ -128,6 +128,10 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
   white-space: nowrap;   /* un libelle sur une ligne, « Se déconnecter » compris (12 px depuis DEC_00842) */
 }
 /* les icones du rail : encre2, libelle .7rem en 500 (Antoine, 2026-11-10) ; 16 px et rapprochees depuis le 2026-11-11 (DEC_00835, 2C) */
+/* une icone plus nette, au cas par cas : l'encre du texte et un trait de 1,5 (reponse d'Antoine a PCP056-1111-ba, DEC_00852) ;
+   l'onglet courant du rail garde sa couleur */
+.ico .net { stroke: var(--encre); }
+.rail a[aria-current="page"] .ico .net, .dm-b:hover .ico .net, .dm-b:focus-visible .ico .net { stroke: currentColor; }
 .rail .ico { width: 16px; height: 16px; padding: var(--s0) var(--s2); border-radius: var(--r-pilule); box-sizing: content-box; }   /* 16 px (Antoine, 2026-11-11, DEC_00835, 2C) */
 .rail a:hover .ico, .rail button:hover .ico { background-color: color-mix(in srgb, var(--discret) 15%, transparent); }
 .rail a[aria-current="page"] { color: var(--marque); font-weight: 600; }
