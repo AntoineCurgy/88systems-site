@@ -22,6 +22,7 @@ rattache_a:
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+html { background-color: var(--fond); overscroll-behavior: none; }   /* fixe au bout du defilement (Antoine, 2026-11-11) */
 body { min-height: 100vh; display: flex; flex-direction: column; background-color: var(--fond); color: var(--encre);
   font: .875rem/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 .large { width: 100%; max-width: 68rem; margin: 0 auto; padding: 0 var(--s4); }
