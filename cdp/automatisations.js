@@ -165,13 +165,11 @@ function ligneAuto(a) {
   la.append(pt, el("span", "la-id mono", a.court || String(a.id).slice(-2)), nom, outils, histo, d);
   montrerRafraichissement(a, a.nom, d, avisAutos, relireAutosBientot);
   b.append(la, ico("chevron", 16));
-  if (String(a.id) === derniereOuverte) b.classList.add("ouverte");
   ouvrir.addEventListener("click", () => {
     const id = String(a.id);
     // Antoine, 2026-11-10 : la fenetre de detail « disparait » ; « a la place, ceci s'ouvre dans un nouvel onglet »,
     // la page Details de l'automatisation. Sans page publiee, la fiche reste : rien ne disparait sans remplacant.
     if (a.notice === "publiee") {
-      marquerOuverte(id);
       window.open(API + "/api/automatisations/" + encodeURIComponent(id) + "/notice", "_blank", "noopener");
       return;
     }
@@ -202,15 +200,9 @@ function section(titre, ...enfants) {
   return s;
 }
 
-// La derniere automatisation ouverte reste en surbrillance (Antoine, 2026-11-10 : « quand on est sur un item, il doit
-// etre en surbrillance ») ; gardee le temps de l'onglet, pour la retrouver au retour.
-let derniereOuverte = (() => { try { return sessionStorage.getItem("auto-ouverte") || ""; } catch (_) { return ""; } })();
-
-function marquerOuverte(id) {
-  derniereOuverte = id;
-  try { sessionStorage.setItem("auto-ouverte", id); } catch (_) { /* stockage refuse : la surbrillance vit le temps de la page */ }
-  for (const [r, x] of lignesAutos) r.classList.toggle("ouverte", String(x.id) === id);
-}
+// L'automatisation dont la fiche est ouverte est en surbrillance (Antoine, 2026-11-10 : « quand on est sur un item, il
+// doit etre en surbrillance »), et seulement le temps de la fiche : rien ne reste selectionne apres (Antoine, 2026-11-11 :
+// « j'aime pas qu'un élément reste sélectionné »), ni pour une page ouverte dans un autre onglet.
 
 function ouvrirFiche(id) {
   if (!donneesAutos) return;
@@ -219,7 +211,6 @@ function ouvrirFiche(id) {
   if (!a) return fermerPanneau(false);
   if (String(a.id) !== id) history.replaceState(null, "", adresseAvec((q) => q.set("id", String(a.id))));
   const st = statutDe(a);
-  marquerOuverte(String(a.id));
   const ligne = lignesAutos.find(([, x]) => x === a);
   const rangee = ligne ? ligne[0] : null;
   const depuis = rangee ? rangee.querySelector(".lb-o") : null;
@@ -281,8 +272,8 @@ function ouvrirFiche(id) {
 // Fermer la fiche retire `?id` de l'adresse, sans ajouter d'etape a l'historique.
 auFermer = (mode) => {
   if (mode !== "fiche") return;
-  for (const [r, x] of lignesAutos) {
-    r.classList.toggle("ouverte", String(x.id) === derniereOuverte);   // la surbrillance reste, la fiche ferme
+  for (const [r] of lignesAutos) {
+    r.classList.remove("ouverte");   // la fiche ferme, rien ne reste selectionne (2026-11-11)
     r.querySelector(".lb-o").setAttribute("aria-expanded", "false");
   }
   if (params().has("id")) history.replaceState(null, "", adresseAvec((q) => q.delete("id")));
