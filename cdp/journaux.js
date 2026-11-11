@@ -123,6 +123,7 @@ function vue(d) {
   for (const t of ["Heure", "Automatisation", "Résultat", "Durée", "Description"]) tr.append(el("th", null, t));
   thead.append(tr);
   table.append(cg, thead);
+  colonnesAuContenu(table, 5, true);   // la description prend la place qui reste (DEC_00853)
   const groupes = [];
   for (const jour of [...new Set(passages.map((p) => p.date))]) {
     const du = passages.filter((p) => p.date === jour);

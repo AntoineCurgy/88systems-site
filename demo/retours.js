@@ -95,6 +95,7 @@ function vueRetours([rets, autos]) {
     return [l, r];
   });
   table.append(cg, thead, tb);
+  colonnesAuContenu(table, 5, true);   // l'objet du retour prend la place qui reste (DEC_00853)
   carte.append(table);
   const vide = el("p", "vide", "Aucun retour ne correspond.");
   vide.hidden = true;

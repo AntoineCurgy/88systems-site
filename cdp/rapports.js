@@ -83,6 +83,7 @@ function vueRapports([donnees, autos]) {
   }
   thead.append(tr);
   table.append(cg, thead);
+  colonnesAuContenu(table, 5, false);   // sans texte long, la colonne du résumé prend la place : les boutons restent à droite (DEC_00853)
   const lignes = [];
   for (const g of domaines) {
     const liste = raps.filter((r) => (r.domaine || "Autres") === g);

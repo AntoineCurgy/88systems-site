@@ -58,6 +58,13 @@ const $ = (id) => document.getElementById(id);
 
 // ------------------------------------------------------------------ outils DOM
 
+// Les colonnes au contenu (DEC_00853, choix 2A) : la colonne `reste` (comptee de 1) prend la place qui reste ; un texte
+// long s'y tronque (`tronquer`). Les largeurs du colgroup cedent ; la regle vit dans portail.css (.gd.cc).
+function colonnesAuContenu(table, reste, tronquer) {
+  table.classList.add("cc", "cc-r" + reste);
+  if (tronquer) table.classList.add("cc-tronque");
+}
+
 function el(tag, classe, texte) {
   const e = document.createElement(tag);
   if (classe) e.className = classe;
@@ -155,7 +162,7 @@ function parties(iso) {
 // "2026-10-03T19:42:00+00:00" -> "03/10/2026 à 21 h 42" (heure de Paris)
 function majLisible(iso) {
   const p = parties(iso);
-  return p ? `${p.day}/${p.month}/${p.year} à ${p.hour} h ${p.minute}` : (iso || "");
+  return p ? `${p.day}/${p.month} à ${p.hour}:${p.minute}` : (iso || "");   // la forme des listes, « 10/11 à 09:00 » (DEC_00835, DEC_00853)
 }
 
 // la date du jour de `maj`, a Paris, en AAAA-MM-JJ

@@ -99,6 +99,13 @@ function vueAutomatisations([donnees]) {
     groupesAutos.push([sec, cpt]);
     sections.push(sec);
   }
+  // l'en-tete des colonnes, une fois, au-dessus du premier groupe visible, sur la grille des lignes (DEC_00853, choix 1A)
+  const enTete = el("div", "lb la-tete-l");
+  enTete.setAttribute("aria-hidden", "true");   // la liste n'est pas un tableau : chaque ligne se lit seule
+  const lt = el("span", "la la-tete");
+  lt.append(el("span"), el("span", null, "N°"), el("span"), el("span", null, "Automatisation"),
+            el("span", null, "Documentation"), el("span", "la-h", "Sept derniers passages"), el("span", "la-d", "Dernier passage"));
+  enTete.append(lt, el("span", "la-tete-ch"));
   const vide = el("p", "vide", "Aucune automatisation ne correspond.");
   vide.hidden = true;
 
@@ -112,12 +119,14 @@ function vueAutomatisations([donnees]) {
       total += ok ? 1 : 0;
     }
     for (const [sec, cpt] of groupesAutos) {
-      const visibles = [...sec.querySelectorAll(".lb")].filter((b) => !b.hidden);
+      const visibles = [...sec.querySelectorAll(".lb:not(.la-tete-l)")].filter((b) => !b.hidden);
       sec.hidden = visibles.length === 0;
       cpt.textContent = String(visibles.length);
       visibles.forEach((b, i) => b.classList.toggle("premier", i === 0));
     }
     vide.hidden = total > 0;
+    const premier = groupesAutos.find(([sec]) => !sec.hidden);
+    if (premier) premier[0].prepend(enTete); else enTete.remove();
   };
   rafraichirFiltres();
   // la tete figee comme dans Rapports, Retours, Emails et Journaux (Antoine, 2026-11-11 : « fixe la partie filtre de

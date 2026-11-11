@@ -103,6 +103,7 @@ function vueEnvois(d) {
   }
   thead.append(tr);
   table.append(cg, thead);
+  colonnesAuContenu(table, 2, true);   // l'objet du message prend la place qui reste (DEC_00853)
   const groupes = [];
   for (const jour of [...new Set(liste.map(jourEnvoi))]) {
     const duJour = liste.filter((e) => jourEnvoi(e) === jour);
