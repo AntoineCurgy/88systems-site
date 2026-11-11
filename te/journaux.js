@@ -168,6 +168,14 @@ function vue(d) {
     }
   }
   filtrer();
+  // arrivee depuis une ligne d'Automatisations (journaux.html?auto=AUT_…) : la fiche de son dernier passage s'ouvre,
+  // une fois ; l'adresse perd ?auto pour qu'une relecture ne la rouvre pas (Antoine, 2026-11-11)
+  const auto = new URLSearchParams(location.search).get("auto");
+  if (auto) {
+    history.replaceState(null, "", location.pathname);
+    const premiere = groupes.flatMap((g) => g[2]).find(([, p]) => p.id === auto);
+    if (premiere) setTimeout(() => ouvrirPassage(premiere[1], d, premiere[0]), 0);
+  }
   const tete = el("div", "tete-fixe");
   tete.append(titre, outils);
   return [figerTete(tete), carte];

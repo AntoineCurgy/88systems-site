@@ -106,6 +106,10 @@ function vueAutomatisations([donnees]) {
   lt.append(el("span"), el("span", null, "N°"), el("span"), el("span", null, "Automatisation"),
             el("span", null, "Documentation"), el("span", "la-h", "Sept derniers passages"), el("span", "la-d", "Dernier passage"));
   enTete.append(lt, el("span", "la-tete-ch"));
+  // figee sous la tete de la page, comme l'en-tete des tableaux (Antoine, 2026-11-11 : « il faut figer entete colonne de
+  // l'onglet automatisation ») : hors des groupes, pour rester en haut sur toute la liste
+  const enTeteW = el("div", "la-tete-w");
+  enTeteW.append(enTete);
   const vide = el("p", "vide", "Aucune automatisation ne correspond.");
   vide.hidden = true;
 
@@ -126,7 +130,8 @@ function vueAutomatisations([donnees]) {
     }
     vide.hidden = total > 0;
     const premier = groupesAutos.find(([sec]) => !sec.hidden);
-    if (premier) premier[0].prepend(enTete); else enTete.remove();
+    enTeteW.hidden = !premier;
+    for (const [sec] of groupesAutos) sec.classList.toggle("sous-tete", Boolean(premier) && sec === premier[0]);
   };
   rafraichirFiltres();
   // la tete figee comme dans Rapports, Retours, Emails et Journaux (Antoine, 2026-11-11 : « fixe la partie filtre de
@@ -137,7 +142,7 @@ function vueAutomatisations([donnees]) {
   avisAutos.textContent = "";
   const tete = el("div", "tete-fixe");
   tete.append(el("h1", null, "Automatisations"), outils, avisAutos);
-  return [figerTete(tete), ...sections, vide];
+  return [figerTete(tete), enTeteW, ...sections, vide];
 }
 
 function ligneAuto(a) {
@@ -179,8 +184,13 @@ function ligneAuto(a) {
   b.append(la, ico("chevron", 16));
   ouvrir.addEventListener("click", () => {
     const id = String(a.id);
-    // Antoine, 2026-11-10 : la fenetre de detail « disparait » ; « a la place, ceci s'ouvre dans un nouvel onglet »,
-    // la page Details de l'automatisation. Sans page publiee, la fiche reste : rien ne disparait sans remplacant.
+    // la ligne ouvre le journal de l'automatisation, sa fiche des sept derniers jours dans Journaux (Antoine,
+    // 2026-11-11 : « j'aimerais quand on clique sur la ligne en fait ca affiche le journal ») ; la page Details reste
+    // sur le bouton Documentation. Sans aucun passage, la fiche d'avant reste : rien ne disparait sans remplacant.
+    if (a.dernier) {
+      location.href = "journaux.html?auto=" + encodeURIComponent(id);
+      return;
+    }
     if (a.notice === "publiee") {
       window.open(API + "/api/automatisations/" + encodeURIComponent(id) + "/notice", "_blank", "noopener");
       return;

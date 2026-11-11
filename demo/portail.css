@@ -333,12 +333,16 @@ tbody th { font-weight: 500; }
 /* la colonne d'action, de la meme largeur dans Rapports et Automatisations : la fleche, le cadenas, ou rien (DEC_00835, 1A) */
 .rf-col { display: inline-flex; align-items: center; justify-content: center; width: 1.8rem; flex: none; }
 .rf-col .rf-b { margin: 0; }
+.la .rf-col { position: relative; z-index: 1; }   /* au-dessus du bouton qui couvre la ligne : la fleche ne l'ouvre pas (2026-11-11) */
 .gd tbody th[scope="row"] { position: relative; padding-left: var(--s6); }
 .gd tbody th[scope="row"] > .rf-col { position: absolute; left: .5rem; top: 50%; transform: translateY(-50%); }
 /* la ligne est un bloc : le bouton du nom la couvre entiere, le bouton Documentation passe au-dessus */
 div.lb { position: relative; }
 /* l'en-tete des colonnes d'Automatisations (DEC_00853, 1A) : la grille des lignes, la forme des en-tetes des tableaux */
-div.la-tete-l { cursor: default; border-top: 0; border-bottom: 1.5px solid var(--bord); margin-bottom: var(--s1); }
+div.la-tete-l { cursor: default; border-top: 0; border-bottom: 1.5px solid var(--bord); }
+/* figee sous la tete de la page sur toute la liste (2026-11-11) : une bande blanche collee au premier groupe visible */
+.la-tete-w { position: sticky; top: calc(var(--hb) + var(--tete, 0px)); z-index: 5; margin-bottom: calc(-1 * var(--s3)); padding: var(--s1) var(--s3) 0; background-color: var(--surface); border-radius: var(--r-carte) var(--r-carte) 0 0; }
+.grp-c.sous-tete { border-top-left-radius: 0; border-top-right-radius: 0; padding-top: var(--s1); }
 div.la-tete-l:hover { background-color: transparent; }
 .la-tete > span { font-size: var(--t-meta); color: var(--discret); font-weight: 600; white-space: nowrap; }
 .la-tete .la-d { text-align: right; }
