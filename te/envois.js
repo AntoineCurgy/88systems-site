@@ -30,7 +30,7 @@ function pourquoi(e) {
   const r = m.match(/^rapport (\S+)/);
   if (r) {
     const td = el("td", null, "Rapport ");
-    td.append(el("span", "mono discret", r[1]));
+    td.append(el("span", "mono discret", r[1].replace(/^AUT_/, "")));   // le numero court, comme les autres listes (5A)
     return td;
   }
   return el("td", null, estCode(e) ? "Code de connexion" : (m || e.appelant || "—"));
@@ -95,7 +95,8 @@ function vueEnvois(d) {
   }
   const thead = el("thead");
   const tr = el("tr");
-  for (const texte of ["Heure", "Objet", "Pourquoi", "À qui", "Résultat"]) {
+  // « Pourquoi » devient « Objet », l'objet du message « Email » (Antoine, 2026-11-11, DEC_00835, choix 5A)
+  for (const texte of ["Heure", "Email", "Objet", "À qui", "Résultat"]) {
     const th = el("th", null, texte);
     th.scope = "col";
     tr.append(th);

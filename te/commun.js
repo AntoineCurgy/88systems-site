@@ -59,6 +59,14 @@ function ico(nom, taille) {
   return s;
 }
 
+// la colonne d'action a gauche du nom, de la meme largeur dans Rapports et Automatisations : la fleche de
+// rafraichissement, ou le cadenas d'une ligne restreinte, ou rien (Antoine, 2026-11-11, DEC_00835, choix 1A)
+function colonneAction(contenu) {
+  const s = el("span", "rf-col");
+  if (contenu) s.append(contenu);
+  return s;
+}
+
 function cadenas(taille) {
   const c = el("span", "cad");
   c.append(ico("cadenas", taille));

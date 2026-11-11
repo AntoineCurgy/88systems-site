@@ -24,25 +24,70 @@ const duree = (s) => {
   return n < 60 ? `${n} s` : `${Math.floor(n / 60)} min ${String(n % 60).padStart(2, "0")}`;
 };
 
-// « Description », jamais « Ce qui s'est passé » (Antoine, 2026-11-11, DEC_00832)
-function ouvrirPassage(p, d, depuis) {
+// La fiche d'un passage, en recit (Antoine, 2026-11-11, DEC_00835, choix 4C, sur le modele d'une alerte de Sentry) : le
+// resultat et sa date, puis la description a la ligne (« faut juste un petit "entrée" avant ») ; depuis quand ; la
+// chronologie des sept jours ; les faits de l'automatisation, lus dans /api/automatisations. « Description », jamais
+// « Ce qui s'est passé » (DEC_00832).
+const MOT_FICHE = { "échec": "Erreur", "écarts": "Écarts", alerte: "Alerte", "à voir": "À vérifier", ok: "Réussi" };
+const COULEUR_FICHE = { "échec": "var(--rouge)", alerte: "var(--ambre)", "à voir": "var(--ambre)", ok: "var(--vert)" };
+const STATUT_FICHE = { ok: "Fonctionnelle", panne: "Interrompue", construction: "En construction" };
+let faitsAutos = null;   // les automatisations, lues une fois a la premiere fiche
+async function faitsDe(id) {
+  if (!faitsAutos) {
+    const { statut, donnees } = await appeler("GET", "/api/automatisations");
+    if (statut === 401) { sessionPerdue(); return {}; }
+    faitsAutos = (statut === 200 && donnees && Array.isArray(donnees.automatisations)) ? donnees.automatisations : null;
+  }
+  return (faitsAutos || []).find((a) => a.id === id) || {};
+}
+const fluxLisibleJ = (f) => String(f || "").replace(/\s*<>\s*/g, " ↔ ").replace(/\s*>\s*/g, " → ");
+function joursLisibles(j) {
+  const l = String(j || "").split("-").filter(Boolean);
+  if (l.length === 7) return "tous les jours";
+  const n = { LU: "lundi", MA: "mardi", ME: "mercredi", JE: "jeudi", VE: "vendredi", SA: "samedi", DI: "dimanche" };
+  return l.map((x) => n[x] || x).join(", ");
+}
+const heureJ = (p) => (p.heure || "").slice(0, 5);
+function depuisLeJ(i) {
+  const [j, h] = String(i.ouvert || "").split(" ");
+  return `${jourLisibleJ(j).toLowerCase()} à ${(h || "").slice(0, 5)}`;
+}
+
+async function ouvrirPassage(p, d, depuis) {
+  const a = await faitsDe(p.id);
+  const hist = (d.passages || []).filter((x) => x.id === p.id);
+  const inc = (d.incidents || []).filter((i) => i.id === p.id);
   const titre = el("h2", null, p.nom);
   titre.id = "panneau-titre";
-  const tete = el("p", "rt-tete");
-  tete.append(tagPassage(p.resultat), " ", el("span", "mono discret", p.id));
-  const dl = el("dl", "rt-dl");
-  for (const [mot, v] of [["Quand", `${jourLisibleJ(p.date)}, ${(p.heure || "").slice(0, 5)}`], ["Durée", duree(p.duree)],
-                          ["Description", p.detail || "—"], ["Version du code", p.version || "—"], ["Machine", p.machine || "—"]])
-    dl.append(el("dt", null, mot), el("dd", null, v));
-  const enfants = [titre, tete, dl];
-  const inc = (d.incidents || []).filter((i) => i.id === p.id);
-  if (inc.length) {
-    const s = el("section", "fi-s");
-    s.append(el("h3", null, inc.length > 1 ? "Incidents ouverts" : "Incident ouvert"));
-    for (const i of inc) s.append(el("p", null, `${(i.ouvert || "").slice(0, 16).replace(" ", " à ")} · ${i.texte}`));
-    enfants.push(s);
-  }
-  ouvrirPanneau("envoi", enfants, depuis);
+  const sous = el("p", "jx-sous", `${String(p.id).replace("AUT_", "")} · ${fluxLisibleJ(a.flux) || "—"}`);
+  const lead = el("p", "jx-lead");
+  lead.style.setProperty("--c", COULEUR_FICHE[p.resultat] || "var(--encre)");
+  lead.append(el("b", null, `${MOT_FICHE[p.resultat] || p.resultat}, le ${jourLisibleJ(p.date).toLowerCase()} à ${heureJ(p)}.`),
+              el("br"), p.detail || "—");
+  const memes = hist.filter((x) => x.resultat === p.resultat).length;
+  const dep = el("p", "jx-depuis", inc.length
+    ? `Incident ouvert depuis le ${depuisLeJ(inc[0])} : ${inc[0].passages} passages au même résultat.`
+    : `${MOT_FICHE[p.resultat] || p.resultat} : ${memes} sur ${hist.length} passages ces sept derniers jours.`);
+  const ol = el("ol", "jx-ch");
+  hist.forEach((x, n) => {
+    const li = el("li");
+    li.style.setProperty("--c", COULEUR_FICHE[x.resultat] || "var(--pale)");
+    li.append(el("span", "jx-q", `${jourLisibleJ(x.date)} à ${heureJ(x)}`), " · ", tagPassage(x.resultat), " · ",
+              el("span", "jx-m", duree(x.duree)), el("br"),
+              el("span", "jx-m", n > 0 && x.detail === hist[n - 1].detail ? "même description que la veille" : (x.detail || "—")));
+    ol.append(li);
+  });
+  const chrono = el("section", "jx-b");
+  chrono.append(el("h3", null, "Les sept derniers jours"), ol);
+  const faits = el("dl", "jx-dl");
+  for (const [mot, v] of [["Ce qu'elle fait", a.objectif || "—"], ["Quand elle tourne", a.jours ? `${joursLisibles(a.jours)}, à ${a.heure || "—"}` : "—"],
+                          ["Son état", STATUT_FICHE[a.statut] || "—"], ["Version du code", p.version || "—"], ["Machine", p.machine || "—"]])
+    faits.append(el("dt", null, mot), el("dd", null, v));
+  const auto = el("section", "jx-b");
+  auto.append(el("h3", null, "L'automatisation"), faits);
+  ouvrirPanneau("envoi", [titre, sous, lead, dep, chrono, auto], depuis);
+  const voile = document.querySelector(".fen-voile");
+  if (voile) voile.classList.add("fen-mail");   // la fenetre large des emails : la chronologie s'y lit
 }
 
 function vue(d) {

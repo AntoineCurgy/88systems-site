@@ -160,9 +160,10 @@ function ligneAuto(a) {
   outils.append(boutonDocumentation(a), boutonDemande({ id: a.id, nom: a.nom }, "dm-b"));
   // rafraichir cette automatisation, comme la ligne de son rapport (Antoine, 2026-11-10, PCP049-1110-p) ; absent si
   // le portail ne sait pas le demander, ou sans droit
-  if (a.rafraichir) outils.append(boutonRafraichir(a, a.nom, "/api/automatisations/" + encodeURIComponent(a.id) + "/rafraichir",
-                                                   d, avisAutos, relireAutosBientot, "Rafraîchir cette automatisation"));
-  la.append(pt, el("span", "la-id mono", a.court || String(a.id).slice(-2)), nom, outils, histo, d);
+  // la fleche, dans sa colonne a gauche du nom, comme dans Rapports (Antoine, 2026-11-11, DEC_00835, choix 1A)
+  const action = colonneAction(a.rafraichir ? boutonRafraichir(a, a.nom, "/api/automatisations/" + encodeURIComponent(a.id) + "/rafraichir",
+                                                                d, avisAutos, relireAutosBientot, "Rafraîchir cette automatisation") : null);
+  la.append(pt, el("span", "la-id mono", a.court || String(a.id).slice(-2)), action, nom, outils, histo, d);
   montrerRafraichissement(a, a.nom, d, avisAutos, relireAutosBientot);
   b.append(la, ico("chevron", 16));
   ouvrir.addEventListener("click", () => {

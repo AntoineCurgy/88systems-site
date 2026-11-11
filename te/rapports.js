@@ -15,6 +15,15 @@ function ordreDomaines(raps) {
   });
 }
 
+// les systemes que touche l'automatisation d'un rapport : ceux que l'API donne pour elle, sinon lus dans son flux
+const TOUS_SYSTEMES = "Tous les systèmes";
+function systemesDuRapport(r, auto) {
+  if (auto && Array.isArray(auto.systemes) && auto.systemes.length) return auto.systemes;
+  const f = String(r.flux || "").trim();
+  if (/^tous/i.test(f)) return [TOUS_SYSTEMES];
+  return f.split(/\s*(?:<>|>|→|↔|,|\+)\s*/).filter(Boolean);
+}
+
 function urlRapport(r) { return API + "/api/rapports/" + encodeURIComponent(r.id); }
 
 function vueRapports([donnees, autos]) {
@@ -26,6 +35,7 @@ function vueRapports([donnees, autos]) {
       "Un rapport vous donne chaque jour, dans un classeur et par courriel, l'état d'un contrôle entre vos logiciels.")];
   }
   const f = filtres;
+  if (f.g && !raps.some((r) => systemesDuRapport(r, autosParId.get(String(r.automatisation))).includes(f.g))) f.g = "";   // un ancien filtre par domaine
   const restreints = raps.filter((r) => !r.acces).length;
   const avis = el("p", "avis");
   avis.setAttribute("aria-live", "polite");
@@ -35,12 +45,19 @@ function vueRapports([donnees, autos]) {
   const sous = restreints ? el("p", "sous-titre") : null;
   if (sous) sous.append(cadenas(14), `${restreints} en accès restreint`);
 
-  // domaines
+  // le filtre par systeme, un seul nom par bouton, et un rapport sous chaque systeme que son automatisation touche
+  // (Antoine, 2026-11-11, DEC_00835 : « juste laisser un nom de systeme a chaque fois donc sage, yooz, yardi, etc... et
+  // si un systeme est impliqué dans lautomatisation alors il apparait ») ; les groupes du tableau restent par domaine
   const domaines = ordreDomaines(raps);
+  const systemesDe = new Map(raps.map((r) => [r, systemesDuRapport(r, autosParId.get(String(r.automatisation)))]));
+  const tousSystemes = [...new Set([...systemesDe.values()].flat().filter((x) => x !== TOUS_SYSTEMES))];
+  for (const [r, l] of systemesDe) if (l.includes(TOUS_SYSTEMES)) systemesDe.set(r, tousSystemes);   // une automatisation de tous les systemes les touche tous
+  const compte = (s) => raps.filter((r) => systemesDe.get(r).includes(s)).length;
+  const systemes = tousSystemes.sort((a, b) => compte(b) - compte(a) || a.localeCompare(b, "fr"));
   const barre = el("div", "gb-barre");
   barre.setAttribute("role", "group");
-  barre.setAttribute("aria-label", "Domaines");
-  const choix = [["", "Tous", raps.length], ...domaines.map((g) => [g, g, raps.filter((r) => (r.domaine || "Autres") === g).length])];
+  barre.setAttribute("aria-label", "Systèmes");
+  const choix = [["", "Tous", raps.length], ...systemes.map((s) => [s, s, compte(s)])];
   for (const [v, texte, n] of choix) {
     const b = bouton("gb-o", texte);
     b.append(" ", el("span", null, n));
@@ -122,8 +139,8 @@ function vueRapports([donnees, autos]) {
     for (const b of barre.children) b.setAttribute("aria-pressed", String(b.dataset.v === f.g));
     for (const b of pe.children) b.setAttribute("aria-pressed", String(b.dataset.v === f.e));
     let total = 0;
-    for (const [l, r, g] of lignes) {
-      const ok = (!f.g || g === f.g) && (!f.e || etatAffiche(r) === f.e) && (!f.q || String(r.sujet).toLowerCase().includes(f.q));
+    for (const [l, r] of lignes) {
+      const ok = (!f.g || systemesDe.get(r).includes(f.g)) && (!f.e || etatAffiche(r) === f.e) && (!f.q || String(r.sujet).toLowerCase().includes(f.q));
       l.hidden = !ok;
       total += ok ? 1 : 0;
     }
@@ -152,7 +169,7 @@ function ligneRapport(r, avis, auto) {
   if (!r.acces) {
     tr.className = "restreint";
     if (auto) notice.append(boutonDocumentation(auto));   // comme dans l'onglet Automatisations, ou chacun la voit
-    nom.append(cadenas(14), String(r.sujet));
+    nom.append(colonneAction(cadenas(14)), String(r.sujet));
     const b = bouton("btn eteint");
     b.setAttribute("aria-disabled", "true");
     b.append(ico("cadenas", 14), "Accès restreint");
@@ -162,15 +179,16 @@ function ligneRapport(r, avis, auto) {
     });
     action.append(b);
   } else {
-    nom.textContent = String(r.sujet);
+    nom.append(colonneAction(null), String(r.sujet));
     // une demande sur ce rapport, chez la cellule qui porte son automatisation (DEC_00165, 2026-10-31)
     // les boutons d'une ligne restent ensemble, meme quand le nom passe a la ligne
     const outilsL = el("span", "dm-g");
     outilsL.append(boutonDemande({ id: r.automatisation, nom: r.sujet, rapport: String(r.sujet) }, "dm-b"));
     // rafraichir ce seul rapport (Antoine, 2026-11-02, DEC_00379 de PCP001 : « un bouton par ligne, quand on clique
     // sur un bouton ca raffraichit uniquement ce rapport ») ; absent si le portail ne sait pas le demander
-    if (r.rafraichir) outilsL.append(boutonRafraichir(r, r.sujet, "/api/rapports/" + encodeURIComponent(r.id) + "/rafraichir",
-                                                      date, avis, relireBientot, "Rafraîchir ce rapport"));
+    // la fleche, dans sa colonne a gauche du nom (Antoine, 2026-11-11, DEC_00835, choix 1A)
+    if (r.rafraichir) nom.firstChild.append(boutonRafraichir(r, r.sujet, "/api/rapports/" + encodeURIComponent(r.id) + "/rafraichir",
+                                                             date, avis, relireBientot, "Rafraîchir ce rapport"));
     nom.append(outilsL);
     const t = tag(etatAffiche(r));
     if (t) etat.append(t);

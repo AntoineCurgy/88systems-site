@@ -4,6 +4,9 @@
 // de detail et d'historique au clic sur une ligne. La page ne decide de rien : l'API filtre par les droits.
 "use strict";
 
+// la date d'un retour en « 04/11 », comme les autres listes (Antoine, 2026-11-11, DEC_00835, choix 5A)
+const jourCourtRetour = (iso) => { const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}` : (iso || ""); };
+
 const ETATS_RETOUR = { recu: ["Reçu", "t-ferme"], en_cours: ["En cours", "t-ambre"], corrige: ["Corrigé", "t-vert"],
                        referme: ["Refermé", "t-ferme"] };
 // Les mots de la fenetre « Nouveau retour » (depot d'Antoine du 2026-11-05, recommandations de PCP049-1105-c). Un nouveau
@@ -83,7 +86,7 @@ function vueRetours([rets, autos]) {
     l.setAttribute("aria-label", `${r.objet}, ${(ETATS_RETOUR[r.etat] || ETATS_RETOUR.recu)[0]} : voir le détail`);
     const e = el("td");
     e.append(tagRetour(r.etat));
-    l.append(el("td", "mono gd-date", r.date), e, el("td", null, MOT_TYPE[r.type] || "Amélioration"),
+    l.append(el("td", "mono gd-date", jourCourtRetour(r.date)), e, el("td", null, MOT_TYPE[r.type] || "Amélioration"),
              el("td", null, r.nom), el("td", "rt-o", r.objet), el("td", "discret", r.de || ""));
     // le clic ne remonte pas au document, qui fermerait aussitot le panneau ouvert (commun.js)
     l.addEventListener("click", (ev) => { ev.stopPropagation(); ouvrirDetail(r, l); });
