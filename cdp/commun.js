@@ -219,7 +219,25 @@ const SOURCES = {
               normaliser: (d) => { for (const r of d.rapports) if (r && r.etat === "a_valider") r.etat = "ok"; return d; } },
   parametres: { chemin: "/api/parametres", verifier: (d) => Array.isArray(d.lignes) },
   cartographie: { chemin: "/api/cartographie", verifier: (d) => typeof d.publiee === "boolean" },
+  // les agents d'IA publies pour le client (DEC_00892) ; « source: absente » tant que rien n'est publie
+  agents: { chemin: "/api/agents", verifier: (d) => Array.isArray(d.agents) && typeof d.source === "string" },
 };
+
+// ---------------------------------------------------------------- les agents d'IA (DEC_00892, maquettes 1A et 2A)
+const ETAPES_AG = ["Imaginé", "Essai", "Recette", "En service"];
+function etapeAg(a) { return ETAPES_AG[a.etape] || ETAPES_AG[0]; }
+function bancAg(a) { return `${a.banc.reussis} sur ${a.banc.cas}`; }
+function pctBanc(a) { return a.banc.cas ? Math.round(a.banc.reussis / a.banc.cas * 100) : 0; }
+function statutAg(a) { return a.etape === ETAPES_AG.length - 1 ? "ok" : "construction"; }
+function tagEtape(a) { return el("span", "tag " + (a.etape === 3 ? "t-vert" : "t-ferme"), etapeAg(a)); }
+function jaugeBanc(a) {
+  const j = el("span", "agb");
+  j.setAttribute("aria-hidden", "true");
+  const p = el("span");
+  p.style.setProperty("--p", String(pctBanc(a)));
+  j.append(p);
+  return j;
+}
 
 // ------------------------------------------------------------------ le cache (comme l'app KCP)
 // Afficher tout de suite ce qu'on a deja, puis revalider en reseau, et redessiner

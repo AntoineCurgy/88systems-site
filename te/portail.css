@@ -612,3 +612,38 @@ h2, h3, .ke-titre, .b-t2, .p-h, thead th { font-weight: 500; }
 main table td, main table td.discret { color: var(--encre2); }
 main table td.rt-o { color: var(--encre); }
 main table td.rt-o .mono { font-size: var(--t-petit); color: var(--discret); }
+
+/* Les agents d'IA (DEC_00892, 2026-11-12) : l'onglet en 1A, l'accueil en miroir 2A ; les variables de la charte seulement */
+/* commun aux options : la jauge du banc, la garde, la suite ; les variables de la charte seulement */
+.agb { display: inline-block; width: 4.5rem; height: .4rem; border-radius: var(--r-pilule); background-color: var(--surface2); overflow: hidden; vertical-align: middle; }
+.agb > span { display: block; height: 100%; width: calc(var(--p, 0) * 1%); background-color: var(--vert); border-radius: var(--r-pilule); }
+.ag-bl { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; margin-bottom: var(--s0); }
+.ag-bl strong { font-weight: 500; font-size: var(--t-titre-carte); }
+.ag-garde { display: flex; align-items: flex-start; gap: var(--s1); color: var(--encre2); }
+.ag-garde .cad { margin: .15rem 0 0; }
+.ag-suite { margin-top: var(--s1); }
+.fi-s .o-l .o-p { text-decoration: none; color: var(--encre); }
+.fi-s .rt-dl { margin: 0; }
+/* 1A : la grille des lignes d'Automatisations, ses colonnes au contenu */
+.ag1 { display: grid; grid-template-columns: 1rem 2.2rem minmax(12rem, 17rem) minmax(0, 1fr) 6rem 9.5rem 14rem; column-gap: var(--s4); align-items: center; width: 100%; font-size: var(--t-corps); }
+.ag1-r { color: var(--encre2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ag1-b { display: inline-flex; align-items: center; gap: var(--s1); white-space: nowrap; }
+.ag1-b .mono { font-size: var(--t-petit); color: var(--encre2); min-width: 3.6rem; }
+.ag1-g { display: flex; align-items: center; gap: var(--s0); font-size: var(--t-petit); color: var(--encre2); }
+.ag1-g .cad { margin: 0; }
+.ag1 .tag { white-space: nowrap; }
+.ag1-corps { display: flex; flex-direction: column; gap: var(--s3); }
+.ag1-corps .lb { padding: var(--s2) var(--s0); }
+@media (max-width: 60rem) {
+  .ag1 { grid-template-columns: 1rem 2.2rem minmax(0, 1fr) auto; }
+  .ag1-r, .ag1-b, .ag1-g, .ag1-corps .la-tete-w { display: none; }
+}
+/* 2A : deux cartes jumelles, meme hauteur, meme anneau */
+.ag-anneau { --s: 0; --r: 0; --e: 0; background-image: conic-gradient(var(--vert) calc(var(--s, 0) * 1%), var(--marque) 0 calc(var(--r, 0) * 1%), var(--trait) 0 calc(var(--e, 0) * 1%), var(--rail-on) 0); }
+.ag-anneau strong { color: var(--marque); }
+.ac-deux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+a.ac-j { color: var(--encre); text-decoration: none; flex-wrap: nowrap; }
+a.ac-j:hover { border-color: var(--marque); }
+.ac-sur { font-size: var(--t-meta); color: var(--marque); font-weight: 500; letter-spacing: .04em; margin-bottom: var(--s00); }
+@media (max-width: 40rem) { .ac-deux { grid-template-columns: 1fr; } }
+.case.ag-case { color: var(--encre2); }
