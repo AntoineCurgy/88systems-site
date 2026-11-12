@@ -6,7 +6,8 @@
 
 const SOURCE_JOURNAUX = { chemin: "/api/journaux", verifier: (d) => Array.isArray(d.passages) };
 const RESULTAT = { ok: ["Réussi", "t-vert"], "écarts": ["Écarts trouvés", "t-ferme"], alerte: ["Alerte", "t-ambre"],
-                   "à voir": ["À voir", "t-ambre"], "échec": ["Échec", "t-rouge"] };
+                   "à voir": ["À voir", "t-ambre"], "échec": ["Échec", "t-rouge"],
+                   "base de test": ["Base de test", "t-ferme"] };
 const GROUPES_JOURNAUX = [["", "Tous", () => true], ["echec", "Échecs", (p) => p.resultat === "échec"],
                           ["alerte", "Alertes", (p) => p.resultat === "alerte"], ["ecarts", "Écarts", (p) => p.resultat === "écarts"]];
 const filtresJournaux = { g: "", q: "" };

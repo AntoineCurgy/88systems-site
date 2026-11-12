@@ -22,6 +22,7 @@ const ETATS = { ok: ["Fonctionnel", "t-vert"], interrompu: ["Interrompu", "t-rou
 const STATUTS = { ok: "Fonctionnelle", panne: "Interrompue", construction: "En construction" };
 // Une automatisation « Figée » ne tourne plus : ce texte remplace sa date (Antoine, 2026-10-22).
 const FIGE = "Historique figé";
+const TEST = "base de test";   // « En service sur base de test » (Antoine, 2026-11-12, choix A a PCP001-1112-j)
 const PANNE_SERVICE = "Le service ne répond pas pour l'instant. Réessayez dans quelques minutes.";
 
 // le jeu unique d'icones, lu a la publication dans portail/charte/icones/ (DEC_00842) ; la source fait foi
@@ -120,7 +121,7 @@ function rapportMontre(r) { return !r.acces || !(r.livrable === "interface" || r
 // "2026-10-07T07:02:51+00:00" -> "09:02" (heure de Paris)
 // Le mot d'un dernier passage : « échec », « écarts », « alerte », sinon « abouti » (« ok », « à voir »).
 function motPassage(resultat) {
-  return resultat === "échec" || resultat === "écarts" || resultat === "alerte" ? resultat : "abouti";
+  return resultat === "échec" || resultat === "écarts" || resultat === "alerte" || resultat === TEST ? resultat : "abouti";
 }
 
 function heureDe(iso) {
