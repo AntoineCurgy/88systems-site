@@ -224,11 +224,11 @@ const SOURCES = {
 };
 
 // ---------------------------------------------------------------- les agents d'IA (DEC_00892, maquettes 1A et 2A)
-const ETAPES_AG = ["Imaginé", "Essai", "Recette", "En service"];
+const ETAPES_AG = ["Imaginé", "Essai", "Recette", "En service", "Arrêté"];   // 4 : arrete (PCP001-1112-y)
 function etapeAg(a) { return ETAPES_AG[a.etape] || ETAPES_AG[0]; }
 function bancAg(a) { return `${a.banc.reussis} sur ${a.banc.cas}`; }
 function pctBanc(a) { return a.banc.cas ? Math.round(a.banc.reussis / a.banc.cas * 100) : 0; }
-function statutAg(a) { return a.etape === ETAPES_AG.length - 1 ? "ok" : "construction"; }
+function statutAg(a) { return a.etape === 3 ? "ok" : "construction"; }
 function tagEtape(a) { return el("span", "tag " + (a.etape === 3 ? "t-vert" : "t-ferme"), etapeAg(a)); }
 function jaugeBanc(a) {
   const j = el("span", "agb");

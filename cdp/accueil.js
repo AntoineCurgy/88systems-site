@@ -41,7 +41,7 @@ function carteAgents(agents) {
   a.style.setProperty("--r", String(Math.round((k(3) + k(2)) / t * 100)));
   a.style.setProperty("--e", String(Math.round((k(3) + k(2) + k(1)) / t * 100)));
   const titre = agents.length ? pluriel(k(1), "agent IA en essai", "agents IA en essai") : "Aucun agent IA publié";
-  return jumeau("agents.html", a, "Agents IA", titre, `${k(3)} en service · ${k(2)} en recette · ${k(1)} en essai`);
+  return jumeau("agents.html", a, "Agents IA", titre, `${k(3)} en service · ${k(2)} en recette · ${k(1)} en essai` + (k(4) ? ` · ${k(4)} arrêté${k(4) > 1 ? "s" : ""}` : ""));
 }
 
 function caseAuto(a) {

@@ -7,7 +7,7 @@
 let autosParId = new Map();
 let agentsVus = [];
 const filtreAg = { e: "" };
-const GROUPES_AG = { 1: "Agents en essai", 2: "Agents en recette", 3: "Agents en service" };
+const GROUPES_AG = { 1: "Agents en essai", 2: "Agents en recette", 3: "Agents en service", 4: "Agents arrêtés" };
 
 function params() { return new URLSearchParams(location.search); }
 
@@ -30,13 +30,13 @@ function blocFiche(titre, ...enfants) {
 
 function ficheAgent(a) {
   const st = el("p", "fi-st " + statutAg(a));
-  st.append(pastille(statutAg(a)), a.etape === 3 ? "En service" : `En construction · ${etapeAg(a)}`);
+  st.append(pastille(statutAg(a)), a.etape === 3 ? "En service" : a.etape === 4 ? "Arrêté" : `En construction · ${etapeAg(a)}`);
   const nom = el("h2", "fi-nom", a.nom);
   nom.id = "panneau-titre";
   const ref = el("p", "fi-flux", a.sert);
   ref.append(" ", el("span", "mono", a.court));
   const frise = el("ol", "frise");
-  ETAPES_AG.forEach((e, i) => frise.append(el("li", i <= a.etape ? "fait" : "", e)));
+  ETAPES_AG.slice(0, 4).forEach((e, i) => frise.append(el("li", i <= a.etape && a.etape < 4 ? "fait" : "", e)));
   const banc = el("p", "ag-bl");
   banc.append(el("strong", null, bancAg(a)), jaugeBanc(a),
     el("span", "discret", [a.banc.quand, a.banc.seuil ? "seuil " + a.banc.seuil : ""].filter(Boolean).join(" · ")));
@@ -45,7 +45,8 @@ function ficheAgent(a) {
   const blocs = [st, nom, ref, blocFiche("Rôle", el("p", null, a.phrase))];
   const avancement = [frise];
   if (a.prochaine) avancement.push(el("p", "discret ag-suite", a.prochaine));
-  blocs.push(blocFiche("Avancement", ...avancement));
+  blocs.push(a.etape === 4 ? blocFiche("Avancement", el("p", null, "Arrêté : il ne passe pas au réel."), ...avancement.slice(1))
+                           : blocFiche("Avancement", ...avancement));
   const bancB = [banc];
   if (a.corriges) bancB.push(el("p", "discret", a.corriges));
   blocs.push(blocFiche("Banc d'essai", ...bancB), blocFiche("Garde", garde));
@@ -120,7 +121,7 @@ function vueAgents([autosD, agD]) {
   const barre = el("div", "gb-barre");
   barre.setAttribute("role", "group");
   barre.setAttribute("aria-label", "Étape");
-  for (const [v, t, k] of [["", "Tous", agentsVus.length], ["1", "En essai", n(1)], ["2", "En recette", n(2)], ["3", "En service", n(3)]]) {
+  for (const [v, t, k] of [["", "Tous", agentsVus.length], ["1", "En essai", n(1)], ["2", "En recette", n(2)], ["3", "En service", n(3)], ["4", "Arrêtés", n(4)]].filter((x) => x[0] !== "4" || x[2])) {
     const b = bouton("gb-o", t);
     b.append(" ", el("span", null, k));
     b.dataset.v = v;
@@ -130,7 +131,7 @@ function vueAgents([autosD, agD]) {
   const tete = el("div", "tete-fixe");
   tete.append(el("h1", null, "Agents"), barre);
   const groupes = [];
-  for (const e of [3, 2, 1]) {
+  for (const e of [3, 2, 1, 4]) {
     const liste = agentsVus.filter((a) => a.etape === e);
     if (!liste.length) continue;
     const sec = el("section", "carte grp-c");
