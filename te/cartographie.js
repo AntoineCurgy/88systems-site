@@ -29,4 +29,23 @@ function vueCartographie([d]) {
   return [el("h1", null, "Cartographie"), sous, carte];
 }
 
-demarrer(() => suivre([SOURCES.cartographie], (d, premier) => poser(vueCartographie(d), premier)));
+// Le lien direct vers une vue (Antoine, 2026-11-12) : cartographie.html?carte=<ancre>&vue=<vue> ouvre la carte sur
+// cette vue, une fois connecte ; une seule fois par minute, pour ne jamais boucler si la carte refusait la session.
+function lienVue() {
+  const q = new URLSearchParams(location.search);
+  const carte = q.get("carte") || "", vue = q.get("vue") || "";
+  if (!/^[A-Za-z0-9_-]{1,80}$/.test(carte) && !/^[A-Za-z0-9_-]{1,40}$/.test(vue)) return "";
+  const p = /^[A-Za-z0-9_-]{1,40}$/.test(vue) ? "?" + new URLSearchParams({ vue }) : "";
+  return API + "/api/cartographie/page" + p + (/^[A-Za-z0-9_-]{1,80}$/.test(carte) ? "#" + carte : "");
+}
+
+demarrer(() => suivre([SOURCES.cartographie], (d, premier) => {
+  poser(vueCartographie(d), premier);
+  const vers = premier && d.publiee ? lienVue() : "";
+  let deja = 0;
+  try { deja = Number(sessionStorage.getItem("carte-saut") || 0); } catch (_) { /* rien */ }
+  if (vers && Date.now() - deja > 60000) {
+    try { sessionStorage.setItem("carte-saut", String(Date.now())); } catch (_) { /* rien */ }
+    location.replace(vers);
+  }
+}));
