@@ -86,7 +86,7 @@ async function ouvrirPassage(p, d, depuis) {
 }
 
 function vue(d) {
-  const titre = el("h1", null, "Journaux");
+  const titre = el("h1", null, "Journal");
   const passages = d.passages;
   if (!passages.length) {
     const vide = el("div", "carte vide");
