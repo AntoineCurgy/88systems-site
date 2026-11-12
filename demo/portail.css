@@ -529,6 +529,17 @@ body.fen-ouverte { overflow: hidden; }
 .dm-n input { margin: 0; accent-color: var(--marque); }
 .dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1.5px solid var(--bord); border-radius: var(--r-bouton); font: inherit; font-size: var(--t-corps); resize: vertical; }
 .dm-t:focus { outline: 2px solid var(--marque); outline-offset: 1px; }
+/* la fenetre « Nouveau retour », plus grande (depot d'Antoine du 2026-11-12 : « la fenetre popup est toute petite »), et ses pieces */
+.doc-fen.dm { width: 760px; max-height: calc(100vh - 2 * var(--s3)); overflow-y: auto; }
+.dm .dm-t { min-height: 14rem; }
+.dm select { width: 100%; min-width: 0; }
+.dm .rt-sur { grid-template-columns: minmax(0, 1fr); }
+.dm-pj { margin-top: var(--s2); }
+.dm-pj-l { list-style: none; margin: var(--s1) 0 0; padding: 0; font-size: var(--t-petit); }
+.dm-pj-l li { display: flex; align-items: center; gap: var(--s1); padding: var(--s00) 0; }
+.dm-pj-x { padding: 0; background-color: transparent; border: 0; color: var(--discret); text-decoration: underline; font: inherit; cursor: pointer; }
+.dm-pj-x:hover, .dm-pj-x:focus-visible { color: var(--marque); }
+.dm-pj-a { margin: var(--s0) 0 0; font-size: var(--t-petit); color: var(--discret); }
 .dm-pied { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-top: var(--s2); }
 .dm-pied .message { margin: 0; }
 .dm-ok { margin: var(--s1) 0 var(--s0); padding: var(--s2) var(--s2); border-left: 4px solid var(--vert); border-radius: 0 var(--r-bouton) var(--r-bouton) 0; background-color: var(--vert-f); font-size: var(--t-corps); }

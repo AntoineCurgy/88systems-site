@@ -20,6 +20,13 @@ const EXEMPLES = { anomalie: "Dans le rapport de ce matin, la ligne… affiche�
 // la barre : Tous, Ouverts (recu et en cours), Traites, Sans suite
 const GROUPES = [["", "Tous", () => true], ["ouverts", "Ouverts", (r) => r.etat === "recu" || r.etat === "en_cours"],
                  ["corriges", "Traités", (r) => r.etat === "corrige"], ["refermes", "Sans suite", (r) => r.etat === "referme"]];
+// Les pieces jointes d'un retour (depot d'Antoine du 2026-11-12 : « un fichier ou des screenshots », RGI_01678) : les memes
+// bornes que l'API, dites avant l'envoi ; une capture se colle aussi dans la fenetre (Ctrl+V)
+const PIECES_MAX = 5;
+const PIECE_MO = 5;
+const PIECES_MO = 10;
+const PIECES_ACCEPTEES = ".png,.jpg,.jpeg,.gif,.webp,.pdf,.xlsx,.xls,.docx,.doc,.pptx,.csv,.txt,.eml,.msg";
+const DELAI_PIECES = 120000;
 const SOURCE_RETOURS = { chemin: "/api/retours", verifier: (d) => Array.isArray(d.retours) };
 const filtres = { g: "", q: "" };
 
@@ -187,9 +194,61 @@ function ouvrirNouveau(autos, depuis, choisi) {
     choix.append(l);
   }
   const zone = el("textarea", "dm-t");
-  zone.rows = 6;
+  zone.rows = 10;
   zone.maxLength = TEXTE_DEMANDE_MAX;
   zone.setAttribute("aria-label", "Votre retour");
+  // les pieces : un bouton qui ouvre le choix des fichiers, la liste de ce qui partira, chaque piece retirable
+  const jointes = [];
+  const fichier = el("input");
+  fichier.type = "file";
+  fichier.multiple = true;
+  fichier.accept = PIECES_ACCEPTEES;
+  fichier.hidden = true;
+  const ajouter = bouton("btn btn-s dm-pj-b", "Joindre un fichier");
+  ajouter.type = "button";
+  const listePieces = el("ul", "dm-pj-l");
+  const aidePieces = el("p", "dm-pj-a", `Une capture d'écran se colle aussi ici (Ctrl+V). ${PIECES_MAX} pièces au plus, ${PIECE_MO} Mo chacune.`);
+  const montrerPieces = () => {
+    listePieces.replaceChildren(...jointes.map((f, i) => {
+      const li = el("li", null, `${f.name} · ${Math.max(1, Math.round(f.size / 1024))} Ko `);
+      const retirer = bouton("dm-pj-x", "Retirer");
+      retirer.type = "button";
+      retirer.setAttribute("aria-label", `Retirer ${f.name}`);
+      retirer.addEventListener("click", () => { jointes.splice(i, 1); montrerPieces(); });
+      li.append(retirer);
+      return li;
+    }));
+    ajouter.disabled = jointes.length >= PIECES_MAX;
+  };
+  const joindre = (fichiers) => {
+    for (const f of fichiers) {
+      const total = jointes.reduce((t, x) => t + x.size, 0) + f.size;
+      if (jointes.length >= PIECES_MAX || f.size > PIECE_MO * 1048576 || total > PIECES_MO * 1048576) {
+        message.className = "message erreur";
+        message.textContent = `Pièce refusée : ${PIECES_MAX} au plus, ${PIECE_MO} Mo chacune, ${PIECES_MO} Mo en tout.`;
+        break;
+      }
+      jointes.push(f);
+    }
+    montrerPieces();
+  };
+  ajouter.addEventListener("click", () => fichier.click());
+  fichier.addEventListener("change", () => { joindre([...fichier.files]); fichier.value = ""; });
+  fen.addEventListener("paste", (e) => {
+    const images = [...(e.clipboardData ? e.clipboardData.files : [])].filter((f) => f.type.startsWith("image/"));
+    if (!images.length) return;
+    e.preventDefault();
+    const n = jointes.length;
+    joindre(images.map((f, i) => new File([f], `capture-${n + i + 1}.${(f.type.split("/")[1] || "png").replace("jpeg", "jpg")}`, { type: f.type })));
+  });
+  const enBase64 = (f) => new Promise((ok, ko) => {
+    const r = new FileReader();
+    r.onload = () => ok(String(r.result).split(",")[1] || "");
+    r.onerror = () => ko(r.error);
+    r.readAsDataURL(f);
+  });
+  const blocPieces = el("div", "dm-pj");
+  blocPieces.append(ajouter, fichier, listePieces, aidePieces);
   const pied = el("div", "dm-pied");
   const message = el("p", "message");
   message.setAttribute("aria-live", "polite");
@@ -206,7 +265,7 @@ function ouvrirNouveau(autos, depuis, choisi) {
     labSur.hidden = n === "demande";
     zone.placeholder = EXEMPLES[n];
   };
-  fen.append(x, titre, el("p", "dm-lab", "Type"), choix, labSur, labZone, zone, pied);
+  fen.append(x, titre, el("p", "dm-lab", "Type"), choix, labSur, labZone, zone, blocPieces, pied);
   choix.addEventListener("change", accorder);
   accorder();
   fen.addEventListener("submit", async (e) => {
@@ -222,7 +281,17 @@ function ouvrirNouveau(autos, depuis, choisi) {
     message.className = "message";
     message.textContent = "Envoi…";
     const nature = natureChoisie();
-    const r = await appeler("POST", "/api/demandes", { id: nature === "demande" ? "GENERAL" : sur.value, rapport: "", nature, texte });
+    let pieces;
+    try {
+      pieces = await Promise.all(jointes.map(async (f) => ({ nom: f.name, contenu: await enBase64(f) })));
+    } catch (_) {
+      envoyer.disabled = false;
+      message.className = "message erreur";
+      message.textContent = "Une pièce jointe n'a pas pu être lue. Retirez-la et réessayez.";
+      return;
+    }
+    const r = await appeler("POST", "/api/demandes", { id: nature === "demande" ? "GENERAL" : sur.value, rapport: "", nature, texte, pieces },
+                            "json", pieces.length ? DELAI_PIECES : undefined);
     if (r.statut === 200) {
       fen.replaceChildren(x, titre, el("p", "dm-ok",
         "Votre retour est transmis. Il apparaîtra dans ce tableau, avec son état, à la prochaine mise à jour."));

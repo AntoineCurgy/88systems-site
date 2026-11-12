@@ -181,9 +181,9 @@ function jourDe(iso) {
 
 class SessionPerdue extends Error {}
 
-async function appeler(methode, chemin, corps, format = "json") {
+async function appeler(methode, chemin, corps, format = "json", delai = DELAI) {
   const controle = new AbortController();
-  const minuteur = setTimeout(() => controle.abort(), DELAI);
+  const minuteur = setTimeout(() => controle.abort(), delai);   // un envoi de pieces jointes attend plus longtemps
   try {
     const r = await fetch(API + chemin, {
       method: methode, credentials: "include", signal: controle.signal,
