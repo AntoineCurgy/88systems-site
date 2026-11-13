@@ -23,6 +23,7 @@ const STATUTS = { ok: "Fonctionnelle", panne: "Interrompue", construction: "En c
 // Une automatisation « Figée » ne tourne plus : ce texte remplace sa date (Antoine, 2026-10-22).
 const FIGE = "Historique figé";
 const TEST = "base de test";   // « En service sur base de test » (Antoine, 2026-11-12, choix A a PCP001-1112-j)
+const RODAGE = "en rodage";   // « En rodage » : servie, sans destinataire (DEC_00937 de PCP059, RGI_01733)
 const PANNE_SERVICE = "Le service ne répond pas pour l'instant. Réessayez dans quelques minutes.";
 
 // le jeu unique d'icones, lu a la publication dans portail/charte/icones/ (DEC_00842) ; la source fait foi

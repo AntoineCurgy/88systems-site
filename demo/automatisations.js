@@ -165,7 +165,7 @@ function ligneAuto(a) {
   if (a.fige) d.textContent = FIGE;
   else if (a.dernier) {
     d.textContent = `${jourCourt(a.dernier.date)} à ${heureCourte(a.dernier.heure)} · ${motPassage(a.dernier.resultat)}`
-                    + (a.test && a.dernier.resultat !== TEST ? " · " + TEST : "");
+                    + (a.test && a.dernier.resultat !== TEST ? " · " + TEST : "") + (a.rodage ? " · " + RODAGE : "");
     if (a.dernier.resultat === "alerte") d.classList.add("alerte");   // le rate signale se voit (2026-10-09)
   } else d.append(el("span", "discret", "jamais lancée"));
   const pt = pastille(st);
