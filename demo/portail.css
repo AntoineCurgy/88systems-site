@@ -52,6 +52,10 @@
   --r-carte: 12px;
   --r-pilule: 999px;
   --r-rond: 50%;
+  /* deux hauteurs de controle (DEC_00933, choix 3C et 4A d'Antoine du 2026-11-13) : 32 px pour tout bouton, champ,
+     recherche et barre segmentee ; 30 px pour une pastille de choix et la croix d'une fenetre */
+  --h-controle: 2rem;
+  --h-pastille: 1.875rem;
   /* l'echelle d'espacement, celle de la page de pilotage (--s1 a --s6) et deux petits pas (DEC_00842, 5A) */
   --s00: .125rem;   /* 2 px */
   --s0: .25rem;     /* 4 px */
@@ -74,7 +78,7 @@ body {
 h1, h2, h3 { margin: 0; line-height: 1.25; }
 p { margin: 0; }
 a { color: var(--marque); }
-:focus-visible { outline: 3px solid var(--marque); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--marque); outline-offset: 2px; }
 [tabindex="-1"]:focus { outline: none; }
 [hidden] { display: none !important; }
 /* les onglets Retours et Emails, selon la session : la classe est posee des le <head> depuis le cache (commun.js) */
@@ -175,7 +179,7 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
 
 .tag { display: inline-flex; align-items: center; gap: var(--s0); font: 600 var(--t-petit)/1.5 var(--texte); vertical-align: middle; }
 /* un point de couleur et le mot, sans fond (Antoine, 2026-11-04, DEC_00520, option 8C) */
-.tag[class*="t-"]::before { content: ""; flex: none; width: .5rem; height: .5rem; border-radius: var(--r-rond); background-color: currentColor; }
+.tag[class*="t-"]::before { content: ""; flex: none; width: var(--s1); height: var(--s1); border-radius: var(--r-rond); background-color: currentColor; }
 .t-vert { color: var(--vert); }
 .tag:not([class*="t-"]) { font-weight: 400; color: var(--encre2); }   /* le type d'un retour : une metadonnee, sans gras */
 .gd .tag { white-space: nowrap; }   /* une etiquette tient sur une ligne (2026-10-08) */
@@ -187,12 +191,12 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s0);
-  padding: var(--s1) var(--s3); border: 0; border-radius: var(--r-bouton); background-color: var(--marque); color: var(--surface);
-  font: inherit; font-weight: 600; font-size: var(--t-corps); text-decoration: none; white-space: nowrap; cursor: pointer;
+  height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s3); border: 0; border-radius: var(--r-bouton); background-color: var(--marque); color: var(--surface);
+  font: inherit; font-weight: 600; font-size: var(--t-petit); text-decoration: none; white-space: nowrap; cursor: pointer;
 }
 .btn.eteint { background-color: var(--surface2); color: var(--pale); cursor: not-allowed; }
 /* le bouton blanc borde de la page de pilotage, pour un geste secondaire (DEC_00520, option 7C) */
-.btn.btn-s { background-color: var(--surface); color: var(--encre); border: 1.5px solid transparent; padding: calc(var(--s1) - 1.5px) calc(var(--s3) - 1.5px); }
+.btn.btn-s { background-color: var(--surface); color: var(--encre); border: 1.5px solid transparent; padding: 0 calc(var(--s3) - 1.5px); }
 .btn.btn-s:hover { border-color: var(--encre); }
 .cad { display: inline-flex; vertical-align: -2px; margin-right: var(--s0); color: var(--discret); }
 .lien-r { font: inherit; font-size: var(--t-petit); background-color: transparent; border: 0; padding: 0; color: var(--discret); text-decoration: underline; cursor: pointer; white-space: nowrap; }
@@ -210,7 +214,7 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
 /* les filtres en petits groupes colles, avec leurs comptes, comme l'onglet Sessions de la page de pilotage ;
    la recherche a droite (Antoine, 2026-11-04, DEC_00520, option 5C) */
 .gb-barre, .pe { display: inline-flex; flex-wrap: wrap; background-color: var(--surface); border: 1.5px solid var(--bord); border-radius: var(--r-pilule); overflow: hidden; align-self: flex-start; }
-.gb-o, .pe-b { font: inherit; font-size: var(--t-petit); border: 0; background-color: transparent; border-radius: 0; padding: var(--s1) var(--s3); cursor: pointer; color: var(--encre2); white-space: nowrap; }
+.gb-o, .pe-b { display: inline-flex; align-items: center; height: var(--h-controle); box-sizing: border-box; font: inherit; font-size: var(--t-petit); border: 0; background-color: transparent; border-radius: 0; padding: 0 var(--s3); cursor: pointer; color: var(--encre2); white-space: nowrap; }
 .gb-o + .gb-o, .pe-b + .pe-b { border-left: 1.5px solid var(--bord); }
 .gb-o:hover, .pe-b:hover { background-color: var(--survol); }
 .gb-o span, .pe-b span { font: var(--t-meta) var(--mono); color: var(--discret); margin-left: var(--s0); }
@@ -221,7 +225,7 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
 /* Les champs de recherche, plus petits et plus nets (Antoine, 2026-11-11 : « un peu trop gros […] un design un peu plus
    Tesla, un peu plus comme le reste maintenant, un peu plus sharp ») : la hauteur des barres de filtres, un trait fin, une
    loupe discrete, le trait plus fonce au focus, sans halo. */
-.cherche input { font: inherit; font-size: var(--t-petit); height: 2.05rem; box-sizing: border-box; padding: 0 var(--s2) 0 var(--s5); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); width: 15rem; max-width: 100%; color: var(--encre);
+.cherche input { font: inherit; font-size: var(--t-petit); height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2) 0 var(--s5); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); width: 15rem; max-width: 100%; color: var(--encre);
   background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c5e62' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat .7rem center; }
 .cherche input::placeholder { color: var(--pale); }
 .cherche input:hover { border-color: var(--bord-champ-survol); }
@@ -455,9 +459,10 @@ body.fen-ouverte { overflow: hidden; }
 .etapes li.on span { background-color: var(--marque); border-color: var(--marque); color: var(--surface); }
 .carte-c form { display: flex; flex-direction: column; gap: var(--s2); }
 .carte-c label { font-weight: 600; font-size: var(--t-corps); }
-.champ { font: inherit; padding: var(--s2) var(--s3); border: 1.5px solid transparent; border-radius: var(--r-bouton); background-color: var(--surface); color: var(--encre); }
-.champ:focus-visible, .case-c:focus-visible { outline: 3px solid var(--marque); outline-offset: 1px; }
-.btn.plein { padding: var(--s2) var(--s3); font-size: var(--t-titre-carte); border-radius: var(--r-bouton); }
+.champ { font: inherit; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); background-color: var(--surface); color: var(--encre); }
+.champ:hover, .case-c:hover { border-color: var(--bord-champ-survol); }
+.champ:focus-visible, .case-c:focus-visible { outline: none; border-color: var(--encre2); }
+.btn.plein { border-radius: var(--r-bouton); }   /* une seule hauteur de bouton, connexion comprise (DEC_00933, 3C) */
 .lien { font: inherit; font-size: var(--t-corps); background-color: transparent; border: 0; color: var(--marque); text-decoration: underline; cursor: pointer; align-self: flex-start; padding: 0; }
 .envoye { margin: 0 0 var(--s1); font-size: var(--t-corps); overflow-wrap: anywhere; }
 .cases { display: flex; gap: var(--s1); }
@@ -505,7 +510,8 @@ body.fen-ouverte { overflow: hidden; }
 .doc-fen { position: relative; width: 480px; max-width: 100%; padding: 0 var(--s4) var(--s4); background-color: var(--surface); border: 1.5px solid var(--bord); border-radius: var(--r-carte); box-shadow: var(--ombre-fen); overflow: hidden; }
 /* la tete claire de la fenetre de detail (DEC_00520, option 4A) */
 .doc-fen > h2 { margin: 0 calc(-1 * var(--s4)) var(--s3); padding: var(--s3) var(--s6) var(--s3) var(--s4); font-size: var(--t-titre-carte); background-color: var(--surface2); border-bottom: 1.5px solid var(--bord); }
-.doc-x { position: absolute; top: .75rem; right: 1rem; font-size: var(--t-chiffre); line-height: 1; background-color: transparent; border: 0; cursor: pointer; color: var(--discret); }
+.doc-x { position: absolute; top: var(--s2); right: var(--s3); display: inline-flex; align-items: center; justify-content: center; width: var(--h-pastille); height: var(--h-pastille); padding: 0; font: inherit; font-size: var(--t-chiffre); line-height: 1; background-color: transparent; border: 0; border-radius: var(--r-rond); cursor: pointer; color: var(--discret); }
+.doc-x:hover { background-color: var(--survol); }
 .doc-bandeau { margin: 0; padding: var(--s1) var(--s2); font-size: var(--t-petit); line-height: 1.6; border-left: 4px solid var(--pale); border-radius: 0 var(--r-bouton) var(--r-bouton) 0; background-color: var(--filet); }
 .doc-bandeau.vert { border-left-color: var(--vert); background-color: var(--vert-f); }
 .doc-bandeau.orange { border-left-color: var(--ambre); background-color: var(--ambre-f); }
@@ -521,14 +527,15 @@ body.fen-ouverte { overflow: hidden; }
 /* la fenetre « Faire une demande » (DEC_00165, 2026-10-31) : celle de la documentation, avec un formulaire */
 .dm-sur { margin: 0 0 var(--s3); color: var(--discret); font-size: var(--t-corps); }
 .dm-n { display: flex; flex-wrap: wrap; gap: var(--s1); margin-bottom: var(--s2); }
-.dm-n label { display: inline-flex; align-items: center; gap: var(--s0); padding: var(--s0) var(--s2); border: 1.5px solid var(--bord); border-radius: var(--r-pilule); font-size: var(--t-petit); cursor: pointer; }
+.dm-n label { display: inline-flex; align-items: center; gap: var(--s0); height: var(--h-pastille); box-sizing: border-box; padding: 0 var(--s2); border: 1.5px solid var(--bord); border-radius: var(--r-pilule); font-size: var(--t-petit); cursor: pointer; }
 /* le choix fait, plein, comme la page de pilotage (DEC_00520, option 9B) */
 .dm-n label:has(input:checked) { border-color: var(--marque); background-color: var(--marque); color: var(--surface); font-weight: 600; }
 .dm-n label:has(input:focus-visible) { outline: 3px solid var(--marque); outline-offset: 2px; }
 .dm-lab { display: block; margin: 0 0 var(--s0); font-size: var(--t-meta); font-weight: 600; color: var(--discret); }
 .dm-n input { margin: 0; accent-color: var(--marque); }
-.dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1.5px solid var(--bord); border-radius: var(--r-bouton); font: inherit; font-size: var(--t-corps); resize: vertical; }
-.dm-t:focus { outline: 2px solid var(--marque); outline-offset: 1px; }
+.dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); font: inherit; font-size: var(--t-corps); resize: vertical; }
+.dm-t:hover, .rt-sur select:hover { border-color: var(--bord-champ-survol); }
+.dm-t:focus, .rt-sur select:focus { outline: none; border-color: var(--encre2); }
 /* la fenetre « Nouveau retour », plus grande (depot d'Antoine du 2026-11-12 : « la fenetre popup est toute petite »), et ses pieces */
 .doc-fen.dm { width: 760px; max-height: calc(100vh - 2 * var(--s3)); overflow-y: auto; }
 .dm .dm-t { min-height: 14rem; }
@@ -537,19 +544,20 @@ body.fen-ouverte { overflow: hidden; }
 .dm-pj { margin-top: var(--s2); }
 .dm-pj-l { list-style: none; margin: var(--s1) 0 0; padding: 0; font-size: var(--t-petit); }
 .dm-pj-l li { display: flex; align-items: center; gap: var(--s1); padding: var(--s00) 0; }
-.dm-pj-x { padding: 0; background-color: transparent; border: 0; color: var(--discret); text-decoration: underline; font: inherit; cursor: pointer; }
-.dm-pj-x:hover, .dm-pj-x:focus-visible { color: var(--marque); }
 .dm-pj-a { margin: var(--s0) 0 0; font-size: var(--t-petit); color: var(--discret); }
 .dm-pied { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-top: var(--s2); }
 .dm-pied .message { margin: 0; }
 .dm-ok { margin: var(--s1) 0 var(--s0); padding: var(--s2) var(--s2); border-left: 4px solid var(--vert); border-radius: 0 var(--r-bouton) var(--r-bouton) 0; background-color: var(--vert-f); font-size: var(--t-corps); }
 .dm-f { display: inline-flex; align-items: center; gap: var(--s1); }
-.dm-b { display: inline-flex; align-items: center; margin-left: var(--s1); padding: var(--s00); vertical-align: middle; background-color: transparent; border: 0; border-radius: var(--r-petit); color: var(--discret); cursor: pointer; }
+.dm-b { display: inline-flex; align-items: center; justify-content: center; width: var(--h-controle); height: var(--h-controle); box-sizing: border-box; margin-left: var(--s1); padding: 0; vertical-align: middle; background-color: transparent; border: 0; border-radius: var(--r-petit); color: var(--discret); cursor: pointer; }
 .dm-b:hover, .dm-b:focus-visible { color: var(--marque); background-color: var(--survol); }
 .dm-g { white-space: nowrap; }
 .dm-b.rf-b { margin-left: var(--s0); }
 .rf-e .rf-v { font-size: inherit; }
-.dm-b[aria-disabled="true"] { opacity: .45; cursor: default; }
+.dm-b[aria-disabled="true"] { cursor: progress; }
+.dm-b[aria-disabled="true"] .ico { animation: dm-tourne 1s linear infinite; }   /* occupe : la fleche tourne (section 5, « jamais grisé ») */
+@keyframes dm-tourne { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .dm-b[aria-disabled="true"] .ico { animation: none; } }
 .rf-e { display: block; margin-top: var(--s00); font-family: var(--texte); color: var(--ambre); white-space: normal; }
 .rf-e.rf-k { color: var(--rouge); }
 
@@ -569,7 +577,7 @@ body.fen-ouverte { overflow: hidden; }
 .rt-h { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s1); font-size: var(--t-corps); }
 .rt-h .mono { color: var(--discret); margin-right: var(--s1); }
 .rt-sur { display: grid; gap: var(--s0); margin-bottom: var(--s2); font-size: var(--t-meta); font-weight: 600; color: var(--discret); }
-.rt-sur select { font: inherit; font-size: var(--t-corps); font-weight: 400; padding: var(--s1) var(--s1); border: 1.5px solid var(--bord); border-radius: var(--r-bouton); background-color: var(--surface); color: var(--encre); }
+.rt-sur select { font: inherit; font-size: var(--t-corps); font-weight: 400; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s1); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); background-color: var(--surface); color: var(--encre); }
 /* La fenetre d'un email de l'onglet « Emails » (Antoine, 2026-11-11) : la moitie de l'ecran, les champs en tete comme le
    brouillon de la page de pilotage (une ligne par champ, les adresses a la suite), puis le message. */
 .fen-voile.fen-mail .fen { width: min(max(50vw, 640px), 96vw); height: 82vh; max-height: 82vh; }

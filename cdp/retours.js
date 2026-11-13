@@ -211,14 +211,13 @@ function ouvrirNouveau(autos, depuis, choisi) {
   const montrerPieces = () => {
     listePieces.replaceChildren(...jointes.map((f, i) => {
       const li = el("li", null, `${f.name} · ${Math.max(1, Math.round(f.size / 1024))} Ko `);
-      const retirer = bouton("dm-pj-x", "Retirer");
+      const retirer = bouton("lien-r", "Retirer");
       retirer.type = "button";
       retirer.setAttribute("aria-label", `Retirer ${f.name}`);
       retirer.addEventListener("click", () => { jointes.splice(i, 1); montrerPieces(); });
       li.append(retirer);
       return li;
     }));
-    ajouter.disabled = jointes.length >= PIECES_MAX;
   };
   const joindre = (fichiers) => {
     for (const f of fichiers) {
@@ -232,7 +231,15 @@ function ouvrirNouveau(autos, depuis, choisi) {
     }
     montrerPieces();
   };
-  ajouter.addEventListener("click", () => fichier.click());
+  // jamais grise (la charte, « Le bouton qui attend, et jamais grisé ») : plein, il dit pourquoi au lieu de s'eteindre
+  ajouter.addEventListener("click", () => {
+    if (jointes.length >= PIECES_MAX) {
+      message.className = "message erreur";
+      message.textContent = `${PIECES_MAX} pièces au plus : retirez-en une pour en joindre une autre.`;
+      return;
+    }
+    fichier.click();
+  });
   fichier.addEventListener("change", () => { joindre([...fichier.files]); fichier.value = ""; });
   fen.addEventListener("paste", (e) => {
     const images = [...(e.clipboardData ? e.clipboardData.files : [])].filter((f) => f.type.startsWith("image/"));
