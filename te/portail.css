@@ -8,13 +8,13 @@
   --fond: #f4f4f4;
   --surface: #ffffff;
   --surface2: #e9e9e9;
-  --bord: #e8e8e8;
-  --filet: #eeeeee;
+  --bord: #dcdddf;
+  --filet: #e4e5e7;
   --survol: #f7f7f7;
   --encre: #171a20;
-  --encre2: #393c41;
-  --discret: #5c5e62;
-  --pale: #8b8d90;
+  --encre2: #2b2e33;
+  --discret: #4b4d52;
+  --pale: #727478;
   --vert: #1e7a4b;
   --vert-clair: #8cc7a6;
   --rouge: #9b2c2c;
@@ -28,7 +28,7 @@
   --hb: 4.6rem;
   --rail: 6.5rem;
   /* la charte du portail (DEC_00824, DEC_00827) : les couleurs ecrites en dur avant, nommees par leur role */
-  --bord-champ: #d0d1d2;         /* contour des champs et des boutons blancs */
+  --bord-champ: #b9bbbe;         /* contour des champs et des boutons blancs */
   --bord-champ-survol: #a9abad;
   --vert-f: #e3f1e8;             /* fonds teintes des etats */
   --rouge-f: #f6e3e3;
@@ -228,8 +228,7 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
 .cherche input { font: inherit; font-size: var(--t-petit); height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2) 0 var(--s5); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); width: 15rem; max-width: 100%; color: var(--encre);
   background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c5e62' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat .7rem center; }
 .cherche input::placeholder { color: var(--pale); }
-.cherche input:hover { border-color: var(--bord-champ-survol); }
-.cherche input:focus { outline: none; border-color: var(--encre2); }
+.cherche input:focus { outline: none; border-color: var(--encre2); }   /* un seul changement : rien au survol, un trait plus fonce quand on ecrit, sans animation (DEC_00958) */
 .vide { color: var(--discret); }
 .avis { font-size: var(--t-corps); color: var(--rouge); }
 .avis:empty { display: none; }
@@ -461,8 +460,7 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 .carte-c form { display: flex; flex-direction: column; gap: var(--s2); }
 .carte-c label { font-weight: 500; font-size: var(--t-corps); }
 .champ { font: inherit; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); background-color: var(--surface); color: var(--encre); }
-.champ:hover, .case-c:hover { border-color: var(--bord-champ-survol); }
-.champ:focus-visible, .case-c:focus-visible { outline: none; border-color: var(--encre2); }
+.champ:focus, .case-c:focus { outline: none; border-color: var(--encre2); }
 .btn.plein { border-radius: var(--r-bouton); }   /* une seule hauteur de bouton, connexion comprise (DEC_00933, 3C) */
 .lien { font: inherit; font-size: var(--t-corps); background-color: transparent; border: 0; color: var(--marque); text-decoration: underline; cursor: pointer; align-self: flex-start; padding: 0; }
 .envoye { margin: 0 0 var(--s1); font-size: var(--t-corps); overflow-wrap: anywhere; }
@@ -535,7 +533,6 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 .dm-lab { display: block; margin: 0 0 var(--s0); font-size: var(--t-meta); font-weight: 500; color: var(--discret); }
 .dm-n input { margin: 0; accent-color: var(--marque); }
 .dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1.5px solid var(--bord); border-radius: var(--r-bouton); background-color: var(--surface2); font: inherit; font-size: var(--t-corps); resize: vertical; }   /* la zone de texte de la charte, fond gris et trait de 1,5 px, partout (DEC_00955) */
-.dm-t:hover, .rt-sur select:hover { border-color: var(--bord-champ-survol); }
 .dm-t:focus, .rt-sur select:focus { outline: none; border-color: var(--encre2); }
 /* la fenetre « Nouveau retour », plus grande (depot d'Antoine du 2026-11-12 : « la fenetre popup est toute petite »), et ses pieces */
 .doc-fen.dm { width: 760px; max-height: calc(100vh - 2 * var(--s3)); overflow-y: auto; }
