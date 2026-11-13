@@ -225,7 +225,7 @@ html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"]
 /* Les champs de recherche, plus petits et plus nets (Antoine, 2026-11-11 : « un peu trop gros […] un design un peu plus
    Tesla, un peu plus comme le reste maintenant, un peu plus sharp ») : la hauteur des barres de filtres, un trait fin, une
    loupe discrete, le trait plus fonce au focus, sans halo. */
-.cherche input { font: inherit; font-size: var(--t-petit); height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2) 0 var(--s5); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); width: 15rem; max-width: 100%; color: var(--encre);
+.cherche input { font: inherit; font-size: var(--t-petit); height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2) 0 var(--s5); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); width: 15rem; max-width: 100%; color: var(--encre);
   background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c5e62' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat .7rem center; }
 .cherche input::placeholder { color: var(--pale); }
 .cherche input:hover { border-color: var(--bord-champ-survol); }
@@ -459,7 +459,7 @@ body.fen-ouverte { overflow: hidden; }
 .etapes li.on span { background-color: var(--marque); border-color: var(--marque); color: var(--surface); }
 .carte-c form { display: flex; flex-direction: column; gap: var(--s2); }
 .carte-c label { font-weight: 600; font-size: var(--t-corps); }
-.champ { font: inherit; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); background-color: var(--surface); color: var(--encre); }
+.champ { font: inherit; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); background-color: var(--surface); color: var(--encre); }
 .champ:hover, .case-c:hover { border-color: var(--bord-champ-survol); }
 .champ:focus-visible, .case-c:focus-visible { outline: none; border-color: var(--encre2); }
 .btn.plein { border-radius: var(--r-bouton); }   /* une seule hauteur de bouton, connexion comprise (DEC_00933, 3C) */
@@ -533,7 +533,7 @@ body.fen-ouverte { overflow: hidden; }
 .dm-n label:has(input:focus-visible) { outline: 3px solid var(--marque); outline-offset: 2px; }
 .dm-lab { display: block; margin: 0 0 var(--s0); font-size: var(--t-meta); font-weight: 600; color: var(--discret); }
 .dm-n input { margin: 0; accent-color: var(--marque); }
-.dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); font: inherit; font-size: var(--t-corps); resize: vertical; }
+.dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); font: inherit; font-size: var(--t-corps); resize: vertical; }
 .dm-t:hover, .rt-sur select:hover { border-color: var(--bord-champ-survol); }
 .dm-t:focus, .rt-sur select:focus { outline: none; border-color: var(--encre2); }
 /* la fenetre « Nouveau retour », plus grande (depot d'Antoine du 2026-11-12 : « la fenetre popup est toute petite »), et ses pieces */
@@ -577,7 +577,7 @@ body.fen-ouverte { overflow: hidden; }
 .rt-h { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s1); font-size: var(--t-corps); }
 .rt-h .mono { color: var(--discret); margin-right: var(--s1); }
 .rt-sur { display: grid; gap: var(--s0); margin-bottom: var(--s2); font-size: var(--t-meta); font-weight: 600; color: var(--discret); }
-.rt-sur select { font: inherit; font-size: var(--t-corps); font-weight: 400; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s1); border: 1px solid var(--bord-champ); border-radius: var(--r-petit); background-color: var(--surface); color: var(--encre); }
+.rt-sur select { font: inherit; font-size: var(--t-corps); font-weight: 400; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s1); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); background-color: var(--surface); color: var(--encre); }
 /* La fenetre d'un email de l'onglet « Emails » (Antoine, 2026-11-11) : la moitie de l'ecran, les champs en tete comme le
    brouillon de la page de pilotage (une ligne par champ, les adresses a la suite), puis le message. */
 .fen-voile.fen-mail .fen { width: min(max(50vw, 640px), 96vw); height: 82vh; max-height: 82vh; }
