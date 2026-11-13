@@ -534,7 +534,7 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 .dm-n label:has(input:focus-visible) { outline: 3px solid var(--marque); outline-offset: 2px; }
 .dm-lab { display: block; margin: 0 0 var(--s0); font-size: var(--t-meta); font-weight: 500; color: var(--discret); }
 .dm-n input { margin: 0; accent-color: var(--marque); }
-.dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); font: inherit; font-size: var(--t-corps); resize: vertical; }
+.dm-t { display: block; width: 100%; box-sizing: border-box; padding: var(--s1) var(--s2); border: 1.5px solid var(--bord); border-radius: var(--r-bouton); background-color: var(--surface2); font: inherit; font-size: var(--t-corps); resize: vertical; }   /* la zone de texte de la charte, fond gris et trait de 1,5 px, partout (DEC_00955) */
 .dm-t:hover, .rt-sur select:hover { border-color: var(--bord-champ-survol); }
 .dm-t:focus, .rt-sur select:focus { outline: none; border-color: var(--encre2); }
 /* la fenetre « Nouveau retour », plus grande (depot d'Antoine du 2026-11-12 : « la fenetre popup est toute petite »), et ses pieces */
