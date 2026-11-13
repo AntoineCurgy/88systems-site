@@ -21,7 +21,16 @@ function vueCartographie([d]) {
     lien.target = "_blank";
     lien.rel = "noopener";
     lien.setAttribute("aria-label", "Ouvrir la cartographie (nouvel onglet)");
-    carte.append(lien);
+    const gestes = el("div", "ca-g");
+    gestes.append(lien);
+    if (d.pdf) {   // RGI_01751 : le PDF de la carte, une vue par page (DEC_00961)
+      const pdf = el("a", "btn btn-s ca-b");
+      pdf.append(ico("telecharger", 15), "Télécharger en PDF");
+      pdf.href = API + "/api/cartographie/pdf";
+      pdf.setAttribute("aria-label", "Télécharger la cartographie en PDF");
+      gestes.append(pdf);
+    }
+    carte.append(gestes);
   } else {
     carte.append(el("p", "ca-t", "Cartographie en cours"),
       el("p", "discret", "La carte de votre système d'information sera ici dès qu'elle est publiée."));

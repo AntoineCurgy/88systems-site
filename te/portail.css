@@ -19,7 +19,7 @@
   --vert-clair: #8cc7a6;
   --rouge: #9b2c2c;
   --ambre: #b7791f;
-  --rail-on: #e8f0f2;
+  --rail-on: #d6e6eb;   /* un cran plus fonce : le fond de l onglet actif se voyait a peine sur blanc (Antoine, 2026-11-13, PCP049-1113-n : « Je crois que c est un probleme de contraste ») */
   --clair: #cfe1e6;
   --ombre-fen: 0 18px 50px rgba(22, 21, 15, .25);
   --voile: rgba(22, 21, 15, .45);
@@ -523,6 +523,7 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 .ca .ca-t { margin: 0; font-weight: 500; font-size: var(--t-titre-carte); }
 .ca .discret { margin: 0 0 var(--s1); }
 .ca-b { display: inline-flex; align-items: center; gap: var(--s1); text-decoration: none; }
+.ca-g { display: flex; flex-wrap: wrap; gap: var(--s1); }
 /* la fenetre « Faire une demande » (DEC_00165, 2026-10-31) : celle de la documentation, avec un formulaire */
 .dm-sur { margin: 0 0 var(--s3); color: var(--discret); font-size: var(--t-corps); }
 .dm-n { display: flex; flex-wrap: wrap; gap: var(--s1); margin-bottom: var(--s2); }
