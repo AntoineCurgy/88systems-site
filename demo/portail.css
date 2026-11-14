@@ -666,3 +666,32 @@ a.ac-j:hover { border-color: var(--marque); }
 .ac-sur { font-size: var(--t-meta); color: var(--marque); font-weight: 500; letter-spacing: .04em; margin-bottom: var(--s00); }
 @media (max-width: 40rem) { .ac-deux { grid-template-columns: 1fr; } }
 .case.ag-case { color: var(--encre2); }
+
+/* La carte des flux de l'accueil (DEC_00981, RGI_01823 ; Antoine, 2026-11-14, PCP049-1114-a : « je veux exactement cette
+   version ») : chaque systeme une fois, chaque liaison une fois, aux couleurs des points ; un trait plein est un flux,
+   un pointille un controle de coherence. Les jetons de la charte seulement. */
+.cf .cf-sous { margin: -.2rem 0 .6rem; font-size: 13px; color: var(--discret); }
+.cf .cf-corps { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 1rem; align-items: start; }
+@media (max-width: 900px) { .cf .cf-corps { grid-template-columns: 1fr; } }
+.cf svg { width: 100%; height: auto; display: block; }
+.cf .cf-e { fill: none; stroke-linecap: round; transition: opacity .15s; }
+.cf .cf-e.ctl { stroke-dasharray: 2 5; }
+.cf .cf-z { fill: none; stroke: transparent; stroke-width: 14; cursor: pointer; }
+.cf .cf-n { cursor: pointer; transition: opacity .15s; }
+.cf .cf-n rect { fill: var(--surface); stroke-width: 1.6; }
+.cf .cf-n:hover rect, .cf .cf-n:focus rect { fill: var(--survol); }
+.cf .cf-n text { font-size: 13px; font-weight: 500; fill: var(--encre); }
+.cf .cf-n text.g { font-size: 15px; }
+.cf svg.focus .cf-e:not(.on), .cf svg.focus .cf-n:not(.on) { opacity: .15; }
+.cf .cf-d { border-left: 1px solid var(--filet); padding-left: 1rem; min-height: 8rem; }
+.cf .cf-aide { font-size: 13px; color: var(--discret); margin: 0; }
+.cf .cf-dt { font-weight: 500; margin: 0 0 .4rem; }
+.cf .cf-dl { list-style: none; margin: 0; padding: 0; max-height: 18rem; overflow: auto; }
+.cf .cf-dl a { display: grid; grid-template-columns: auto auto 1fr; gap: .1rem .45rem; align-items: center; padding: .3rem 0;
+  color: var(--encre); text-decoration: none; border-top: 1px solid var(--filet); font-size: 13px; }
+.cf .cf-dl a:hover { background: var(--survol); }
+.cf .cf-num { color: var(--discret); font-variant-numeric: tabular-nums; }
+.cf .cf-fl { grid-column: 3; font-size: 12px; color: var(--marque); }
+.cf .cf-lg { display: inline-flex; align-items: center; gap: .3rem; }
+.cf .cf-tr { display: inline-block; width: 18px; border-top: 2px solid var(--discret); }
+.cf .cf-tr.ctl { border-top-style: dotted; }
