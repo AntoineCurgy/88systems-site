@@ -19,7 +19,7 @@ function vueParametres([donnees]) {
   const table = el("table", "pa");
   const thead = el("thead");
   const tr = el("tr");
-  for (const [texte, classe] of [["Automatisation"], ["Par courriel"], ...jours.map((j) => [(JOURS[j] || [j])[0], "c"])]) {
+  for (const [texte, classe] of [["Automatisation"], ["Par email"], ...jours.map((j) => [(JOURS[j] || [j])[0], "c"])]) {
     const th = el("th", classe, texte);
     th.scope = "col";
     tr.append(th);
@@ -55,7 +55,7 @@ function vueParametres([donnees]) {
     inter.checked = !!l.courriel;
     const rail = el("span", "sw-r");
     rail.setAttribute("aria-hidden", "true");
-    sw.append(inter, rail, el("span", "sr", "Recevoir par courriel : " + l.nom));
+    sw.append(inter, rail, el("span", "sr", "Recevoir par email : " + l.nom));
     tdSw.append(sw);
     ligne.append(tdSw);
     // Decisions d'Antoine du 2026-10-04 : un jour absent de `jours_possibles` est grise et
@@ -122,7 +122,7 @@ function vueParametres([donnees]) {
   });
   enr.append(b, m);
   return [el("h1", null, "Paramètres"),
-    el("p", "sous-titre", "Définissez ici les jours où vous souhaitez recevoir les rapports par courriel."), carte, enr];
+    el("p", "sous-titre", "Définissez ici les jours où vous souhaitez recevoir les rapports par email."), carte, enr];
 }
 
 // Le cache suit ce qui vient d'etre enregistre : revenir sur la page montre ses choix.

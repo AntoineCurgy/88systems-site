@@ -23,7 +23,7 @@ function vueRapports([donnees, autos]) {
   const raps = donnees.rapports.filter(rapportMontre).sort((a, b) => String(a.sujet).localeCompare(String(b.sujet), "fr"));
   if (!raps.length) {
     return [el("h1", null, "Rapports"), vueVide("Aucun rapport déployé",
-      "Un rapport vous donne chaque jour, dans un classeur et par courriel, l'état d'un contrôle entre vos logiciels.")];
+      "Un rapport vous donne chaque jour, dans un classeur et par email, l'état d'un contrôle entre vos logiciels.")];
   }
   const f = filtres;
   const restreints = raps.filter((r) => !r.acces).length;
