@@ -671,9 +671,8 @@ a.ac-j:hover { border-color: var(--marque); }
    version ») : chaque systeme une fois, chaque liaison une fois, aux couleurs des points ; un trait plein est un flux,
    un pointille un controle de coherence. Les jetons de la charte seulement. */
 .cf .cf-sous { margin: -.2rem 0 .6rem; font-size: 13px; color: var(--discret); }
-.cf .cf-corps { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 1rem; align-items: start; }
-@media (max-width: 900px) { .cf .cf-corps { grid-template-columns: 1fr; } }
-.cf svg { width: 100%; height: auto; display: block; }
+.cf .cf-corps { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 1rem; align-items: stretch; }
+.cf svg { width: 100%; max-width: 1000px; height: auto; display: block; margin: 0 auto; }
 .cf .cf-e { fill: none; stroke-linecap: round; transition: opacity .15s; }
 .cf .cf-e.ctl { stroke-dasharray: 2 5; }
 .cf .cf-z { fill: none; stroke: transparent; stroke-width: 14; cursor: pointer; }
@@ -683,10 +682,11 @@ a.ac-j:hover { border-color: var(--marque); }
 .cf .cf-n text { font-size: 13px; font-weight: 500; fill: var(--encre); }
 .cf .cf-n text.g { font-size: 15px; }
 .cf svg.focus .cf-e:not(.on), .cf svg.focus .cf-n:not(.on) { opacity: .15; }
-.cf .cf-d { border-left: 1px solid var(--filet); padding-left: 1rem; min-height: 8rem; }
+.cf .cf-d { border-left: 1px solid var(--filet); padding-left: 1rem; min-height: 8rem; display: flex; flex-direction: column; }
 .cf .cf-aide { font-size: 13px; color: var(--discret); margin: 0; }
 .cf .cf-dt { font-weight: 500; margin: 0 0 .4rem; }
-.cf .cf-dl { list-style: none; margin: 0; padding: 0; max-height: 18rem; overflow: auto; }
+.cf .cf-dl { list-style: none; margin: 0; padding: 0; flex: 1 1 0; min-height: 0; overflow: auto; }
+@media (max-width: 900px) { .cf .cf-corps { grid-template-columns: 1fr; } .cf .cf-dl { flex: none; max-height: 18rem; } }
 .cf .cf-dl a { display: grid; grid-template-columns: auto auto 1fr; gap: .1rem .45rem; align-items: center; padding: .3rem 0;
   color: var(--encre); text-decoration: none; border-top: 1px solid var(--filet); font-size: 13px; }
 .cf .cf-dl a:hover { background: var(--survol); }
