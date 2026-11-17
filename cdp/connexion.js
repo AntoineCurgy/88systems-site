@@ -9,7 +9,18 @@ const MOTIFS = { perdue: "Votre session a pris fin. Reconnectez-vous pour contin
 function retour() {
   const r = demande.get("retour") || "";
   const [page, requete = ""] = r.split("?");
+  if (page === "carte") return pageCarte(new URLSearchParams(requete));
   return PAGES.includes(page) ? page + (requete ? "?" + requete : "") : "index.html";
+}
+
+// RGI_01870 : le lien direct de la carte (choix A d'Antoine, PCP057-1116-a, 2026-11-17) ramene, apres le code, a la
+// page seule de la carte, sans le menu du portail, sur l'adresse de l'API du client (jamais une adresse recue) ;
+// l'ancre et la vue gardent leurs seuls caracteres sans danger.
+function pageCarte(q) {
+  const carte = q.get("carte") || "", vue = q.get("vue") || "";
+  return API + "/api/cartographie/page"
+    + (/^[A-Za-z0-9_-]{1,40}$/.test(vue) ? "?vue=" + vue : "")
+    + (/^[A-Za-z0-9_-]{1,80}$/.test(carte) ? "#" + carte : "");
 }
 
 let adresseSaisie = "";
