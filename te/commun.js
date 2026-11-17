@@ -339,10 +339,17 @@ function poserMoi() {
   // la feuille masquait chaque agent (2026-10-16).
 }
 
+// RGI_01846 : ce que la fiche du client cache a ses utilisateurs (son administrateur voit tout) ; une page cachee
+// ouverte par son adresse part vers la Cartographie, qui ne se cache jamais
+const CACHABLES = { "index.html": "accueil", "automatisations.html": "automatisations", "agents.html": "agents" };
+
 function ongletsDuRail(m) {
   const c = document.documentElement.classList;
   c.toggle("sans-retours", !m.onglet_retours);
   c.toggle("sans-envois", !m.onglet_envois);
+  const caches = m.caches || [];
+  Object.values(CACHABLES).forEach((x) => c.toggle("cache-" + x, caches.includes(x)));
+  if (caches.includes(CACHABLES[pageCourante()])) location.replace("cartographie.html");
 }
 
 // Un onglet vide le dit, et dit ce qu'il pourrait porter (PCP049-1031-c, 2026-10-31).

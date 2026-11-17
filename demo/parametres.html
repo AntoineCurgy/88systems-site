@@ -15,10 +15,10 @@
   Aucun secret ici : tout ce qui est servi au navigateur est public. La session vit dans
   un cookie HttpOnly pose par l'API. logo-demo.css est pose a la publication.
 -->
-<script>(function(){try{var m=JSON.parse(localStorage.getItem("portail:demo:moi")||"null");if(m&&m.adresse){var c=document.documentElement.classList;c.toggle("sans-retours",!m.onglet_retours);c.toggle("sans-envois",!m.onglet_envois)}}catch(e){}})();</script>
-<link rel="stylesheet" href="portail.css?v=924021a09a">
+<script>(function(){try{var m=JSON.parse(localStorage.getItem("portail:demo:moi")||"null");if(m&&m.adresse){var c=document.documentElement.classList;c.toggle("sans-retours",!m.onglet_retours);c.toggle("sans-envois",!m.onglet_envois);var k=m.caches||[];["accueil","automatisations","agents"].forEach(function(x){c.toggle("cache-"+x,k.indexOf(x)>=0)})}}catch(e){}})();</script>
+<link rel="stylesheet" href="portail.css?v=0644a5445a">
 <link rel="stylesheet" href="logo-demo.css?v=155fbdc213">
-<script defer src="commun.js?v=4fa53ec57c"></script>
+<script defer src="commun.js?v=4eeefb3e70"></script>
 <script defer src="parametres.js?v=24910db588"></script>
 </head>
 <body>

@@ -15,10 +15,10 @@
   Aucun secret ici : tout ce qui est servi au navigateur est public. La session vit dans
   un cookie HttpOnly pose par l'API. logo-cdp.css est pose a la publication.
 -->
-<script>(function(){try{var m=JSON.parse(localStorage.getItem("portail:cdp:moi")||"null");if(m&&m.adresse){var c=document.documentElement.classList;c.toggle("sans-retours",!m.onglet_retours);c.toggle("sans-envois",!m.onglet_envois)}}catch(e){}})();</script>
-<link rel="stylesheet" href="portail.css?v=8d5d9617a4">
+<script>(function(){try{var m=JSON.parse(localStorage.getItem("portail:cdp:moi")||"null");if(m&&m.adresse){var c=document.documentElement.classList;c.toggle("sans-retours",!m.onglet_retours);c.toggle("sans-envois",!m.onglet_envois);var k=m.caches||[];["accueil","automatisations","agents"].forEach(function(x){c.toggle("cache-"+x,k.indexOf(x)>=0)})}}catch(e){}})();</script>
+<link rel="stylesheet" href="portail.css?v=e39af41775">
 <link rel="stylesheet" href="logo-cdp.css?v=c5d7fa3901">
-<script defer src="commun.js?v=bf8c2de044"></script>
+<script defer src="commun.js?v=7298d0482d"></script>
 <script defer src="cartographie.js?v=0ecc0b3e2e"></script>
 </head>
 <body>
