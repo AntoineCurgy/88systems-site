@@ -461,7 +461,13 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 .carte-c label { font-weight: 500; font-size: var(--t-corps); }
 .champ { font: inherit; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s2); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); background-color: var(--surface); color: var(--encre); }
 .champ:focus, .case-c:focus { outline: none; border-color: var(--encre2); }
-.btn.plein { border-radius: var(--r-bouton); }   /* une seule hauteur de bouton, connexion comprise (DEC_00933, 3C) */
+.btn.plein { border-radius: var(--r-bouton); }   /* une seule hauteur de bouton, sauf la connexion depuis le 2026-11-17 (DEC_00933, 3C ; DEC_01148) */
+/* RGI_01874 : la variante « grands controles » de la charte, sur la seule page de connexion, seule a l'ecran (choix A
+   d'Antoine a PCP049-1117-ae, DEC_01148) : le champ et le bouton de la page d'avant le 2026-11-13 apres-midi (46 px de
+   haut, texte du bouton en 15 px), les libelles et l'etape en cours en gras */
+.carte-c label, .carte-c .etapes li.on { font-weight: 600; }
+.carte-c .champ { height: auto; padding: var(--s2) var(--s3); border-width: 1.5px; font-size: 15px; }
+.carte-c .btn.plein { height: auto; padding: var(--s2) var(--s3); font-size: 15px; }
 .lien { font: inherit; font-size: var(--t-corps); background-color: transparent; border: 0; color: var(--marque); text-decoration: underline; cursor: pointer; align-self: flex-start; padding: 0; }
 .envoye { margin: 0 0 var(--s1); font-size: var(--t-corps); overflow-wrap: anywhere; }
 .cases { display: flex; gap: var(--s1); }
