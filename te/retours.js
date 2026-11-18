@@ -13,7 +13,9 @@ const ETATS_RETOUR = { recu: ["Reçu", "t-ferme"], en_cours: ["En cours", "t-amb
 // besoin ne porte sur rien d'existant : il part sans liste. Un retour passe classe « demande » porte sur une
 // automatisation existante : il se lit « Amelioration ».
 const TYPES_RETOUR = [["anomalie", "Anomalie"], ["amelioration", "Amélioration"], ["demande", "Nouveau besoin"]];
-const MOT_TYPE = { anomalie: "Anomalie", amelioration: "Amélioration", demande: "Amélioration" };
+// RGI_01879 : le type montre vient du verdict de l'equipe (DEC_01164) ; sans verdict, « À qualifier »
+const MOT_TYPE = { anomalie: "Anomalie", amelioration: "Amélioration", besoin: "Nouveau besoin", question: "Question",
+                   a_qualifier: "À qualifier" };
 const EXEMPLES = { anomalie: "Dans le rapport de ce matin, la ligne… affiche… alors que…",
                    amelioration: "J'aimerais ajouter dans le rapport une colonne…",
                    demande: "J'aimerais recevoir chaque semaine un contrôle sur…" };
@@ -93,7 +95,7 @@ function vueRetours([rets, autos]) {
     l.setAttribute("aria-label", `${r.objet}, ${(ETATS_RETOUR[r.etat] || ETATS_RETOUR.recu)[0]} : voir le détail`);
     const e = el("td");
     e.append(tagRetour(r.etat));
-    l.append(el("td", "mono gd-date", jourCourtRetour(r.date)), e, el("td", null, MOT_TYPE[r.type] || "Amélioration"),
+    l.append(el("td", "mono gd-date", jourCourtRetour(r.date)), e, el("td", null, MOT_TYPE[r.type] || "À qualifier"),
              el("td", null, r.nom), el("td", "rt-o", r.objet), el("td", "discret", r.de || ""));
     // le clic ne remonte pas au document, qui fermerait aussitot le panneau ouvert (commun.js)
     l.addEventListener("click", (ev) => { ev.stopPropagation(); ouvrirDetail(r, l); });
@@ -131,7 +133,7 @@ function ouvrirDetail(r, depuis) {
   const titre = el("h2", null, r.objet);
   titre.id = "panneau-titre";
   const tete = el("p", "rt-tete");
-  tete.append(tagRetour(r.etat), " ", el("span", "tag", MOT_TYPE[r.type] || "Amélioration"));
+  tete.append(tagRetour(r.etat), " ", el("span", "tag", MOT_TYPE[r.type] || "À qualifier"));
   const dl = el("dl", "rt-dl");
   for (const [mot, valeur] of [["Automatisation", r.nom], ["Date", r.date], ["De", r.de || "—"]]) {
     dl.append(el("dt", null, mot), el("dd", null, valeur));
