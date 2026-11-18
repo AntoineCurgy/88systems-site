@@ -328,6 +328,7 @@ function poserMoi() {
   avatar.title = moi.nom ? moi.nom + " · " + adresse : adresse;
   avatar.setAttribute("aria-label", "Connecté : " + (moi.nom || adresse));
   if (!$("maj").textContent) majBandeau(moi.maj);
+  poserComme();
   // l'onglet « Retours » n'existe que si le service lit la liste des retours (DEC_00506) ; il remplace alors les bulles ;
   // l'onglet « Emails » n'existe que pour l'administrateur du portail (DEC_00598, DEC_00606). Les deux se montrent par
   // une classe de <html>, posee des le <head> depuis le cache (le script en ligne de chaque page) : le rail ne
@@ -337,6 +338,106 @@ function poserMoi() {
   // L'onglet « Agents » reste toujours visible, vide ou non (Antoine, 2026-10-31, PCP049-1031-c : « toujours
   // montrer Agents IA, Automatisations, Rapports et Cartographie », pour donner envie) ; il disparaissait quand
   // la feuille masquait chaque agent (2026-10-16).
+}
+
+// RGI_01916 (DEC_01214, Antoine a PCP049-1118-ag, choix A) : « Voir comme », pour l'administrateur seul. Son pastille ouvre
+// la liste des utilisateurs du client ; regarde, le portail montre ce que cet utilisateur voit, en lecture seule, sous un
+// bandeau qui le dit et ramene a soi. L'API decide de tout : la page ne fait que poser ou retirer le regard.
+function poserComme() {
+  const av = $("avatar");
+  if (moi.voir_comme && av && !av.dataset.comme) {
+    av.dataset.comme = "1";
+    av.setAttribute("role", "button");
+    av.tabIndex = 0;
+    av.classList.add("avatar-b");
+    av.title = "Voir le portail comme un utilisateur";
+    av.setAttribute("aria-label", "Voir le portail comme un utilisateur");
+    av.addEventListener("click", ouvrirComme);
+    av.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ouvrirComme(); } });
+  }
+  let b = $("bandeau-comme");
+  if (!moi.comme) { if (b) b.remove(); return; }
+  if (!b) {
+    b = el("div", "comme-b");
+    b.id = "bandeau-comme";
+    b.setAttribute("role", "status");
+    const haut = document.querySelector(".haut");
+    if (haut) haut.after(b);
+  }
+  const retour = bouton("btn btn-s", "Revenir à moi");
+  retour.type = "button";
+  retour.addEventListener("click", () => regarder(""));
+  const qui = moi.comme.nom ? `${moi.comme.nom} (${moi.comme.adresse})` : moi.comme.adresse;
+  b.replaceChildren(el("span", null, `Vous voyez le portail comme ${qui}, en lecture seule.`), retour);
+}
+
+async function regarder(adresse) {
+  const r = await appeler("POST", "/api/voir-comme", { adresse });
+  if (r.statut !== 200) return false;
+  viderCache();
+  location.reload();
+  return true;
+}
+
+function ouvrirComme() {
+  if (document.querySelector(".comme-voile")) return;
+  const voile = el("div", "doc-voile comme-voile");
+  voile.setAttribute("role", "dialog");
+  voile.setAttribute("aria-modal", "true");
+  voile.setAttribute("aria-labelledby", "comme-titre");
+  const fen = el("div", "doc-fen comme-fen");
+  const x = bouton("doc-x", "×");
+  x.setAttribute("aria-label", "Fermer");
+  const titre = el("h2", null, "Voir le portail comme…");
+  titre.id = "comme-titre";
+  const lab = el("label", "cherche comme-q");   // le champ de recherche des listes du portail
+  lab.append(el("span", "sr", "Chercher un utilisateur"));
+  const cherche = el("input");
+  cherche.type = "search";
+  cherche.placeholder = "Chercher un utilisateur…";
+  lab.append(cherche);
+  const liste = el("ul", "comme-l");
+  const message = el("p", "message", "Chargement…");
+  message.setAttribute("aria-live", "polite");
+  fen.append(x, titre, lab, message, liste);
+  voile.append(fen);
+  const fermer = () => { voile.remove(); document.removeEventListener("keydown", echap); $("avatar").focus(); };
+  const echap = (e) => { if (e.key === "Escape") fermer(); };
+  x.addEventListener("click", fermer);
+  voile.addEventListener("click", (e) => { if (e.target === voile) fermer(); });
+  document.addEventListener("keydown", echap);
+  document.body.append(voile);
+  cherche.focus();
+  appeler("GET", "/api/utilisateurs").then(({ statut, donnees }) => {
+    if (statut !== 200 || !donnees || !Array.isArray(donnees.utilisateurs)) {
+      message.className = "message erreur";
+      message.textContent = "La liste des utilisateurs n'a pas pu être lue. Réessayez dans un instant.";
+      return;
+    }
+    message.textContent = "";
+    message.hidden = true;
+    const lignes = donnees.utilisateurs.map((u) => {
+      const li = el("li");
+      const b = bouton("comme-u", "");
+      b.type = "button";
+      b.append(el("span", "comme-n", u.nom || u.adresse), el("span", "comme-a", u.adresse));
+      if (u.adresse === donnees.comme) b.setAttribute("aria-current", "true");
+      b.addEventListener("click", async () => {
+        if (!(await regarder(u.adresse))) {
+          message.hidden = false;
+          message.className = "message erreur";
+          message.textContent = "Impossible de voir le portail comme cet utilisateur.";
+        }
+      });
+      li.append(b);
+      liste.append(li);
+      return [li, `${u.nom} ${u.adresse}`.toLowerCase()];
+    });
+    cherche.addEventListener("input", () => {
+      const q = cherche.value.trim().toLowerCase();
+      for (const [li, texte] of lignes) li.hidden = Boolean(q) && !texte.includes(q);
+    });
+  });
 }
 
 function ongletsDuRail(m) {

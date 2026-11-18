@@ -703,3 +703,17 @@ a.ac-j:hover { border-color: var(--marque); }
 .cf .cf-lg { display: inline-flex; align-items: center; gap: .3rem; }
 .cf .cf-tr { display: inline-block; width: 18px; border-top: 2px solid var(--discret); }
 .cf .cf-tr.ctl { border-top-style: dotted; }
+
+/* RGI_01916 : « Voir comme », pour l'administrateur : sa pastille ouvre la liste ; un bandeau dit qui il regarde */
+.avatar-b { cursor: pointer; }
+.avatar-b:hover { box-shadow: 0 0 0 3px var(--trait); }
+.avatar-b:focus-visible { outline: 3px solid var(--surface); outline-offset: 2px; }
+.comme-b { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s2); padding: var(--s1) var(--s3); background-color: var(--ambre-f); color: var(--encre); border-bottom: 1.5px solid var(--bord); font-size: var(--t-petit); }
+.comme-fen { width: 480px; max-height: calc(100vh - 2 * var(--s3)); overflow-y: auto; }
+.comme-q { display: block; margin-bottom: var(--s2); }
+.comme-q input { width: 100%; }
+.comme-l { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s0); }
+.comme-u { display: grid; width: 100%; text-align: left; padding: var(--s1) var(--s2); font: inherit; background-color: transparent; border: 0; border-radius: var(--r-bouton); cursor: pointer; color: var(--encre); }
+.comme-u:hover, .comme-u[aria-current="true"] { background-color: var(--survol); }
+.comme-n { font-weight: 500; }
+.comme-a { color: var(--discret); font-size: var(--t-petit); }
