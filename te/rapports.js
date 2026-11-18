@@ -157,6 +157,9 @@ function ligneRapport(r, avis, auto) {
     // les boutons d'une ligne restent ensemble, meme quand le nom passe a la ligne
     const outilsL = el("span", "dm-g");
     outilsL.append(boutonDemande({ id: r.automatisation, nom: r.sujet, rapport: String(r.sujet) }, "dm-b"));
+    // RGI_01887 : recalculer a une date d'arrete, a cote de la demande, pour un rapport que l'index marque
+    if (r.arrete_au_choix) outilsL.append(boutonArrete(r, String(r.sujet), "/api/rapports/" + encodeURIComponent(r.id) + "/rafraichir",
+                                                       date, avis, relireBientot));
     // rafraichir ce seul rapport (Antoine, 2026-11-02, DEC_00379 de PCP001 : « un bouton par ligne, quand on clique
     // sur un bouton ca raffraichit uniquement ce rapport ») ; absent si le portail ne sait pas le demander
     // la fleche, dans sa colonne a gauche du nom (Antoine, 2026-11-11, DEC_00835, choix 1A)

@@ -712,7 +712,9 @@ function montrerRafraichissement(cible, nom, date, avis, relire) {
   const textes = { en_file: "Rafraîchissement demandé…", en_cours: "Rafraîchissement en cours…",
                    refuse: "Non rafraîchi", echec: "Rafraîchissement en échec" };
   if (!textes[e]) return;
-  const p = el("span", "rf-e" + (EN_COURS_RAF.includes(e) ? "" : " rf-k"), textes[e]);
+  // RGI_01887 : un recalcul a une date d'arrete choisie dit sa date
+  const au = cible.rafraichir.arrete ? " (au " + dateLongue(cible.rafraichir.arrete) + ")" : "";
+  const p = el("span", "rf-e" + (EN_COURS_RAF.includes(e) ? "" : " rf-k"), textes[e] + au);
   // le motif d'un refus ou d'un echec, tel que le lanceur l'ecrit : a la demande, comme le resume
   if (cible.rafraichir.motif && !EN_COURS_RAF.includes(e)) {
     const v = bouton("lien-r rf-v", "voir pourquoi");
@@ -748,6 +750,117 @@ function boutonRafraichir(cible, nom, chemin, date, avis, relire, titre) {
     avis.textContent = `« ${nom} » sera rafraîchi dans la minute ; la ligne se met à jour seule.`;
   });
   return b;
+}
+
+// ------------------------------------------------------------------ recalculer a une date d'arrete
+// RGI_01887 (Antoine, 2026-11-18, PCP074-1118-b : « date au choix au portail, second classeur ») : sur la ligne d'un
+// rapport que l'index marque, une date d'arrete ; le classeur du matin ne change pas, un second classeur au nom
+// constant est recalcule a cette date. La fenetre reprend celle d'une demande (memes classes, meme fermeture).
+
+const MOIS_LONGS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre",
+                    "novembre", "décembre"];
+
+function dateLongue(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ""));
+  if (!m) return String(iso || "");
+  const j = Number(m[3]);
+  return (j === 1 ? "1er" : j) + " " + MOIS_LONGS[Number(m[2]) - 1] + " " + m[1];
+}
+
+function aujourdhuiParis() {
+  // la date du jour a Paris, au format du champ (AAAA-MM-JJ) ; l'API refuse de toute facon une date future
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+}
+
+function boutonArrete(cible, nom, chemin, date, avis, relire) {
+  const b = bouton("dm-b rf-b");
+  b.prepend(ico("calendrier", 15));
+  b.title = "Recalculer à une date";
+  b.setAttribute("aria-label", "Recalculer « " + nom + " » à une date");
+  b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (EN_COURS_RAF.includes(cible.rafraichir && cible.rafraichir.etat)) {
+      avis.textContent = `« ${nom} » est déjà en cours de rafraîchissement.`;
+      return;
+    }
+    ouvrirArrete(cible, nom, chemin, date, avis, relire, b);
+  });
+  return b;
+}
+
+function ouvrirArrete(cible, nom, chemin, date, avis, relire, depuis) {
+  fermerDemande();
+  const voile = el("div", "doc-voile");
+  voile.setAttribute("role", "dialog");
+  voile.setAttribute("aria-modal", "true");
+  voile.setAttribute("aria-labelledby", "ar-titre");
+  const fen = el("form", "doc-fen dm");
+  fen.noValidate = true;
+  const x = bouton("doc-x", "×");
+  x.setAttribute("aria-label", "Fermer");
+  x.addEventListener("click", fermerDemande);
+  const titre = el("h2", null, "Recalculer à une date");
+  titre.id = "ar-titre";
+  const sur = el("p", "dm-sur", `Rapport « ${nom} »`);
+  const explication = el("p", "dm-sur", "Le rapport du matin ne change pas. Un second classeur, « " + nom
+    + " à date choisie », est recalculé à la date d'arrêté que vous choisissez ; il remplace celui demandé plus tôt dans la journée.");
+  const champ = el("input", "champ");
+  champ.type = "date";
+  champ.id = "ar-date";
+  champ.min = "2020-01-01";
+  champ.max = aujourdhuiParis();
+  champ.required = true;
+  const lab = el("label", "dm-lab", "Date d'arrêté");
+  lab.htmlFor = "ar-date";
+  const pied = el("div", "dm-pied");
+  const message = el("p", "message");
+  message.setAttribute("aria-live", "polite");
+  const envoyer = bouton("btn", "Recalculer");
+  envoyer.type = "submit";
+  pied.append(message, envoyer);
+  fen.append(x, titre, sur, explication, lab, champ, pied);
+  fen.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const jour = champ.value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(jour)) {
+      message.className = "message erreur";
+      message.textContent = "Choisissez une date d'arrêté.";
+      champ.focus();
+      return;
+    }
+    if (jour > champ.max || jour < champ.min) {
+      message.className = "message erreur";
+      message.textContent = "Choisissez une date entre le 1er janvier 2020 et aujourd'hui.";
+      champ.focus();
+      return;
+    }
+    envoyer.disabled = true;
+    message.className = "message";
+    message.textContent = "Envoi…";
+    const r = await appeler("POST", chemin, { arrete: jour });
+    if (r.statut === 401) return sessionPerdue();
+    if (r.statut !== 200 || !r.donnees) {
+      envoyer.disabled = false;
+      message.className = "message erreur";
+      message.textContent = (r.donnees && r.donnees.erreur) ? `Recalcul impossible : ${r.donnees.erreur}.`
+        : "Recalcul impossible pour l'instant. Réessayez dans quelques minutes.";
+      return;
+    }
+    cible.rafraichir = r.donnees;
+    for (const s of date.querySelectorAll(".rf-e")) s.remove();
+    montrerRafraichissement(cible, nom, date, avis, relire);
+    fen.replaceChildren(x, titre, sur, el("p", "dm-ok", `Le recalcul au ${dateLongue(jour)} est demandé. `
+      + `Le classeur « ${nom} à date choisie » apparaît dans la liste dans quelques minutes.`));
+    x.focus();
+  });
+  voile.append(fen);
+  voile.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!fen.contains(e.target)) fermerDemande();
+  });
+  document.body.append(voile);
+  fenetreDemande = { voile, depuis };
+  champ.focus();
 }
 
 const NATURES_DEMANDE = [["demande", "Une demande"], ["retour", "Un retour"], ["correction", "Une correction"]];
