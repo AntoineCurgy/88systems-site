@@ -581,6 +581,8 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 .rt-dl dd { margin: 0; }
 .rt-h { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s1); font-size: var(--t-corps); }
 .rt-h .mono { color: var(--discret); margin-right: var(--s1); }
+.rt-rep { margin: var(--s3) 0 0; }   /* RGI_01915 : « Répondre » sous le fil */
+.dm-sujet { margin: 0 0 var(--s2); color: var(--discret); font-size: var(--t-petit); }
 .rt-sur { display: grid; gap: var(--s0); margin-bottom: var(--s2); font-size: var(--t-meta); font-weight: 500; color: var(--discret); }
 .rt-sur select { font: inherit; font-size: var(--t-corps); font-weight: 400; height: var(--h-controle); box-sizing: border-box; padding: 0 var(--s1); border: 1px solid var(--bord-champ); border-radius: var(--r-bouton); background-color: var(--surface); color: var(--encre); }
 /* La fenetre d'un email de l'onglet « Emails » (Antoine, 2026-11-11) : la moitie de l'ecran, les champs en tete comme le
