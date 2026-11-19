@@ -354,6 +354,11 @@ function poserComme() {
     av.setAttribute("aria-label", "Voir le portail comme un utilisateur");
     av.addEventListener("click", ouvrirComme);
     av.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ouvrirComme(); } });
+    // Antoine, le 2026-11-19 (« je ne vois pas le "prendre le role de" en haut a droite ») : un bouton qui se lit, a
+    // cote de la pastille, ouvre la meme liste
+    const o = bouton("comme-o", "Voir comme…");
+    o.addEventListener("click", ouvrirComme);
+    av.before(o);
   }
   let b = $("bandeau-comme");
   if (!moi.comme) { if (b) b.remove(); return; }

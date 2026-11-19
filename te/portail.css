@@ -498,7 +498,7 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 @media (max-width: 40rem) {
   input, select, textarea { font-size: var(--champ-tel); }   /* 16 px dans tout champ sur telephone (DEC_00850 de PCP056) */
   .b-in { gap: var(--s1); padding: 0 var(--s3); }
-  .b-op, .b-barre, .b-m { display: none; }
+  .b-op, .b-barre, .b-m, .comme-o { display: none; }   /* sur telephone, la pastille seule ouvre « Voir comme » */
   .aide-dl { grid-template-columns: 1fr; }
   .bas-in { padding: var(--s3); }
 }
@@ -707,6 +707,9 @@ a.ac-j:hover { border-color: var(--marque); }
 
 /* RGI_01916 : « Voir comme », pour l'administrateur : sa pastille ouvre la liste ; un bandeau dit qui il regarde */
 .avatar-b { cursor: pointer; }
+.comme-o { font: inherit; font-size: var(--t-meta); color: var(--surface); background-color: transparent; border: 1px solid var(--sur-marque); border-radius: var(--r-bouton); padding: var(--s1) var(--s2); cursor: pointer; white-space: nowrap; }
+.comme-o:hover { background-color: var(--sur-marque); }
+.comme-o:focus-visible { outline: 3px solid var(--surface); outline-offset: 2px; }
 .avatar-b:hover { box-shadow: 0 0 0 3px var(--trait); }
 .avatar-b:focus-visible { outline: 3px solid var(--surface); outline-offset: 2px; }
 .comme-b { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s2); padding: var(--s1) var(--s3); background-color: var(--ambre-f); color: var(--encre); border-bottom: 1.5px solid var(--bord); font-size: var(--t-petit); }
