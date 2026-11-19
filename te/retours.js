@@ -100,7 +100,17 @@ function vueRetours([rets, autos]) {
     l.setAttribute("aria-label", `${r.objet}, ${(ETATS_RETOUR[r.etat] || ETATS_RETOUR.recu)[0]} : voir le détail`);
     const e = el("td");
     e.append(tagRetour(r.etat));
-    l.append(el("td", "mono", numeroTicket(r.id)), el("td", "mono gd-date", jourCourtRetour(r.date)), e, el("td", null, MOT_TYPE[r.type] || "À qualifier"),
+    // DEC_01223 (Antoine, le 2026-11-19 : « il clique sur le numéro du ticket ») : le numero se voit cliquable, et ouvre
+    // la fenetre du ticket, son historique et « Repondre », comme la ligne
+    const num = el("td", "mono");
+    if (numeroTicket(r.id)) {
+      const lien = bouton("lien rt-num", numeroTicket(r.id));
+      lien.type = "button";
+      lien.tabIndex = -1;   // la ligne porte deja le clavier
+      lien.setAttribute("aria-label", `Ouvrir le ticket ${numeroTicket(r.id)}`);
+      num.append(lien);
+    }
+    l.append(num, el("td", "mono gd-date", jourCourtRetour(r.date)), e, el("td", null, MOT_TYPE[r.type] || "À qualifier"),
              el("td", null, r.nom), el("td", "rt-o", r.objet), el("td", "discret", r.de || ""));
     // le clic ne remonte pas au document, qui fermerait aussitot le panneau ouvert (commun.js)
     l.addEventListener("click", (ev) => { ev.stopPropagation(); ouvrirDetail(r, l); });

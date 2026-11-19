@@ -572,6 +572,7 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
 .rt-outils { width: 100%; }
 .rt-sp { flex: 1; }
 .rt-l { cursor: pointer; }
+.rt-num { font-size: inherit; }
 .rt-l:hover, .rt-l:focus-visible { background-color: var(--survol); }
 .rt-l:focus-visible { outline: 2px solid var(--marque); outline-offset: -2px; }
 
