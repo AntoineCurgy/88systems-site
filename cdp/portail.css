@@ -358,6 +358,7 @@ div.lb.ouverte .la-nom strong { font-weight: 500; }
 .lb-o:focus-visible { outline: none; }
 div.lb:has(.lb-o:focus-visible) { outline: 2px solid var(--marque); outline-offset: -2px; }
 .la-o { position: relative; z-index: 1; display: flex; align-items: center; gap: var(--s00); }   /* Documentation et la demande, sur la ligne */
+.rf-vide { visibility: hidden; }   /* la place du calendrier sur une ligne sans date : les carres restent alignes (RGI_01936) */
 .la .doc-b, .gd .doc-b { position: relative; z-index: 1; margin: 0; padding: var(--s0) var(--s2); font-size: var(--t-meta); }   /* le meme bouton dans Rapports (2026-11-04) */
 .la-id { color: var(--discret); font-size: var(--t-meta); }
 .la-nom { display: flex; flex-direction: column; gap: var(--s00); line-height: 1.3; }
@@ -490,7 +491,7 @@ input[type="checkbox"], input[type="radio"] { font: inherit; }   /* jamais la po
   .contenu { padding: var(--s3) var(--s3) var(--s5); }
   .la { grid-template-columns: 1rem 2rem minmax(0, 1fr); }
   .la:not(.ag-la) { grid-template-columns: 1rem 3rem 1.8rem minmax(0, 1fr) auto; column-gap: var(--s2); }
-  .la-h, .la-d, .ag-la .o-l { display: none; }
+  .la-h, .la-d, .ag-la .o-l, .rf-vide { display: none; }
   .aide { grid-template-columns: 1fr; }
   .aide-som { position: static; flex-direction: row; flex-wrap: wrap; }
   .ke-d { border-left: 0; padding-left: 0; }
