@@ -1,0 +1,12 @@
+/* Le bandeau de consentement du site 88systems.io (PCP077) : seulement les jetons de la charte */
+#consentement { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: var(--s3); }
+.consentement-boite { max-width: 68rem; margin: 0 auto; background-color: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: var(--s4); }
+.consentement-titre { margin: 0 0 var(--s1); font-weight: 600; color: var(--encre); }
+.consentement-boite p { color: var(--encre2); }
+.consentement-details { margin-top: var(--s3); display: grid; gap: var(--s2); }
+.consentement-case { display: flex; gap: var(--s2); align-items: flex-start; color: var(--encre2); max-width: 68ch; }
+.consentement-case strong { color: var(--encre); }
+.consentement-actions { margin-top: var(--s3); display: flex; flex-wrap: wrap; gap: var(--s2); }
+.consentement-bouton { display: inline-flex; align-items: center; height: 2.6rem; padding: 0 var(--s4); border: 0; border-radius: 10px; background-color: var(--marque); color: #ffffff; font: inherit; font-weight: 600; cursor: pointer; }
+.lien-consentement { color: inherit; }
+.consentement-details[hidden] { display: none; }
