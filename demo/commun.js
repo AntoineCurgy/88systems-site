@@ -815,6 +815,9 @@ const EN_COURS_RAF = ["en_file", "en_cours"];
 // son motif tel que le lanceur l'ecrit ; fait, rien (la date dit le nouveau passage).
 function montrerRafraichissement(cible, nom, date, avis, relire) {
   const e = cible.rafraichir && cible.rafraichir.etat;
+  // RGI_01947, 4B et 5A d'Antoine (PCP049-1122-e) : un recalcul a une date qui part par email ne se montre pas sur la
+  // ligne, pour personne ; son classeur, ou son echec, arrive par email a celui qui l'a demande
+  if (recalculParEmail(cible)) return;
   const textes = { en_file: "Rafraîchissement demandé…", en_cours: "Rafraîchissement en cours…",
                    refuse: "Non rafraîchi", echec: "Rafraîchissement en échec" };
   if (!textes[e]) return;
@@ -837,7 +840,7 @@ function boutonRafraichir(cible, nom, chemin, date, avis, relire, titre) {
   b.prepend(ico("rafraichir", 15));
   b.title = titre;
   b.setAttribute("aria-label", "Rafraîchir " + nom);
-  const occupe = () => EN_COURS_RAF.includes(cible.rafraichir && cible.rafraichir.etat);
+  const occupe = () => EN_COURS_RAF.includes(cible.rafraichir && cible.rafraichir.etat) && !recalculParEmail(cible);
   if (occupe()) b.setAttribute("aria-disabled", "true");
   b.addEventListener("click", async (e) => {
     e.stopPropagation();
@@ -853,7 +856,9 @@ function boutonRafraichir(cible, nom, chemin, date, avis, relire, titre) {
     cible.rafraichir = donnees;
     for (const s of date.querySelectorAll(".rf-e")) s.remove();
     montrerRafraichissement(cible, nom, date, avis, relire);
-    avis.textContent = `« ${nom} » sera rafraîchi dans la minute ; la ligne se met à jour seule.`;
+    // la demande n'est pas reposee tant qu'un recalcul a une date tourne (l'API rend son etat)
+    avis.textContent = recalculParEmail(cible) ? `« ${nom} » est en cours de calcul à une autre date ; réessayez dans quelques minutes.`
+      : `« ${nom} » sera rafraîchi dans la minute ; la ligne se met à jour seule.`;
   });
   return b;
 }
@@ -878,20 +883,113 @@ function aujourdhuiParis() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
 }
 
+// RGI_01947 : l'envoi par email est allume pour ce client (la ligne d'un rapport, ou le rapport d'une automatisation)
+function recalculParEmail(cible) {
+  return !!(cible && (cible.arrete_par_email || (cible.arrete_au_choix && cible.arrete_au_choix.par_email)));
+}
+
 function boutonArrete(cible, nom, chemin, date, avis, relire) {
   const b = bouton("dm-b rf-b");
   b.prepend(ico("calendrier", 15));
-  b.title = "Recalculer à une date";
-  b.setAttribute("aria-label", "Recalculer « " + nom + " » à une date");
+  const email = recalculParEmail(cible);
+  // 1A d'Antoine (PCP049-1122-e) : l'icone ne change pas, son infobulle dit l'email
+  b.title = email ? "Recevoir ce rapport à une autre date, par email" : "Recalculer à une date";
+  b.setAttribute("aria-label", (email ? "Recevoir « " + nom + " » à une autre date" : "Recalculer « " + nom + " » à une date"));
   b.addEventListener("click", (e) => {
     e.stopPropagation();
     if (EN_COURS_RAF.includes(cible.rafraichir && cible.rafraichir.etat)) {
-      avis.textContent = `« ${nom} » est déjà en cours de rafraîchissement.`;
+      avis.textContent = email ? `« ${nom} » est déjà en cours de calcul ; réessayez dans quelques minutes.`
+        : `« ${nom} » est déjà en cours de rafraîchissement.`;
       return;
     }
-    ouvrirArrete(cible, nom, chemin, date, avis, relire, b);
+    (email ? ouvrirArreteEmail : ouvrirArrete)(cible, nom, chemin, date, avis, relire, b);
   });
   return b;
+}
+
+// 2A et 3B d'Antoine (PCP049-1122-e) : la fenetre courte (le nom du rapport, la date, le delai, « Recevoir par
+// email ») ; apres le clic, elle confirme d'une coche verte et d'une phrase, et se ferme par « Fermer ».
+// mesures de PCP001 du 2026-11-22 : 1 min 30 pour le rapprochement bancaire ; pour le cadrage de la dette, 13 min, puis
+// 4 min 30 a 17h23 apres la correction des reprises de Finance Active (une mesure ; la charge du matin non mesuree)
+const DELAI_RECALCUL = "Délai de traitement : entre 1 et 10 minutes.";
+
+function ouvrirArreteEmail(cible, nom, chemin, date, avis, relire, depuis) {
+  fermerDemande();
+  const voile = el("div", "doc-voile");
+  voile.setAttribute("role", "dialog");
+  voile.setAttribute("aria-modal", "true");
+  voile.setAttribute("aria-labelledby", "ar-titre");
+  const fen = el("form", "doc-fen dm");
+  fen.noValidate = true;
+  const x = bouton("doc-x", "×");
+  x.setAttribute("aria-label", "Fermer");
+  x.addEventListener("click", fermerDemande);
+  const titre = el("h2", null, "Recevoir à une autre date");
+  titre.id = "ar-titre";
+  const sur = el("p", "dm-sur ar-nom", nom);
+  const champ = el("input", "champ");
+  champ.type = "date";
+  champ.id = "ar-date";
+  champ.min = "2020-01-01";
+  champ.max = aujourdhuiParis();
+  champ.required = true;
+  const lab = el("label", "dm-lab", "Date d'arrêté");
+  lab.htmlFor = "ar-date";
+  const delai = el("p", "ar-delai");
+  delai.append(ico("envois", 14), DELAI_RECALCUL);
+  const pied = el("div", "dm-pied");
+  const message = el("p", "message");
+  message.setAttribute("aria-live", "polite");
+  const envoyer = bouton("btn", "Recevoir par email");
+  envoyer.type = "submit";
+  pied.append(message, envoyer);
+  fen.append(x, titre, sur, lab, champ, delai, pied);
+  fen.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const jour = champ.value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(jour)) {
+      message.className = "message erreur";
+      message.textContent = "Choisissez une date d'arrêté.";
+      champ.focus();
+      return;
+    }
+    if (jour > champ.max || jour < champ.min) {
+      message.className = "message erreur";
+      message.textContent = "Choisissez une date entre le 1er janvier 2020 et aujourd'hui.";
+      champ.focus();
+      return;
+    }
+    envoyer.disabled = true;
+    message.className = "message";
+    message.textContent = "Envoi…";
+    const r = await appeler("POST", chemin, { arrete: jour });
+    if (r.statut === 401) return sessionPerdue();
+    if (r.statut !== 200 || !r.donnees) {
+      envoyer.disabled = false;
+      message.className = "message erreur";
+      message.textContent = (r.donnees && r.donnees.erreur) ? `Demande impossible : ${r.donnees.erreur}.`
+        : "Demande impossible pour l'instant. Réessayez dans quelques minutes.";
+      return;
+    }
+    cible.rafraichir = r.donnees;
+    const fait = el("p", "dm-ok ar-fait");
+    fait.append(ico("succes", 18), `Le classeur au ${dateLongue(jour)} vous arrive par email dans quelques minutes.`);
+    const fin = el("div", "dm-pied");
+    const fermer = bouton("btn btn-s", "Fermer");
+    fermer.type = "button";
+    fermer.addEventListener("click", fermerDemande);
+    fin.append(el("p", "message"), fermer);   // la place du message, pour que « Fermer » reste a droite
+    fen.replaceChildren(x, titre, sur, fait, fin);
+    fermer.focus();
+  });
+  voile.append(fen);
+  voile.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!fen.contains(e.target)) fermerDemande();
+  });
+  document.body.append(voile);
+  fenetreDemande = { voile, depuis };
+  champ.focus();
 }
 
 function ouvrirArrete(cible, nom, chemin, date, avis, relire, depuis) {
