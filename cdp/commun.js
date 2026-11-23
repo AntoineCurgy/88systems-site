@@ -329,8 +329,8 @@ function poserMoi() {
   avatar.setAttribute("aria-label", "Connecté : " + (moi.nom || adresse));
   if (!$("maj").textContent) majBandeau(moi.maj);
   poserComme();
-  // l'onglet « Retours » n'existe que si le service lit la liste des retours (DEC_00506) ; il remplace alors les bulles ;
-  // l'onglet « Emails » n'existe que pour l'administrateur du portail (DEC_00598, DEC_00606). Les deux se montrent par
+  // l'onglet « Tickets » (ex « Retours », RGI_02021) n'existe que si le service lit la liste des retours (DEC_00506) ; il remplace alors les bulles ;
+  // les onglets « Emails » et « Journal » n'existent que pour l'administrateur du portail (RGI_02020). Ils se montrent par
   // une classe de <html>, posee des le <head> depuis le cache (le script en ligne de chaque page) : le rail ne
   // clignote plus a chaque page, le temps que ce script tourne (audit du 2026-11-11, « ca flash un peu bizarrement »).
   ongletsDuRail(moi);
@@ -449,6 +449,7 @@ function ongletsDuRail(m) {
   const c = document.documentElement.classList;
   c.toggle("sans-retours", !m.onglet_retours);
   c.toggle("sans-envois", !m.onglet_envois);
+  c.toggle("sans-journaux", !m.onglet_journaux);   // RGI_02020 : le Journal, pour l'administrateur seul
 }
 
 // Un onglet vide le dit, et dit ce qu'il pourrait porter (PCP049-1031-c, 2026-10-31).

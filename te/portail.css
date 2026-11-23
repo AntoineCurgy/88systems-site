@@ -90,7 +90,8 @@ a { color: var(--marque); }
 [tabindex="-1"]:focus { outline: none; }
 [hidden] { display: none !important; }
 /* les onglets Retours et Emails, selon la session : la classe est posee des le <head> depuis le cache (commun.js) */
-html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"] { display: none !important; }
+html.sans-retours a[data-page="retours"], html.sans-envois a[data-page="envois"],
+html.sans-journaux a[data-page="journaux"] { display: none !important; }
 .mono { font-family: var(--mono); }
 .discret { color: var(--discret); }
 .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

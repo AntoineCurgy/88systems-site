@@ -216,8 +216,8 @@ function ouvrirEnvoi(e, depuis) {
 
 demarrer(async () => {
   if (!moi.onglet_envois) {
-    poser([el("h1", null, "Emails"), vueVide("Aucun email",
-      "Aucun email n'est encore suivi pour ce portail.")], true);
+    poser([el("h1", null, "Emails"), vueVide("Emails réservés",
+      "Les emails envoyés par le portail sont réservés à son administrateur.")], true);
     return;
   }
   await suivre([SOURCE_ENVOIS], (d, premier) => poser(vueEnvois(d[0]), premier));

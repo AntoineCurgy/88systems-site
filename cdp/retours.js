@@ -22,7 +22,7 @@ const MOT_TYPE = { anomalie: "Anomalie", amelioration: "Amélioration", besoin: 
 const EXEMPLES = { anomalie: "Dans le rapport de ce matin, la ligne… affiche… alors que…",
                    amelioration: "J'aimerais ajouter dans le rapport une colonne…",
                    demande: "J'aimerais recevoir chaque semaine un contrôle sur…",
-                   autre: "Votre retour, en quelques lignes…" };
+                   autre: "Votre demande, en quelques lignes…" };
 // la barre : Tous, Ouverts (recu et en cours), Traites, Sans suite
 const GROUPES = [["", "Tous", () => true], ["ouverts", "Ouverts", (r) => r.etat === "recu" || r.etat === "en_cours"],
                  ["corriges", "Traités", (r) => r.etat === "corrige"], ["refermes", "Sans suite", (r) => r.etat === "referme"]];
@@ -59,20 +59,20 @@ function vueRetours([rets, autos]) {
     barre.append(b);
   }
   const lab = el("label", "cherche");
-  lab.append(el("span", "sr", "Rechercher un retour"));
+  lab.append(el("span", "sr", "Rechercher un ticket"));
   const champ = el("input");
   champ.type = "search";
-  champ.placeholder = "Rechercher un retour…";
+  champ.placeholder = "Rechercher un ticket…";
   champ.value = filtres.q;
   champ.addEventListener("input", () => { filtres.q = champ.value.trim().toLowerCase(); filtrer(); });
   lab.append(champ);
-  const nouveau = bouton("btn rt-n", "＋ Nouveau retour");
+  const nouveau = bouton("btn rt-n", "＋ Nouveau ticket");
   nouveau.addEventListener("click", () => ouvrirNouveau(autos.automatisations, nouveau));
   const outils = el("div", "outils ligne rt-outils");
   outils.append(barre, el("span", "rt-sp"), lab, nouveau);   // la recherche a droite (DEC_00520, option 5C)
 
   if (!liste.length) {
-    return [el("h1", null, "Retours"), outils, vueVide("Aucun retour pour l'instant",
+    return [el("h1", null, "Tickets"), outils, vueVide("Aucun ticket pour l'instant",
       "Signalez une anomalie, proposez une amélioration ou faites une demande : elle arrive à l'équipe qui suit l'automatisation, et son état s'affiche ici.")];
   }
 
@@ -121,7 +121,7 @@ function vueRetours([rets, autos]) {
   table.append(cg, thead, tb);
   colonnesAuContenu(table, 6, true);   // l'objet du retour prend la place qui reste (DEC_00853)
   carte.append(table);
-  const vide = el("p", "vide", "Aucun retour ne correspond.");
+  const vide = el("p", "vide", "Aucun ticket ne correspond.");
   vide.hidden = true;
 
   function filtrer() {
@@ -139,7 +139,7 @@ function vueRetours([rets, autos]) {
   }
   filtrer();
   const tete = el("div", "tete-fixe");
-  tete.append(el("h1", null, "Retours"), outils, avis);
+  tete.append(el("h1", null, "Tickets"), outils, avis);
   return [figerTete(tete), carte, vide];
 }
 
@@ -186,7 +186,7 @@ function ouvrirDetail(r, depuis) {
     dl.append(el("dt", null, mot), el("dd", null, valeur));
   }
   const demande = el("section", "fi-s");
-  demande.append(el("h3", null, "Le retour"), el("p", null, r.demande || r.objet));
+  demande.append(el("h3", null, "La demande"), el("p", null, r.demande || r.objet));
   const histo = el("section", "fi-s");
   const ol = el("ol", "rt-h");
   for (const [quand, quoi] of filDe(r)) {
@@ -221,7 +221,7 @@ function ouvrirNouveau(autos, depuis, choisi, ticket) {
   const x = bouton("doc-x", "×");
   x.setAttribute("aria-label", "Fermer");
   x.addEventListener("click", fermerDemande);
-  const titre = el("h2", null, ticket ? `Répondre au ticket ${numeroTicket(ticket.id)}` : "Nouveau retour");
+  const titre = el("h2", null, ticket ? `Répondre au ticket ${numeroTicket(ticket.id)}` : "Nouveau ticket");
   titre.id = "dm-titre";
   const labSur = el("label", "rt-sur");
   labSur.append(el("span", null, "Sélectionner le rapport"));
@@ -253,7 +253,7 @@ function ouvrirNouveau(autos, depuis, choisi, ticket) {
   const zone = el("textarea", "dm-t");
   zone.rows = 10;
   zone.maxLength = TEXTE_DEMANDE_MAX;
-  zone.setAttribute("aria-label", "Votre retour");
+  zone.setAttribute("aria-label", "Votre demande");
   // les pieces : un bouton qui ouvre le choix des fichiers, la liste de ce qui partira, chaque piece retirable
   const jointes = [];
   const fichier = el("input");
@@ -342,7 +342,7 @@ function ouvrirNouveau(autos, depuis, choisi, ticket) {
     const texte = zone.value.trim();
     if (!texte) {
       message.className = "message erreur";
-      message.textContent = "Écrivez votre retour avant d'envoyer.";
+      message.textContent = "Écrivez votre demande avant d'envoyer.";
       zone.focus();
       return;
     }
@@ -366,7 +366,7 @@ function ouvrirNouveau(autos, depuis, choisi, ticket) {
     if (r.statut === 200) {
       fen.replaceChildren(x, titre, el("p", "dm-ok", ticket
         ? "Votre réponse est transmise à l'équipe. Elle apparaîtra dans l'historique du ticket à la prochaine mise à jour."
-        : "Votre retour est transmis. Il apparaîtra dans ce tableau, avec son état, à la prochaine mise à jour."));
+        : "Votre ticket est transmis. Il apparaîtra dans ce tableau, avec son état, à la prochaine mise à jour."));
       x.focus();
       return;
     }
@@ -400,7 +400,7 @@ function ouvrirDepuisLien(autos) {
 
 demarrer(async () => {
   if (!moi.onglet_retours) {
-    poser([el("h1", null, "Retours"), vueVide("Les retours arrivent bientôt",
+    poser([el("h1", null, "Tickets"), vueVide("Les tickets arrivent bientôt",
       "Vous pourrez signaler ici une anomalie, proposer une amélioration ou faire une demande, et suivre son état.")], true);
     return;
   }

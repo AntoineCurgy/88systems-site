@@ -182,4 +182,12 @@ function vue(d) {
   return [figerTete(tete), carte];
 }
 
-demarrer(async () => { await suivre([SOURCE_JOURNAUX], (d, premier) => poser(vue(d[0]), premier)); });
+// RGI_02020 (Antoine, depot du 2026-11-23 : « il faut masquer le journal pour tous sauf pour admin ») : l'onglet est a
+// l'administrateur seul ; une autre adresse qui ouvre la page par son lien ne lit rien, l'API le lui refuse aussi.
+demarrer(async () => {
+  if (!moi.onglet_journaux) {
+    poser([el("h1", null, "Journal"), vueVide("Journal réservé", "Le journal des automatisations est réservé à l'administrateur du portail.")], true);
+    return;
+  }
+  await suivre([SOURCE_JOURNAUX], (d, premier) => poser(vue(d[0]), premier));
+});
