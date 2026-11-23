@@ -61,16 +61,17 @@ function caseAuto(a) {
   return li;
 }
 
-// un point d'agent, a la forme des points des automatisations : « IA » et son numero court, le point de son etape
+// un point d'agent, a la forme des points des automatisations : son numero court seul, le point de son etape, en violet
+// (DEC_01462, Antoine a PCP049-1121-b : « sans les lettres IA, les numéros uniquement ») ; un agent arrete en gris
 function caseAgent(a) {
   const st = statutAg(a);
   const li = el("li");
-  const lien = el("a", "case " + st + " ag-case");
+  const lien = el("a", "case " + st + " ag-case" + (a.etape === 4 ? " ia-arrete" : ""));
   lien.href = "agents.html?" + new URLSearchParams({ id: a.id });
   lien.title = `Agent IA · ${a.nom} · ${etapeAg(a)} · banc ${bancAg(a)}`;
   const pt = el("span", "pt");
   pt.setAttribute("aria-hidden", "true");
-  const num = el("span", null, "IA " + a.court);
+  const num = el("span", null, a.court);
   num.setAttribute("aria-hidden", "true");
   lien.append(pt, num, el("span", "sr", `Agent IA ${a.court} · ${a.nom} : ${etapeAg(a)}`));
   li.append(lien);
@@ -179,7 +180,60 @@ function cfDetail(titre, autos, cible) {
   cible.replaceChildren(el("p", "cf-dt", titre), ul);
 }
 
-function cfDessin(g, detail) {
+// ---------------------------------------------------------------- les agents IA sur la carte (DEC_01462, RGI_02018)
+// Le halo lumineux 2B de la fiche v2 (Antoine a PCP049-1123-t) : la place de chaque agent se lit dans sa fiche publiee
+// (champ « place » : {type: "systeme", systeme}, {type: "flux", de, vers} ou {type: "toutes"}) ; un agent sans place, ou
+// dont le systeme n'est pas sur la carte, n'y est pas dessine. Les trois cas sont ceux du choix 1A.
+function iaPlace(a) {
+  const p = a && a.place;
+  if (!p || typeof p !== "object") return null;
+  if (p.type === "systeme" && typeof p.systeme === "string") return { type: "systeme", sys: p.systeme };
+  if (p.type === "flux" && typeof p.de === "string" && typeof p.vers === "string") return { type: "flux", a: p.de, b: p.vers };
+  if (p.type === "toutes") return { type: "toutes" };
+  return null;
+}
+
+function iaTitre(a) { return `Agent IA ${a.court} · ${a.nom} · ${etapeAg(a)}`; }
+
+function iaPilule(g, x, y, texte, titre, arrete) {
+  const w = 8 + texte.length * 6.2, s = sv("g", {}, g);
+  sv("rect", { x: x - w / 2, y: y - 8, width: w, height: 16, rx: 8, class: "ia-pil" + (arrete ? " ar" : "") }, s);
+  sv("text", { x, y: y + 3.4, class: "ia-pil-t" }, s).textContent = texte;
+  sv("title", {}, s).textContent = titre;
+}
+
+// la lueur sous tout, les traits et les pilules au-dessus de tout
+function iaDessin(svg, parNom, centre, agents) {
+  const fond = sv("g", { class: "ia-fond" }), haut = sv("g", { class: "ia-agents" }), parSys = new Map();
+  for (const a of agents) {
+    const p = iaPlace(a);
+    if (!p) continue;
+    if (p.type === "systeme" && parNom.has(p.sys)) {
+      if (!parSys.has(p.sys)) parSys.set(p.sys, []);
+      parSys.get(p.sys).push(a);
+    } else if (p.type === "flux" && parNom.has(p.a) && parNom.has(p.b)) {
+      const A = parNom.get(p.a), B = parNom.get(p.b), ar = a.etape === 4;
+      // le trait violet court a 6 px du flux, a cote du trait ou du pointille du controle, jamais dessus
+      const ux = B.x - A.x, uy = B.y - A.y, l = Math.hypot(ux, uy) || 1;
+      const fil = sv("path", { d: cfChemin(A, B, A === centre || B === centre), class: "ia-fil" + (ar ? " ar" : ""),
+        transform: `translate(${-uy / l * 6} ${ux / l * 6})` }, haut);
+      sv("title", {}, fil).textContent = iaTitre(a);
+      const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+      const m = A === centre || B === centre ? { x: mx, y: my } : { x: mx + (CF_L / 2 - mx) * 0.41, y: my + (CF_H / 2 - my) * 0.41 };
+      iaPilule(haut, m.x + (ar ? 30 : -24), m.y + (ar ? 16 : -12), a.court + (ar ? " · arrêté" : ""), iaTitre(a), ar);
+    }
+  }
+  for (const [s, liste] of parSys) {
+    const n = parNom.get(s), w = cfLargeur(n), h = cfHauteur(n);
+    sv("rect", { x: n.x - w / 2 - 9, y: n.y - h / 2 - 9, width: w + 18, height: h + 18, rx: h / 2 + 9, class: "ia-lueur" }, fond);
+    iaPilule(haut, n.x, n.y + h / 2 + 15, liste.map((a) => a.court).join(" · "), liste.map(iaTitre).join("\n"),
+      liste.every((a) => a.etape === 4));
+  }
+  svg.insertBefore(fond, svg.children[1]);   // apres les definitions, sous les liaisons
+  svg.append(haut);
+}
+
+function cfDessin(g, detail, agents) {
   const centre = cfPlacer(g);
   const svg = sv("svg", { viewBox: `0 0 ${CF_L} ${CF_H}`, role: "img", "aria-label": "Les systèmes et leurs échanges, avec leur statut" });
   const defs = sv("defs", {}, svg);
@@ -227,10 +281,11 @@ function cfDessin(g, detail) {
     a.addEventListener("focus", montrer);
   }
   svg.addEventListener("mouseleave", () => focus(null));
+  if (agents && agents.length) iaDessin(svg, parNom, centre, agents);
   return svg;
 }
 
-function carteDesFlux(autosD) {
+function carteDesFlux(autosD, agents) {
   const g = grapheFlux(autosD);
   const sec = el("section", "carte cf");
   sec.setAttribute("aria-labelledby", "titre-cf");
@@ -248,6 +303,12 @@ function carteDesFlux(autosD) {
     x.append(el("i", "cf-tr" + c), texte);
     leg.append(x);
   }
+  const places = (agents || []).map(iaPlace);
+  if (places.some(Boolean)) {
+    const x = el("span", "cf-lg");
+    x.append(el("i", "ia-lg-i"), "agent IA");
+    leg.append(x);
+  }
   ch.append(h2, leg);
   if (!g.noeuds.length) {
     sec.append(ch, el("p", "cf-sous", "Aucun système n'est encore relié par une automatisation."));
@@ -258,13 +319,24 @@ function carteDesFlux(autosD) {
   const sous = el("p", "cf-sous", `${pluriel(g.noeuds.length, "système", "systèmes")} · ${pluriel(g.liens.length, "liaison", "liaisons")} : ` +
     `${n.ok} fonctionnelle${n.ok > 1 ? "s" : ""}, ${n.panne} interrompue${n.panne > 1 ? "s" : ""}` +
     (n.construction ? `, ${n.construction} en construction` : "") +
-    (g.globaux.length ? ` · et ${pluriel(g.globaux.length, "contrôle", "contrôles")} sur tous les systèmes` : ""));
+    (g.globaux.length ? ` · et ${pluriel(g.globaux.length, "contrôle", "contrôles")} sur tous les systèmes` : "") +
+    iaPhrase(places));
   const detail = el("div", "cf-d");
   detail.append(el("p", "cf-aide", "Survolez ou touchez un système ou une liaison pour voir ses automatisations ; un clic sur un système ouvre ses automatisations."));
   const corps = el("div", "cf-corps");
-  corps.append(cfDessin(g, detail), detail);
+  corps.append(cfDessin(g, detail, agents), detail);
   sec.append(ch, sous, corps);
   return sec;
+}
+
+// les agents places sur la carte, comptes par cas ; un agent sur toutes les automatisations ne se dessine pas, il se
+// compte ici, comme les controles sur tous les systemes (choix 1A)
+function iaPhrase(places) {
+  const k = (t) => places.filter((p) => p && p.type === t).length, n = places.filter(Boolean).length;
+  if (!n) return "";
+  const cas = [[k("systeme"), "dans un système"], [k("flux"), "sur un flux"], [k("toutes"), "sur toutes les automatisations"]]
+    .filter(([c]) => c).map(([c, t]) => `${c} ${t}`);
+  return ` · ${pluriel(n, "agent IA", "agents IA")} : ${cas.join(", ")}`;
 }
 
 function vueAccueil([autosD, rapsD, agD]) {
@@ -293,7 +365,7 @@ function vueAccueil([autosD, rapsD, agD]) {
 
   // la carte des flux remplace la rangee des systemes (DEC_00981) : chaque systeme n'y est qu'une fois, et un clic sur
   // lui ouvre ses automatisations, comme la carte qu'il remplace
-  return [el("h1", null, "Tableau de bord"), deux, etat, carteDesFlux(autosD)];
+  return [el("h1", null, "Tableau de bord"), deux, etat, carteDesFlux(autosD, agents)];
 }
 
 demarrer(() => suivre([SOURCES.autos, SOURCES.rapports, SOURCES.agents], (d, premier) => poser(vueAccueil(d), premier)));

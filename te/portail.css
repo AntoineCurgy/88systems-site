@@ -36,6 +36,14 @@
   --rouge-bord: #e7c3c3;         /* la carte d'un systeme en panne : son contour */
   --rouge-p: #fdf7f7;            /* et son fond, plus pale que celui d'un etat */
   --sur-marque: rgba(255, 255, 255, .32);   /* filet blanc sur le bandeau */
+  /* le violet des agents IA (DEC_01462, Antoine a PCP049-1123-t : le halo lumineux 2B de la fiche v2), violet 9 de la palette
+     Radix : il ne dit qu'une chose, « agent IA » */
+  --ia: #6e56cf;
+  --ia-f: #f4f0fe;                /* son fond tres pale, la lueur d'un systeme */
+  --ia-bord: #d4cafe;
+  --ia-lueur: rgba(110, 86, 207, .35);   /* le rayonnement d'une pastille d'agent */
+  --ia-lueur-forte: rgba(110, 86, 207, .5);
+  --ia-trait: rgba(110, 86, 207, .7);    /* la lueur du trait d'un agent de flux */
   /* sept tailles (DEC_00827 ; 11 px a rejoint 12 px, DEC_00842, 2A) */
   --champ-tel: 16px;   /* le texte d un champ sur telephone : hors des tailles de la charte, le controle des pages porte l exception (NTE de PCP051, 2026-11-11) */
   --t-menu: 11px;   /* le libelle du menu de gauche seul, comme avant la charte (DEC_00853, choix 3A d'Antoine) */
@@ -673,14 +681,18 @@ main table td.rt-o .mono { font-size: var(--t-petit); color: var(--discret); }
   .ag1-r, .ag1-b, .ag1-g, .ag1-corps .la-tete-w { display: none; }
 }
 /* 2A : deux cartes jumelles, meme hauteur, meme anneau */
-.ag-anneau { --s: 0; --r: 0; --e: 0; background-image: conic-gradient(var(--vert) calc(var(--s, 0) * 1%), var(--marque) 0 calc(var(--r, 0) * 1%), var(--trait) 0 calc(var(--e, 0) * 1%), var(--rail-on) 0); }
-.ag-anneau strong { color: var(--marque); }
+/* l'anneau des agents en violet plein (DEC_01462, halo lumineux 2B) : la part des agents publies hors arretes */
+.ag-anneau { --e: 0; background-image: conic-gradient(var(--ia) calc(var(--e, 0) * 1%), var(--ia-f) 0); }
+.ag-anneau strong { color: var(--ia); }
 .ac-deux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
 a.ac-j { color: var(--encre); text-decoration: none; flex-wrap: nowrap; }
 a.ac-j:hover { border-color: var(--marque); }
 .ac-sur { font-size: var(--t-meta); color: var(--marque); font-weight: 500; letter-spacing: .04em; margin-bottom: var(--s00); }
 @media (max-width: 40rem) { .ac-deux { grid-template-columns: 1fr; } }
-.case.ag-case { color: var(--encre2); }
+/* la pastille d'un agent : blanche, qui rayonne en violet, son numero seul (DEC_01462) ; un agent arrete reste gris */
+.case.ag-case { background-color: var(--surface); color: var(--ia); box-shadow: 0 0 0 1px var(--ia-bord), 0 0 10px var(--ia-lueur); }
+.case.ag-case:hover { box-shadow: 0 0 0 1px var(--ia), 0 0 14px var(--ia-lueur-forte); }
+.case.ag-case.ia-arrete { background-color: var(--fond); box-shadow: none; color: var(--discret); }
 
 /* La carte des flux de l'accueil (DEC_00981, RGI_01823 ; Antoine, 2026-11-14, PCP049-1114-a : « je veux exactement cette
    version ») : chaque systeme une fois, chaque liaison une fois, aux couleurs des points ; un trait plein est un flux,
@@ -815,3 +827,15 @@ tr.dr-masque > th, tr.dr-masque > td { color: var(--pale); background-color: var
 .ap-pied { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); margin-top: auto; padding-top: var(--s1); }
 .ap-maj { color: var(--discret); font-size: var(--t-meta); }
 .ap-adr { margin: 0; font: 400 var(--t-meta)/1.3 var(--mono); color: var(--pale); overflow-wrap: anywhere; }
+
+/* Les agents IA sur la carte des flux (DEC_01462, halo lumineux 2B de la fiche v2) : un systeme qui porte un agent baigne
+   dans une lueur violette, ses numeros en pilule dessous ; un agent de flux est un trait violet continu et lumineux, a
+   cote du flux, son numero en pilule ; un agent arrete en gris. La place de chaque agent vient de sa fiche publiee. */
+.cf .ia-lueur { fill: var(--ia-f); stroke: none; filter: blur(5px); opacity: .95; }
+.cf .ia-fil { fill: none; stroke: var(--ia); stroke-width: 1.6; stroke-dasharray: none; opacity: .9; filter: drop-shadow(0 0 3px var(--ia-trait)); }
+.cf .ia-fil.ar { opacity: .3; filter: none; }
+.cf .ia-pil { fill: var(--ia); }
+.cf .ia-pil.ar { fill: var(--pale); }
+.cf .ia-pil-t { fill: var(--surface); font: 600 9.5px var(--mono); text-anchor: middle; pointer-events: none; }
+.cf svg.focus .ia-agents, .cf svg.focus .ia-fond { opacity: .35; }
+.cf .ia-lg-i { display: inline-block; width: .8rem; height: .8rem; border-radius: var(--r-rond); background-color: var(--ia-f); box-shadow: 0 0 6px var(--ia); }

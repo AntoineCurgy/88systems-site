@@ -33,6 +33,14 @@
   --rouge-bord: #e7c3c3;         /* la carte d'un systeme en panne : son contour */
   --rouge-p: #fdf7f7;            /* et son fond, plus pale que celui d'un etat */
   --sur-marque: rgba(255, 255, 255, .32);   /* filet blanc sur le bandeau */
+  /* le violet des agents IA (DEC_01462, Antoine a PCP049-1123-t : le halo lumineux 2B de la fiche v2), violet 9 de la palette
+     Radix : il ne dit qu'une chose, « agent IA » */
+  --ia: #6e56cf;
+  --ia-f: #f4f0fe;                /* son fond tres pale, la lueur d'un systeme */
+  --ia-bord: #d4cafe;
+  --ia-lueur: rgba(110, 86, 207, .35);   /* le rayonnement d'une pastille d'agent */
+  --ia-lueur-forte: rgba(110, 86, 207, .5);
+  --ia-trait: rgba(110, 86, 207, .7);    /* la lueur du trait d'un agent de flux */
   /* sept tailles (DEC_00827 ; 11 px a rejoint 12 px, DEC_00842, 2A) */
   --champ-tel: 16px;   /* le texte d un champ sur telephone : hors des tailles de la charte, le controle des pages porte l exception (NTE de PCP051, 2026-11-11) */
   --t-menu: 11px;   /* le libelle du menu de gauche seul, comme avant la charte (DEC_00853, choix 3A d'Antoine) */
