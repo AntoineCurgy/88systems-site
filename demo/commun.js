@@ -335,7 +335,8 @@ function poserMoi() {
   // clignote plus a chaque page, le temps que ce script tourne (audit du 2026-11-11, « ca flash un peu bizarrement »).
   ongletsDuRail(moi);
   document.body.classList.toggle("avec-retours", Boolean(moi.onglet_retours));
-  // L'onglet « Agents » reste toujours visible, vide ou non (Antoine, 2026-10-31, PCP049-1031-c : « toujours
+  // La vue des agents (le filtre « Agents IA » de l'onglet Automatisations depuis RGI_02022) reste toujours atteignable,
+  // vide ou non (Antoine, 2026-10-31, PCP049-1031-c : « toujours
   // montrer Agents IA, Automatisations, Rapports et Cartographie », pour donner envie) ; il disparaissait quand
   // la feuille masquait chaque agent (2026-10-16).
 }
@@ -714,6 +715,17 @@ document.addEventListener("keydown", (e) => {
 }, true);
 
 // ------------------------------------------------------------------ calculs partages
+
+// RGI_02022 (Antoine, depot du 2026-11-23 : « il faut fusionner l'onglet agents et automatisations » ; a PCP049-1123-ac,
+// le nom « Automatisations », les agents en violet avec un filtre « Agents IA ») : la vue des agents est un filtre de
+// l'onglet Automatisations, un lien entre les deux pages, qui gardent chacune leur adresse et leurs colonnes
+function filtreAgentsIA(n, actif) {
+  const a = el("a", "gb-o ia");
+  a.href = actif ? "automatisations.html" : "agents.html";
+  a.setAttribute("aria-pressed", String(Boolean(actif)));
+  a.append("Agents IA ", el("span", null, n));
+  return a;
+}
 
 function compter(autos) {
   const n = { ok: 0, panne: 0, construction: 0 };

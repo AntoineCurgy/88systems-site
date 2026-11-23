@@ -26,7 +26,7 @@ function libelleGroupe(origine) {
   return /^Tous/.test(origine) ? origine : "Depuis " + origine;
 }
 
-function vueAutomatisations([donnees]) {
+function vueAutomatisations([donnees, agD]) {
   donneesAutos = donnees;
   majBandeau(donnees.maj);
   const autos = donnees.automatisations;
@@ -49,6 +49,12 @@ function vueAutomatisations([donnees]) {
   champ.placeholder = "Rechercher une automatisation…";
   // une carte de systeme de l'accueil arrive par `?sys=Even` : le systeme passe dans la recherche, qui lit aussi le flux
   // (le filtre par systeme est retire le 2026-11-11), puis quitte l'adresse
+  // RGI_02022 : un filtre d'etat choisi depuis la vue des agents arrive par `?statut=`, puis quitte l'adresse
+  const stAdresse = params().get("statut");
+  if (stAdresse !== null) {
+    if (["", "ok", "panne", "construction"].includes(stAdresse)) f.statut = stAdresse;
+    history.replaceState(null, "", adresseAvec((q) => q.delete("statut")));
+  }
   const sysAdresse = params().get("sys");
   if (sysAdresse) {
     f.q = sysAdresse.trim().toLowerCase();
@@ -68,6 +74,9 @@ function vueAutomatisations([donnees]) {
     b.addEventListener("click", () => { f.statut = v; rafraichirFiltres(); });
     barre.append(b);
   }
+  // RGI_02022 : le filtre violet « Agents IA » mene a la vue des agents, toujours, meme sans agent (PCP049-1031-c :
+  // « toujours montrer Agents IA », pour donner envie)
+  barre.append(filtreAgentsIA(((agD && agD.agents) || []).filter((a) => a.etape > 0).length, false));
 
   // groupes par systeme d'origine : les plus actifs d'abord
   const parOrigine = new Map();
@@ -114,7 +123,7 @@ function vueAutomatisations([donnees]) {
   vide.hidden = true;
 
   rafraichirFiltres = () => {
-    for (const b of barre.children) b.setAttribute("aria-pressed", String(b.dataset.v === f.statut));
+    for (const b of barre.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.v === f.statut));
     let total = 0;
     for (const [b, a] of lignesAutos) {
       const ok = (!f.statut || statutDe(a) === f.statut)
@@ -322,7 +331,7 @@ function suivreAdresse() {
 
 window.addEventListener("popstate", suivreAdresse);
 
-demarrer(() => suivre([SOURCES.autos], (d, premier) => {
+demarrer(() => suivre([SOURCES.autos, SOURCES.agents], (d, premier) => {
   const ouverte = panneauMode === "fiche";
   poser(vueAutomatisations(d), premier);
   // au premier rendu, ou si la fiche etait ouverte : la rouvrir sur les donnees fraiches

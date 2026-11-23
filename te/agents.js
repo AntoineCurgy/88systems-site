@@ -109,12 +109,32 @@ function ouvrirFiche(id) {
   ouvrirPanneau("fiche", ficheAgent(a), depuis);
 }
 
+// RGI_02022 : la vue des agents est un filtre de l'onglet Automatisations : sa barre d'etat d'abord, chaque filtre menant
+// a la liste des automatisations, puis « Agents IA », choisi ; la barre des etapes des agents reste, a droite
+function barreVue(autosD, nAgents) {
+  const nA = compter(autosD.automatisations);
+  const barreA = el("div", "gb-barre");
+  barreA.setAttribute("role", "group");
+  barreA.setAttribute("aria-label", "Vue");
+  for (const [v, t, k] of [["", "Toutes", autosD.automatisations.length], ["ok", "Fonctionnelles", nA.ok], ["panne", "Interrompues", nA.panne], ["construction", "En construction", nA.construction]]) {
+    const a = el("a", "gb-o", t);
+    a.href = "automatisations.html" + (v ? "?" + new URLSearchParams({ statut: v }) : "");
+    a.setAttribute("aria-pressed", "false");
+    a.append(" ", el("span", null, k));
+    barreA.append(a);
+  }
+  barreA.append(filtreAgentsIA(nAgents, true));
+  return barreA;
+}
+
 function vueAgents([autosD, agD]) {
   majBandeau(agD.maj || autosD.maj);
   autosParId = new Map(autosD.automatisations.map((x) => [String(x.id), x]));
   agentsVus = agD.agents.filter((a) => a.etape > 0);   // les agents imagines ne se montrent pas (DEC_00892)
   if (!agentsVus.length) {
-    return [el("h1", null, "Agents"), vueVide(agD.source === "absente" ? "Aucun agent IA publié" : agD.source === "illisible" ? "Liste des agents illisible" : "Aucun agent IA en essai",
+    const vide = el("div", "outils ligne");
+    vide.append(barreVue(autosD, 0));
+    return [el("h1", null, "Automatisations"), vide, vueVide(agD.source === "absente" ? "Aucun agent IA publié" : agD.source === "illisible" ? "Liste des agents illisible" : "Aucun agent IA en essai",
       "Un agent IA s'appuie sur vos automatisations pour traiter une tâche de bout en bout. Ceux en essai apparaîtront ici.")];
   }
   const n = (e) => agentsVus.filter((a) => a.etape === e).length;
@@ -128,8 +148,10 @@ function vueAgents([autosD, agD]) {
     b.addEventListener("click", () => { filtreAg.e = v; filtrer(); });
     barre.append(b);
   }
+  const outils = el("div", "outils ligne");
+  outils.append(barreVue(autosD, agentsVus.length), el("span", "rt-sp"), barre);
   const tete = el("div", "tete-fixe");
-  tete.append(el("h1", null, "Agents"), barre);
+  tete.append(el("h1", null, "Automatisations"), outils);
   const groupes = [];
   for (const e of [3, 2, 1, 4]) {
     const liste = agentsVus.filter((a) => a.etape === e);

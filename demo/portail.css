@@ -229,6 +229,12 @@ html.sans-journaux a[data-page="journaux"] { display: none !important; }
 .gb-o span, .pe-b span { font: var(--t-meta) var(--mono); color: var(--discret); margin-left: var(--s0); }
 .gb-o[aria-pressed="true"], .pe-b[aria-pressed="true"] { background-color: var(--marque); color: var(--surface); font-weight: 500; }
 .gb-o[aria-pressed="true"] span, .pe-b[aria-pressed="true"] span { color: var(--clair); }
+/* RGI_02022 : les agents IA sont une vue de l'onglet Automatisations ; leur filtre est violet, avec la pastille des agents */
+a.gb-o { text-decoration: none; }
+.gb-o.ia { color: var(--ia); }
+.gb-o.ia::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ia); box-shadow: 0 0 6px var(--ia-lueur-forte); margin-right: var(--s1); }
+.gb-o.ia[aria-pressed="true"] { background-color: var(--ia); color: var(--surface); }
+.gb-o.ia[aria-pressed="true"]::before { background: var(--surface); }
 .outils { display: flex; flex-direction: column; gap: var(--s2); align-items: flex-start; }
 .outils.ligne { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); width: 100%; }
 /* Les champs de recherche, plus petits et plus nets (Antoine, 2026-11-11 : « un peu trop gros […] un design un peu plus
