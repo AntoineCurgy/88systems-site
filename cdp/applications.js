@@ -5,15 +5,23 @@
 // donne seulement a qui a le droit sur l'automatisation) ; chacun s'ouvre dans un nouvel onglet, avec son bandeau.
 "use strict";
 
-// l'adresse courte, publiee sous le chemin du client (88systems.io/cdp/factures) ; sans elle, l'ecran servi par l'API
+// RGI_02024 (Antoine a PCP049-1123-ag : « Choix A : L'écran s'ouvre dans le portail : « Ouvrir » affiche l'écran sous le
+// bandeau et le menu, l'onglet Applications reste allumé, sans nouvel onglet ») : « Ouvrir » mene a cette meme page,
+// `?ecran=<id>`, qui montre l'ecran servi par l'API dans un cadre ; l'API ne le laisse afficher que par le portail
 function lienEcran(a) {
-  return a.ecran.court ? new URL(a.ecran.court + "/", location.href).href
-    : API + "/api/automatisations/" + encodeURIComponent(a.id) + "/page";
+  return "applications.html?" + new URLSearchParams({ ecran: a.id });
 }
 
-function adresseLisible(url) {
-  const u = new URL(url);
-  return (u.host + u.pathname).replace(/\/$/, "");
+function vueEcran(a) {
+  const e = a.ecran, nom = e.nom || a.nom;
+  const retour = el("a", "ap-retour", "← Applications");
+  retour.href = "applications.html";
+  const tete = el("div", "ap-tete");
+  tete.append(retour, el("h1", null, nom));
+  const cadre = el("iframe", "ap-cadre");
+  cadre.title = nom;
+  cadre.src = API + "/api/automatisations/" + encodeURIComponent(a.id) + "/page";
+  return [tete, cadre];
 }
 
 function carteAppli(a) {
@@ -23,27 +31,36 @@ function carteAppli(a) {
   if (eq) li.append(el("p", "ap-eq", eq));
   li.append(el("h2", "ap-nom", nom));
   if (a.objectif) li.append(el("p", "ap-quoi", a.objectif));
-  if (e.court) li.append(el("p", "ap-adr", adresseLisible(url)));
   const ouvrir = el("a", "btn b-l");
   ouvrir.href = url;
-  ouvrir.target = "_blank";
-  ouvrir.rel = "noopener";
-  ouvrir.title = adresseLisible(url);
-  ouvrir.setAttribute("aria-label", "Ouvrir " + nom + " dans un nouvel onglet");
-  ouvrir.append(ico("externe", 15), "Ouvrir");
+  ouvrir.setAttribute("aria-label", "Ouvrir " + nom);
+  ouvrir.append("Ouvrir");
   const pied = el("div", "ap-pied");
-  pied.append(el("span", "ap-maj", "Mis à jour le " + majLisible(e.maj)), ouvrir);
+  // RGI_02023 (Antoine, page de pilotage, 2026-11-23 : « dans la page application, tu peux déjà supprimer tout ca :
+  // "88systems.io/cdp/factures Mis à jour le 23/11 à 23:07" et "Les écrans de travail préparés par vos automatisations.
+  // Chacun s'ouvre dans un nouvel onglet." ») : ni l'adresse, ni la mise a jour, ni la phrase d'introduction
+  pied.append(ouvrir);
   li.append(pied);
   return li;
 }
 
 function vueApplications([autos]) {
   const applis = autos.automatisations.filter((a) => a.ecran);
+  const voulu = new URLSearchParams(location.search).get("ecran");
+  const ouvert = voulu && applis.find((a) => a.id === voulu);
+  if (ouvert) return vueEcran(ouvert);
   const h1 = el("h1", null, "Applications");
   if (!applis.length) return [h1, el("p", "vide", "Aucune application ne vous est ouverte pour l'instant.")];
   const ul = el("ul", "ap-liste");
   ul.append(...applis.map(carteAppli));
-  return [h1, el("p", "discret", "Les écrans de travail préparés par vos automatisations. Chacun s'ouvre dans un nouvel onglet."), ul];
+  return [h1, ul];
 }
 
-demarrer(() => suivre([SOURCES.autos], (d, premier) => poser(vueApplications(d), premier)));
+// l'ecran ouvert ne se redessine pas a chaque relecture des automatisations : son cadre se rechargerait sous la main
+let ecranPose = false;
+demarrer(() => suivre([SOURCES.autos], (d, premier) => {
+  if (ecranPose) return;
+  const vue = vueApplications(d);
+  ecranPose = vue.some((x) => x.tagName === "IFRAME");
+  poser(vue, premier);
+}));

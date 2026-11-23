@@ -828,12 +828,16 @@ tr.dr-masque > th, tr.dr-masque > td { color: var(--pale); background-color: var
    travail, sur le modele de la page Agents et des « Apps » de Notion */
 .ap-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: var(--s3); }
 .ap-c { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+/* RGI_02024 : l'ecran ouvert dans le portail, sous son bandeau et son menu */
+.ap-tete { display: flex; align-items: baseline; gap: var(--s3); margin-bottom: var(--s2); }
+.ap-tete h1 { margin: 0; }
+.ap-retour { color: var(--marque); text-decoration: none; font-size: var(--t-petit); white-space: nowrap; }
+.ap-retour:hover { text-decoration: underline; }
+.ap-cadre { display: block; width: 100%; height: calc(100vh - 180px); min-height: 480px; border: 1px solid var(--filet); border-radius: 12px; background: var(--surface); }
 .ap-eq { margin: 0; color: var(--discret); font-size: var(--t-meta); }
 .ap-nom { margin: 0; font-size: var(--t-titre-section); }
 .ap-quoi { margin: 0; color: var(--encre2); }
-.ap-pied { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); margin-top: auto; padding-top: var(--s1); }
-.ap-maj { color: var(--discret); font-size: var(--t-meta); }
-.ap-adr { margin: 0; font: 400 var(--t-meta)/1.3 var(--mono); color: var(--pale); overflow-wrap: anywhere; }
+.ap-pied { display: flex; align-items: center; justify-content: flex-end; gap: var(--s2); margin-top: auto; padding-top: var(--s1); }
 
 /* Les agents IA sur la carte des flux (DEC_01462, halo lumineux 2B de la fiche v2) : un systeme qui porte un agent baigne
    dans une lueur violette, ses numeros en pilule dessous ; un agent de flux est un trait violet continu et lumineux, a
