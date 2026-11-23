@@ -10,6 +10,7 @@ function retour() {
   const r = demande.get("retour") || "";
   const [page, requete = ""] = r.split("?");
   if (page === "carte") return pageCarte(new URLSearchParams(requete));
+  if (page === "ecran") return pageEcran(new URLSearchParams(requete));
   return PAGES.includes(page) ? page + (requete ? "?" + requete : "") : "index.html";
 }
 
@@ -21,6 +22,13 @@ function pageCarte(q) {
   return API + "/api/cartographie/page"
     + (/^[A-Za-z0-9_-]{1,40}$/.test(vue) ? "?vue=" + vue : "")
     + (/^[A-Za-z0-9_-]{1,80}$/.test(carte) ? "#" + carte : "");
+}
+
+// RGI_01998 : le lien direct d'un ecran de travail (la page des comptables fournisseurs de CDP, la premiere) ramene,
+// apres le code, a cet ecran, sur l'adresse de l'API du client ; l'identifiant garde ses seuls caracteres sans danger.
+function pageEcran(q) {
+  const aut = q.get("aut") || "";
+  return /^[A-Za-z0-9_]{1,40}$/.test(aut) ? API + "/api/automatisations/" + aut + "/page" : "index.html";
 }
 
 let adresseSaisie = "";
