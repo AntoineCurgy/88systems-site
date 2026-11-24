@@ -8,8 +8,9 @@
 // RGI_02024 (Antoine a PCP049-1123-ag : « Choix A : L'écran s'ouvre dans le portail : « Ouvrir » affiche l'écran sous le
 // bandeau et le menu, l'onglet Applications reste allumé, sans nouvel onglet ») : « Ouvrir » mene a cette meme page,
 // `?ecran=<id>`, qui montre l'ecran servi par l'API dans un cadre ; l'API ne le laisse afficher que par le portail
+// RGI_02060 : un ecran qui a une adresse courte s'ouvre par elle (88systems.io/cdp/factures)
 function lienEcran(a) {
-  return "applications.html?" + new URLSearchParams({ ecran: a.id });
+  return a.ecran.court || "applications.html?" + new URLSearchParams({ ecran: a.id });
 }
 
 // RGI_02032 (Antoine a PCP049-1124-a : l'option C de la fiche « tete de l'ecran », « la barre collee a l'ecran ») : ni
@@ -62,9 +63,17 @@ function carteAppli(a) {
 
 function vueApplications([autos]) {
   const applis = autos.automatisations.filter((a) => a.ecran);
-  const voulu = new URLSearchParams(location.search).get("ecran");
-  const ouvert = voulu && applis.find((a) => a.id === voulu);
-  if (ouvert) return vueEcran(ouvert);
+  // l'ecran voulu : `?ecran=` (son identifiant ou son adresse courte), ou l'adresse courte qui a servi la page ; RGI_02060 :
+  // l'adresse affichee devient l'adresse courte de l'ecran ouvert, et « applications » si aucun n'est ouvert
+  const q = new URLSearchParams(location.search), voulu = q.get("ecran") || nomDeChemin();
+  const ouvert = voulu && applis.find((a) => a.id === voulu || (a.ecran.court && a.ecran.court === voulu));
+  q.delete("ecran");
+  const reste = q.toString() ? "?" + q : "";
+  if (ouvert) {
+    if (ouvert.ecran.court) adressePropre(ouvert.ecran.court, reste);
+    return vueEcran(ouvert);
+  }
+  if (nomDeChemin() !== "applications") adressePropre("applications", reste);
   const h1 = el("h1", null, "Applications");
   if (!applis.length) return [h1, el("p", "vide", "Aucune application ne vous est ouverte pour l'instant.")];
   const ul = el("ul", "ap-liste");

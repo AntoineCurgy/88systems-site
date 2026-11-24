@@ -299,14 +299,35 @@ function horsLigne() {
 
 const PAGES = ["index.html", "rapports.html", "applications.html", "automatisations.html", "agents.html", "cartographie.html", "parametres.html", "retours.html", "envois.html", "journaux.html", "aide.html"];
 
-function pageCourante() {
-  const p = location.pathname.split("/").pop() || "index.html";
-  return PAGES.includes(p) ? p : "index.html";
+// RGI_02060 : l'adresse affichee est celle de la page sans « .html » (« index.html » : le dossier du client) ; GitHub Pages
+// sert `<page>.html` a `<page>`, un lien ou un favori en .html reste bon et se recrit au chargement
+function nomDeChemin() {
+  return decodeURIComponent(location.pathname.split("/").pop() || "");
 }
 
-// Retour a la connexion ; `retour` ne peut nommer qu'une page du portail.
+function adressePropre(nom, requete) {
+  history.replaceState(history.state, "", (nom === "index" ? "./" : nom) + (requete === undefined ? location.search : requete) + location.hash);
+}
+
+(function () {
+  const n = nomDeChemin();
+  if (/^[a-z0-9-]+\.html$/.test(n)) adressePropre(n.slice(0, -5));
+})();
+
+function pageCourante() {
+  let p = nomDeChemin() || "index.html";
+  if (!p.endsWith(".html")) p += ".html";
+  if (PAGES.includes(p)) return p;
+  // l'adresse courte d'un ecran (88systems.io/cdp/factures) sert la page des applications
+  return document.querySelector('script[src^="applications.js"]') ? "applications.html" : "index.html";
+}
+
+// Retour a la connexion ; `retour` ne peut nommer qu'une page du portail. Depuis l'adresse courte d'un ecran, le retour
+// le rouvre (`applications.html?ecran=<court>`).
 function versConnexion(motif) {
-  const q = new URLSearchParams({ retour: pageCourante() + location.search });
+  const p = pageCourante(), n = nomDeChemin().replace(/\.html$/, "");
+  const ecran = p === "applications.html" && n && n !== "applications" && !location.search ? "?" + new URLSearchParams({ ecran: n }) : "";
+  const q = new URLSearchParams({ retour: p + (location.search || ecran) });
   if (motif) q.set("motif", motif);
   location.replace("connexion.html?" + q.toString());
 }
