@@ -24,7 +24,12 @@ function vueEcran(a) {
   fil.append(retour, el("span", "ap-sep", "/"), el("h1", null, nom));
   const tete = el("div", "ap-tete");
   tete.append(fil);
-  if (e.equipe) tete.append(el("span", "ap-eq-t", e.equipe));
+  // RGI_02045 (depot d'Antoine du 2026-11-24 a 13h54 : « ce truc "Aperçu : factures reçues du 19 au 24 novembre [...]" on
+  // va le supprimer, et juste mettre un "A l'essai" à la place de "Comptabilité fournisseurs" [...] A l'essai surligné en
+  // jaune bien sur ») : un ecran dont l'automatisation est en rodage ou en construction porte « À l'essai », a la place
+  // de l'equipe ; les autres, leur equipe. Le message d'apercu (RGI_02040) n'est plus montre.
+  if (a.rodage || statutDe(a) === "construction") tete.append(el("span", "ap-essai", "À l'essai"));
+  else if (e.equipe) tete.append(el("span", "ap-eq-t", e.equipe));
   const cadre = el("iframe", "ap-cadre");
   cadre.title = nom;
   cadre.src = API + "/api/automatisations/" + encodeURIComponent(a.id) + "/page";

@@ -509,12 +509,39 @@ function figerTete(tete) {
   const poserHauteur = () => document.documentElement.style.setProperty("--tete", tete.getBoundingClientRect().height + "px");   // au pixel pres, pas arrondie (RGI_02038)
   if (typeof ResizeObserver === "function") { observeTete = new ResizeObserver(poserHauteur); observeTete.observe(tete); }
   requestAnimationFrame(poserHauteur);
+  demanderCoupes();
   return tete;
+}
+
+// RGI_02044 : la carte d'un tableau se peint a partir du bas de la tete figee (--coupe), pour garder ses coins arrondis
+// et son ombre quand elle defile dessous ; --coupe-bordure, sa bordure telle que le navigateur l'arrondit (1,5 px
+// devient 1 px dans Chrome). Les mesures d'abord, les ecritures ensuite : une seule mise en page par image.
+var coupeEnAttente = false;   // var : figerTete peut l appeler avant cette ligne
+function poserCoupes() {
+  coupeEnAttente = false;
+  const cartes = [...document.querySelectorAll(".carte.gd-c, .carte.grp-c")];
+  if (!cartes.length) return;
+  const tete = document.querySelector(".tete-fixe");
+  const bas = tete ? tete.getBoundingClientRect().bottom : 0;
+  const mesures = cartes.map((c) => [c.getBoundingClientRect().top, getComputedStyle(c).borderTopWidth]);
+  cartes.forEach((c, i) => {
+    c.style.setProperty("--coupe", Math.max(0, bas - mesures[i][0]) + "px");
+    c.style.setProperty("--coupe-bordure", mesures[i][1]);
+  });
+}
+function demanderCoupes() { if (!coupeEnAttente) { coupeEnAttente = true; requestAnimationFrame(poserCoupes); } }
+addEventListener("scroll", demanderCoupes, { passive: true });
+addEventListener("resize", demanderCoupes);
+var observeContenu = null;   // un filtre change la hauteur des cartes sans defilement : la coupe se reprend
+function suivreCoupes(zone) {
+  if (!observeContenu && typeof ResizeObserver === "function") { observeContenu = new ResizeObserver(demanderCoupes); observeContenu.observe(zone); }
+  demanderCoupes();
 }
 
 function poser(noeuds, premier) {
   const zone = $("contenu");
   zone.replaceChildren(...noeuds);
+  suivreCoupes(zone);
   if (premier) {
     const h1 = zone.querySelector("h1");
     if (h1) { h1.tabIndex = -1; h1.focus({ preventScroll: true }); }

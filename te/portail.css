@@ -165,6 +165,18 @@ html.sans-journaux a[data-page="journaux"] { display: none !important; }
    bouge au repos), et l'en-tete se fige a sa place de repos, sous le bord et le haut de sa carte, peints en blanc */
 .droite .tete-fixe { padding-bottom: calc(2 * var(--s3)); margin-bottom: calc(-1 * var(--s3)); }
 .carte, .ke { box-shadow: var(--ombre-app); }
+/* RGI_02044 (Antoine, depot du 2026-11-24 a 13h56 : « quand je scroll le coin devient carré et on voit une ligne
+   apparaitre [...] un léger contraste de gris ») : la tete figee cachait le haut de la carte qui defile dessous, ses
+   coins arrondis et le haut de son ombre ; la carte d'un tableau se peint donc (fond, coins, ombre) a partir du bas de
+   la tete, --coupe pixels sous son haut (commun.js, poserCoupes) ; au repos --coupe vaut 0 et rien ne change. Le
+   tableau ne se fige qu'a 85rem (.gd-c y defile de cote en dessous) ; les groupes des listes, a toute largeur */
+.carte.grp-c { position: relative; isolation: isolate; background-color: transparent; box-shadow: none; }
+.carte.grp-c::after { content: ""; position: absolute; z-index: -1; inset: calc(var(--coupe, 0px) - var(--coupe-bordure, 1px)) calc(-1 * var(--coupe-bordure, 1px)) calc(-1 * var(--coupe-bordure, 1px)); border-radius: inherit; background-color: var(--surface); box-shadow: var(--ombre-app); pointer-events: none; }
+.carte.grp-c.sous-tete::after { border-top-left-radius: min(var(--r-carte), calc(var(--coupe, 0px) * 100)); border-top-right-radius: min(var(--r-carte), calc(var(--coupe, 0px) * 100)); }
+@media (min-width: 85rem) {
+  .carte.gd-c { isolation: isolate; background-color: transparent; box-shadow: none; }
+  .carte.gd-c::after { content: ""; position: absolute; z-index: -1; inset: calc(var(--coupe, 0px) - var(--coupe-bordure, 1px)) calc(-1 * var(--coupe-bordure, 1px)) calc(-1 * var(--coupe-bordure, 1px)); border-radius: inherit; background-color: var(--surface); box-shadow: var(--ombre-app); pointer-events: none; }
+}
 .contenu { max-width: 110rem; width: 100%; margin: 0 auto; padding: var(--s4) var(--s5) var(--s6); min-width: 0; display: flex; flex-direction: column; gap: var(--s3); }
 .contenu h1 { font-size: var(--t-titre-page); letter-spacing: -.015em; }
 .sous-titre { margin: calc(-1 * var(--s2)) 0 0; color: var(--discret); }
@@ -863,6 +875,7 @@ tr.dr-masque > th, tr.dr-masque > td { color: var(--pale); background-color: var
 .ap-sep { color: var(--pale); }
 .contenu .ap-fil h1 { margin: 0; font-size: var(--t-corps); font-weight: 500; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .ap-eq-t { color: var(--discret); font-size: var(--t-meta); white-space: nowrap; }
+.ap-essai { color: var(--ambre); background-color: var(--ambre-f); font-size: var(--t-petit); font-weight: 600; padding: .2rem .7rem; border-radius: var(--r-pilule); white-space: nowrap; }   /* RGI_02045 : « À l'essai » surligne, les couleurs ambre de la charte */
 .ap-cadre { display: block; width: 100%; height: calc(100vh - 150px); min-height: 480px; border: 1px solid var(--filet); border-radius: 0 0 12px 12px; background: var(--surface); }
 @media (max-width: 600px) { .ap-eq-t { display: none; } .ap-tete { padding: 0 var(--s2); } }
 /* RGI_02033 (Antoine a PCP049-1124-c : « Je valide ce fond », l'option 2E de la fiche fond-de-l-ecran/v1, le cadre
@@ -873,6 +886,14 @@ tr.dr-masque > th, tr.dr-masque > td { color: var(--pale); background-color: var
 .ap-app { border-radius: 12px; box-shadow: var(--ombre-app); }
 .ap-app .ap-tete { border: 0; border-bottom: 1px solid var(--filet); }
 .ap-app .ap-cadre { border: 0; }
+/* RGI_02041 (Antoine, depot du 2026-11-24 a 13h48 : « quand je mets la souris sur le fond gris, je peux scroller [...] je
+   devrais pas pouvoir ») : l'ecran ouvert tient exactement la fenetre, la meme marge en haut et en bas, sans le pied de
+   page dessous ; la page ne defile plus, seul l'ecran defile dans son cadre (des 640 px de haut ; plus bas, la page
+   defile encore, pour atteindre le bas du cadre) */
+.droite:has(.ap-app) .bas { display: none; }
+.droite:has(.ap-app) .contenu { padding-bottom: var(--s4); }
+.ap-app .ap-cadre { height: calc(100vh - var(--hb) - 2 * var(--s4) - 2.75rem); min-height: 480px; }
+@media (min-height: 640px) { html:has(.ap-app), html:has(.ap-app) body { overflow: hidden; overscroll-behavior: none; } }
 .ap-nom { margin: 0; font-size: var(--t-titre-section); }
 .ap-quoi { margin: 0; color: var(--encre2); }
 .ap-pied { display: flex; align-items: center; justify-content: flex-end; gap: var(--s2); margin-top: auto; padding-top: var(--s1); }
