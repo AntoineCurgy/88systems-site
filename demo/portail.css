@@ -159,6 +159,11 @@ html.sans-journaux a[data-page="journaux"] { display: none !important; }
    le contraste de l'ecran ouvert (RGI_02033) sur toutes les pages, sans bleu : le menu blanc, le tour gris soutenu, la
    tete figee du meme gris (« au detail pret de la partie superieure »), chaque bloc blanc souleve sur l'ombre douce */
 .droite, .droite .tete-fixe { background-color: var(--surface2); }
+/* RGI_02038 (Antoine, depot du 2026-11-24 a 12h09 : « l'entete [...] ne devrait pas bouger quand je scroll vers le bas
+   regarde. Et ceci vaut pour tous les onglets de ce type non ? ») : l'en-tete des colonnes se figeait contre la tete de la
+   page et remontait de l'espace qui l'en separe au repos (17 a 22 px) ; la tete couvre cet espace (le meme gris, rien ne
+   bouge au repos), et l'en-tete se fige a sa place de repos, sous le bord et le haut de sa carte, peints en blanc */
+.droite .tete-fixe { padding-bottom: calc(2 * var(--s3)); margin-bottom: calc(-1 * var(--s3)); }
 .carte, .ke { box-shadow: var(--ombre-app); }
 .contenu { max-width: 110rem; width: 100%; margin: 0 auto; padding: var(--s4) var(--s5) var(--s6); min-width: 0; display: flex; flex-direction: column; gap: var(--s3); }
 .contenu h1 { font-size: var(--t-titre-page); letter-spacing: -.015em; }
@@ -321,7 +326,8 @@ tbody th { font-weight: 500; }
 .tete-fixe { position: sticky; top: var(--hb); z-index: 15; display: flex; flex-direction: column; gap: var(--s3); margin: calc(-1 * var(--s4)) calc(-1 * var(--s5)) 0; padding: var(--s4) var(--s5) var(--s3); background-color: var(--fond); }
 @media (min-width: 85rem) {
   .gd-c { overflow-x: visible; }
-  .gd thead th { position: sticky; top: calc(var(--hb) + var(--tete, 0px)); z-index: 5; background-color: var(--surface); border-bottom: 0; box-shadow: inset 0 -1.5px 0 var(--bord); }
+  .gd thead th { position: sticky; top: calc(var(--hb) + var(--tete, 0px) + var(--s0) + 1.5px); z-index: 5; background-color: var(--surface); border-bottom: 0; box-shadow: inset 0 -1.5px 0 var(--bord); }
+  .gd thead th::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: calc(var(--s0) + 1.5px); background-color: var(--surface); }   /* RGI_02038 : le haut de la carte, peint au-dessus de l'en-tete fige */
 }
 .gd th { overflow-wrap: anywhere; }
 .gd .c, .td-f { text-align: center; }
@@ -365,7 +371,7 @@ div.lb { position: relative; }
 /* l'en-tete des colonnes d'Automatisations (DEC_00853, 1A) : la grille des lignes, la forme des en-tetes des tableaux */
 div.la-tete-l { cursor: default; border-top: 0; border-bottom: 1.5px solid var(--bord); }
 /* figee sous la tete de la page sur toute la liste (2026-11-11) : une bande blanche collee au premier groupe visible */
-.la-tete-w { position: sticky; top: calc(var(--hb) + var(--tete, 0px)); z-index: 5; margin-bottom: calc(-1 * var(--s3)); padding: var(--s1) var(--s3) 0; background-color: var(--surface); border-radius: var(--r-carte) var(--r-carte) 0 0; }
+.la-tete-w { position: sticky; top: calc(var(--hb) + var(--tete, 0px) + 1.5px); box-shadow: 0 -1.5px 0 var(--surface); z-index: 5; margin-bottom: calc(-1 * var(--s3)); padding: var(--s1) var(--s3) 0; background-color: var(--surface); border-radius: var(--r-carte) var(--r-carte) 0 0; }
 .grp-c.sous-tete { border-top-left-radius: 0; border-top-right-radius: 0; padding-top: var(--s1); }
 div.la-tete-l:hover { background-color: transparent; }
 .la-tete > span { font-size: var(--t-meta); color: var(--discret); font-weight: 500; white-space: nowrap; }

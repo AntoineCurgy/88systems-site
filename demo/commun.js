@@ -506,7 +506,7 @@ if ($("deconnexion")) {
 let observeTete = null;
 function figerTete(tete) {
   if (observeTete) observeTete.disconnect();
-  const poserHauteur = () => document.documentElement.style.setProperty("--tete", tete.offsetHeight + "px");
+  const poserHauteur = () => document.documentElement.style.setProperty("--tete", tete.getBoundingClientRect().height + "px");   // au pixel pres, pas arrondie (RGI_02038)
   if (typeof ResizeObserver === "function") { observeTete = new ResizeObserver(poserHauteur); observeTete.observe(tete); }
   requestAnimationFrame(poserHauteur);
   return tete;
