@@ -182,28 +182,30 @@ function cfDetail(titre, autos, cible) {
 
 // ---------------------------------------------------------------- les agents IA sur la carte (DEC_01462, RGI_02018)
 // Le halo lumineux 2B de la fiche v2 (Antoine a PCP049-1123-t) : la place de chaque agent se lit dans sa fiche publiee
-// (champ « place » : {type: "systeme", systeme}, {type: "flux", de, vers} ou {type: "toutes"}) ; un agent sans place, ou
-// dont le systeme n'est pas sur la carte, n'y est pas dessine. Les trois cas sont ceux du choix 1A.
+// (champ « place » : {type: "systeme", systeme} ou {type: "toutes"}) ; un agent sans place, ou dont le systeme n'est pas
+// sur la carte, n'y est pas dessine. RGI_02027 (depot d'Antoine du 2026-11-24 a 00h10 : « on va enlever les lignes
+// violettes, ca pollue trop et on enleve "ia arrêté" sur la carte […] laisser les petits numéros violets, mais uniquement
+// au niveau des systemes, pas sur les flux […] on laisse les halo ») : un agent arrete, ou place sur un flux, n'est pas
+// sur la carte ; l'agent d'un flux y revient quand sa fiche le place sur un systeme.
 function iaPlace(a) {
   const p = a && a.place;
-  if (!p || typeof p !== "object") return null;
+  if (!p || typeof p !== "object" || a.etape === 4) return null;
   if (p.type === "systeme" && typeof p.systeme === "string") return { type: "systeme", sys: p.systeme };
-  if (p.type === "flux" && typeof p.de === "string" && typeof p.vers === "string") return { type: "flux", a: p.de, b: p.vers };
   if (p.type === "toutes") return { type: "toutes" };
   return null;
 }
 
 function iaTitre(a) { return `Agent IA ${a.court} · ${a.nom} · ${etapeAg(a)}`; }
 
-function iaPilule(g, x, y, texte, titre, arrete) {
+function iaPilule(g, x, y, texte, titre) {
   const w = 8 + texte.length * 6.2, s = sv("g", {}, g);
-  sv("rect", { x: x - w / 2, y: y - 8, width: w, height: 16, rx: 8, class: "ia-pil" + (arrete ? " ar" : "") }, s);
+  sv("rect", { x: x - w / 2, y: y - 8, width: w, height: 16, rx: 8, class: "ia-pil" }, s);
   sv("text", { x, y: y + 3.4, class: "ia-pil-t" }, s).textContent = texte;
   sv("title", {}, s).textContent = titre;
 }
 
-// la lueur sous tout, les traits et les pilules au-dessus de tout
-function iaDessin(svg, parNom, centre, agents) {
+// la lueur sous tout, les pilules au-dessus de tout
+function iaDessin(svg, parNom, agents) {
   const fond = sv("g", { class: "ia-fond" }), haut = sv("g", { class: "ia-agents" }), parSys = new Map();
   for (const a of agents) {
     const p = iaPlace(a);
@@ -211,23 +213,12 @@ function iaDessin(svg, parNom, centre, agents) {
     if (p.type === "systeme" && parNom.has(p.sys)) {
       if (!parSys.has(p.sys)) parSys.set(p.sys, []);
       parSys.get(p.sys).push(a);
-    } else if (p.type === "flux" && parNom.has(p.a) && parNom.has(p.b)) {
-      const A = parNom.get(p.a), B = parNom.get(p.b), ar = a.etape === 4;
-      // le trait violet court a 6 px du flux, a cote du trait ou du pointille du controle, jamais dessus
-      const ux = B.x - A.x, uy = B.y - A.y, l = Math.hypot(ux, uy) || 1;
-      const fil = sv("path", { d: cfChemin(A, B, A === centre || B === centre), class: "ia-fil" + (ar ? " ar" : ""),
-        transform: `translate(${-uy / l * 6} ${ux / l * 6})` }, haut);
-      sv("title", {}, fil).textContent = iaTitre(a);
-      const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
-      const m = A === centre || B === centre ? { x: mx, y: my } : { x: mx + (CF_L / 2 - mx) * 0.41, y: my + (CF_H / 2 - my) * 0.41 };
-      iaPilule(haut, m.x + (ar ? 30 : -24), m.y + (ar ? 16 : -12), a.court + (ar ? " · arrêté" : ""), iaTitre(a), ar);
     }
   }
   for (const [s, liste] of parSys) {
     const n = parNom.get(s), w = cfLargeur(n), h = cfHauteur(n);
     sv("rect", { x: n.x - w / 2 - 9, y: n.y - h / 2 - 9, width: w + 18, height: h + 18, rx: h / 2 + 9, class: "ia-lueur" }, fond);
-    iaPilule(haut, n.x, n.y + h / 2 + 15, liste.map((a) => a.court).join(" · "), liste.map(iaTitre).join("\n"),
-      liste.every((a) => a.etape === 4));
+    iaPilule(haut, n.x, n.y + h / 2 + 15, liste.map((a) => a.court).join(" · "), liste.map(iaTitre).join("\n"));
   }
   svg.insertBefore(fond, svg.children[1]);   // apres les definitions, sous les liaisons
   svg.append(haut);
@@ -281,7 +272,7 @@ function cfDessin(g, detail, agents) {
     a.addEventListener("focus", montrer);
   }
   svg.addEventListener("mouseleave", () => focus(null));
-  if (agents && agents.length) iaDessin(svg, parNom, centre, agents);
+  if (agents && agents.length) iaDessin(svg, parNom, agents);
   return svg;
 }
 
@@ -334,7 +325,7 @@ function carteDesFlux(autosD, agents) {
 function iaPhrase(places) {
   const k = (t) => places.filter((p) => p && p.type === t).length, n = places.filter(Boolean).length;
   if (!n) return "";
-  const cas = [[k("systeme"), "dans un système"], [k("flux"), "sur un flux"], [k("toutes"), "sur toutes les automatisations"]]
+  const cas = [[k("systeme"), "dans un système"], [k("toutes"), "sur toutes les automatisations"]]
     .filter(([c]) => c).map(([c, t]) => `${c} ${t}`);
   return ` · ${pluriel(n, "agent IA", "agents IA")} : ${cas.join(", ")}`;
 }

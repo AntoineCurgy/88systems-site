@@ -43,7 +43,6 @@
   --ia-bord: #d4cafe;
   --ia-lueur: rgba(110, 86, 207, .35);   /* le rayonnement d'une pastille d'agent */
   --ia-lueur-forte: rgba(110, 86, 207, .5);
-  --ia-trait: rgba(110, 86, 207, .7);    /* la lueur du trait d'un agent de flux */
   /* sept tailles (DEC_00827 ; 11 px a rejoint 12 px, DEC_00842, 2A) */
   --champ-tel: 16px;   /* le texte d un champ sur telephone : hors des tailles de la charte, le controle des pages porte l exception (NTE de PCP051, 2026-11-11) */
   --t-menu: 11px;   /* le libelle du menu de gauche seul, comme avant la charte (DEC_00853, choix 3A d'Antoine) */
@@ -829,24 +828,36 @@ tr.dr-masque > th, tr.dr-masque > td { color: var(--pale); background-color: var
 .ap-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: var(--s3); }
 .ap-c { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
 /* RGI_02024 : l'ecran ouvert dans le portail, sous son bandeau et son menu */
-.ap-tete { display: flex; align-items: baseline; gap: var(--s3); margin-bottom: var(--s2); }
-.ap-tete h1 { margin: 0; }
-.ap-retour { color: var(--marque); text-decoration: none; font-size: var(--t-petit); white-space: nowrap; }
-.ap-retour:hover { text-decoration: underline; }
-.ap-cadre { display: block; width: 100%; height: calc(100vh - 180px); min-height: 480px; border: 1px solid var(--filet); border-radius: 12px; background: var(--surface); }
+/* RGI_02032 (Antoine a PCP049-1124-a, option C) : une barre fine d'un seul tenant avec le cadre, qui en fait l'en-tete ;
+   RGI_02026 : rien ne s'intercale entre la tete et l'ecran, qui prend toute la hauteur */
+.ap-app { display: flex; flex-direction: column; min-width: 0; }
+.ap-tete { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); height: 2.75rem; padding: 0 var(--s3); background: var(--surface); border: 1px solid var(--filet); border-bottom: 0; border-radius: 12px 12px 0 0; }
+.ap-fil { display: flex; align-items: center; gap: var(--s1); min-width: 0; }
+.ap-retour { display: inline-flex; align-items: center; gap: 2px; color: var(--discret); text-decoration: none; font-size: var(--t-petit); white-space: nowrap; }
+.ap-retour .ico { transform: rotate(180deg); }
+.ap-retour:hover { color: var(--marque); }
+.ap-sep { color: var(--pale); }
+.contenu .ap-fil h1 { margin: 0; font-size: var(--t-corps); font-weight: 500; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ap-eq-t { color: var(--discret); font-size: var(--t-meta); white-space: nowrap; }
+.ap-cadre { display: block; width: 100%; height: calc(100vh - 150px); min-height: 480px; border: 1px solid var(--filet); border-radius: 0 0 12px 12px; background: var(--surface); }
+@media (max-width: 600px) { .ap-eq-t { display: none; } .ap-tete { padding: 0 var(--s2); } }
+/* RGI_02033 (Antoine a PCP049-1124-c : « Je valide ce fond », l'option 2E de la fiche fond-de-l-ecran/v1, le cadre
+   souleve) : la barre et l'ecran forment une seule carte blanche, sans trait, posee sur une ombre douce ; tout le tour de
+   l'ecran ouvert passe au gris. L'interieur blanc de l'ecran se pose dans sa page, en mode cadre (PCP080). */
+.droite:has(.ap-app) { background-color: var(--surface2); }
+.ap-app { border-radius: 12px; box-shadow: 0 10px 30px rgba(22, 21, 15, .14); }
+.ap-app .ap-tete { border: 0; border-bottom: 1px solid var(--filet); }
+.ap-app .ap-cadre { border: 0; }
 .ap-eq { margin: 0; color: var(--discret); font-size: var(--t-meta); }
 .ap-nom { margin: 0; font-size: var(--t-titre-section); }
 .ap-quoi { margin: 0; color: var(--encre2); }
 .ap-pied { display: flex; align-items: center; justify-content: flex-end; gap: var(--s2); margin-top: auto; padding-top: var(--s1); }
 
 /* Les agents IA sur la carte des flux (DEC_01462, halo lumineux 2B de la fiche v2) : un systeme qui porte un agent baigne
-   dans une lueur violette, ses numeros en pilule dessous ; un agent de flux est un trait violet continu et lumineux, a
-   cote du flux, son numero en pilule ; un agent arrete en gris. La place de chaque agent vient de sa fiche publiee. */
+   dans une lueur violette, ses numeros en pilule dessous ; ni trait de flux ni agent arrete sur la carte (RGI_02027).
+   La place de chaque agent vient de sa fiche publiee. */
 .cf .ia-lueur { fill: var(--ia-f); stroke: none; filter: blur(5px); opacity: .95; }
-.cf .ia-fil { fill: none; stroke: var(--ia); stroke-width: 1.6; stroke-dasharray: none; opacity: .9; filter: drop-shadow(0 0 3px var(--ia-trait)); }
-.cf .ia-fil.ar { opacity: .3; filter: none; }
 .cf .ia-pil { fill: var(--ia); }
-.cf .ia-pil.ar { fill: var(--pale); }
 .cf .ia-pil-t { fill: var(--surface); font: 600 9.5px var(--mono); text-anchor: middle; pointer-events: none; }
 .cf svg.focus .ia-agents, .cf svg.focus .ia-fond { opacity: .35; }
 .cf .ia-lg-i { display: inline-block; width: .8rem; height: .8rem; border-radius: var(--r-rond); background-color: var(--ia-f); box-shadow: 0 0 6px var(--ia); }

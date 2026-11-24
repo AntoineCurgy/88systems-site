@@ -40,7 +40,6 @@
   --ia-bord: #d4cafe;
   --ia-lueur: rgba(110, 86, 207, .35);   /* le rayonnement d'une pastille d'agent */
   --ia-lueur-forte: rgba(110, 86, 207, .5);
-  --ia-trait: rgba(110, 86, 207, .7);    /* la lueur du trait d'un agent de flux */
   /* sept tailles (DEC_00827 ; 11 px a rejoint 12 px, DEC_00842, 2A) */
   --champ-tel: 16px;   /* le texte d un champ sur telephone : hors des tailles de la charte, le controle des pages porte l exception (NTE de PCP051, 2026-11-11) */
   --t-menu: 11px;   /* le libelle du menu de gauche seul, comme avant la charte (DEC_00853, choix 3A d'Antoine) */

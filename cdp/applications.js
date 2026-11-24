@@ -12,16 +12,25 @@ function lienEcran(a) {
   return "applications.html?" + new URLSearchParams({ ecran: a.id });
 }
 
+// RGI_02032 (Antoine a PCP049-1124-a : l'option C de la fiche « tete de l'ecran », « la barre collee a l'ecran ») : ni
+// titre ni lien au-dessus ; une barre fine d'un seul tenant avec le cadre, « ‹ Applications / <nom> » a gauche, l'equipe a
+// droite, pour laisser toute la hauteur a l'ecran. Le nom et l'equipe sont lus dans la page de l'ecran.
 function vueEcran(a) {
   const e = a.ecran, nom = e.nom || a.nom;
-  const retour = el("a", "ap-retour", "← Applications");
+  const retour = el("a", "ap-retour");
   retour.href = "applications.html";
+  retour.append(ico("chevron", 16), "Applications");
+  const fil = el("div", "ap-fil");
+  fil.append(retour, el("span", "ap-sep", "/"), el("h1", null, nom));
   const tete = el("div", "ap-tete");
-  tete.append(retour, el("h1", null, nom));
+  tete.append(fil);
+  if (e.equipe) tete.append(el("span", "ap-eq-t", e.equipe));
   const cadre = el("iframe", "ap-cadre");
   cadre.title = nom;
   cadre.src = API + "/api/automatisations/" + encodeURIComponent(a.id) + "/page";
-  return [tete, cadre];
+  const app = el("div", "ap-app");
+  app.append(tete, cadre);
+  return [app];
 }
 
 function carteAppli(a) {
@@ -61,6 +70,6 @@ let ecranPose = false;
 demarrer(() => suivre([SOURCES.autos], (d, premier) => {
   if (ecranPose) return;
   const vue = vueApplications(d);
-  ecranPose = vue.some((x) => x.tagName === "IFRAME");
+  ecranPose = vue.some((x) => x.classList.contains("ap-app"));
   poser(vue, premier);
 }));
