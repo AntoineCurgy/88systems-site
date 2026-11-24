@@ -11,6 +11,7 @@ function retour() {
   const [page, requete = ""] = r.split("?");
   if (page === "carte") return pageCarte(new URLSearchParams(requete));
   if (page === "ecran") return pageEcran(new URLSearchParams(requete));
+  if (page === "page") return pageReservee(new URLSearchParams(requete));
   return PAGES.includes(page) ? page + (requete ? "?" + requete : "") : "index.html";
 }
 
@@ -29,6 +30,13 @@ function pageCarte(q) {
 function pageEcran(q) {
   const aut = q.get("aut") || "";
   return /^[A-Za-z0-9_]{1,40}$/.test(aut) ? API + "/api/automatisations/" + aut + "/page" : "index.html";
+}
+
+// RGI_02076 : une page reservee (le plan d'action de Terres & Eaux) ramene, apres le code, a son adresse du site, a cote
+// de cette page ; le nom garde ses seuls caracteres sans danger
+function pageReservee(q) {
+  const nom = q.get("nom") || "";
+  return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(nom) && nom.length <= 40 ? nom : "index.html";
 }
 
 let adresseSaisie = "";
