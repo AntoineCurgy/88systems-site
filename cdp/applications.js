@@ -35,11 +35,13 @@ function vueEcran(a) {
 
 function carteAppli(a) {
   const e = a.ecran, nom = e.nom || a.nom, url = lienEcran(a);
+  // RGI_02034 (Antoine a PCP049-1124-j : « il faut supprimer "Comptabilité fournisseurs · Aucune facture" » ; la phrase
+  // « Traitement automatique des factures fournisseurs ») : ni equipe ni compte ; la phrase vient de la page de l'ecran,
+  // l'objectif de l'automatisation a defaut
   const li = el("li", "carte ap-c");
-  const eq = [e.equipe, e.compte].filter(Boolean).join(" · ");
-  if (eq) li.append(el("p", "ap-eq", eq));
   li.append(el("h2", "ap-nom", nom));
-  if (a.objectif) li.append(el("p", "ap-quoi", a.objectif));
+  const quoi = e.description || a.objectif;
+  if (quoi) li.append(el("p", "ap-quoi", quoi));
   const ouvrir = el("a", "btn b-l");
   ouvrir.href = url;
   ouvrir.setAttribute("aria-label", "Ouvrir " + nom);

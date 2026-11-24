@@ -20,6 +20,8 @@
   --clair: #cfe1e6;
   --ombre-fen: 0 18px 50px rgba(22, 21, 15, .25);
   --voile: rgba(22, 21, 15, .45);
+  --ombre-app: 0 10px 30px rgba(22, 21, 15, .14);   /* une application ouverte au premier plan (RGI_02033) */
+  --ombre-carte-app: 0 10px 30px rgba(22, 21, 15, .16);   /* la carte d'une application (RGI_02034, variante 4B) */
   --texte: Helvetica, Arial, sans-serif;   /* Helvetica partout, choisie par Antoine sur capture le 2026-11-11 (DEC_00855) : « celle qui me va » ; Arial a defaut */
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --hb: 4.6rem;

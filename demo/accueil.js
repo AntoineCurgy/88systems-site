@@ -61,8 +61,9 @@ function caseAuto(a) {
   return li;
 }
 
-// un point d'agent, a la forme des points des automatisations : son numero court seul, le point de son etape, en violet
-// (DEC_01462, Antoine a PCP049-1121-b : « sans les lettres IA, les numéros uniquement ») ; un agent arrete en gris
+// un point d'agent, a la forme des points des automatisations, en violet ; un agent arrete en gris. RGI_02036 (depot
+// d'Antoine du 2026-11-24 a 11h02 : « les IA, notés auj 02, 03... doivent s'appeler IA02, IA03, ... et il faut enlever
+// les carrés autour ») : « IA » devant le numero, sans cadre
 function caseAgent(a) {
   const st = statutAg(a);
   const li = el("li");
@@ -71,7 +72,7 @@ function caseAgent(a) {
   lien.title = `Agent IA · ${a.nom} · ${etapeAg(a)} · banc ${bancAg(a)}`;
   const pt = el("span", "pt");
   pt.setAttribute("aria-hidden", "true");
-  const num = el("span", null, a.court);
+  const num = el("span", null, "IA" + a.court);
   num.setAttribute("aria-hidden", "true");
   lien.append(pt, num, el("span", "sr", `Agent IA ${a.court} · ${a.nom} : ${etapeAg(a)}`));
   li.append(lien);
@@ -166,9 +167,20 @@ function cfChemin(A, B, droit) {
   return c ? `M${a.x},${a.y} C${c.x},${c.y} ${c.x},${c.y} ${b.x},${b.y}` : `M${a.x},${a.y} L${b.x},${b.y}`;
 }
 
-// le detail de ce qu'on survole ou touche : ses automatisations, chacune vers sa ligne
-function cfDetail(titre, autos, cible) {
+// le detail de l'element choisi : ses automatisations, chacune vers sa ligne, et ses agents IA, chacun vers sa fiche
+// (RGI_02035) ; pour un systeme, le lien vers ses automatisations, que le clic ouvrait avant
+function cfDetail(titre, autos, cible, agents = [], lienListe = "") {
   const ul = el("ul", "cf-dl");
+  for (const a of agents) {
+    const lien = el("a", "cf-ia");
+    lien.href = "agents.html?" + new URLSearchParams({ id: String(a.id) });
+    const pt = el("span", "pt");
+    pt.setAttribute("aria-hidden", "true");
+    lien.append(pt, el("span", "cf-num", "IA" + a.court), el("span", null, a.nom), el("span", "cf-fl", etapeAg(a)));
+    const li = el("li");
+    li.append(lien);
+    ul.append(li);
+  }
   for (const a of [...autos].sort(parId)) {
     const lien = el("a");
     lien.href = "automatisations.html?" + new URLSearchParams({ id: String(a.id) });
@@ -178,7 +190,14 @@ function cfDetail(titre, autos, cible) {
     ul.append(li);
   }
   cible.replaceChildren(el("p", "cf-dt", titre), ul);
+  if (lienListe) {
+    const tout = el("a", "cf-tout", "Voir dans Automatisations");
+    tout.href = lienListe;
+    cible.append(tout);
+  }
 }
+
+const CF_AIDE = "Cliquez sur un élément de la carte pour voir ses automatisations et agents IA.";
 
 // ---------------------------------------------------------------- les agents IA sur la carte (DEC_01462, RGI_02018)
 // Le halo lumineux 2B de la fiche v2 (Antoine a PCP049-1123-t) : la place de chaque agent se lit dans sa fiche publiee
@@ -205,7 +224,7 @@ function iaPilule(g, x, y, texte, titre) {
 }
 
 // la lueur sous tout, les pilules au-dessus de tout
-function iaDessin(svg, parNom, agents) {
+function iaDessin(svg, parNom, agents, choisir) {
   const fond = sv("g", { class: "ia-fond" }), haut = sv("g", { class: "ia-agents" }), parSys = new Map();
   for (const a of agents) {
     const p = iaPlace(a);
@@ -218,7 +237,8 @@ function iaDessin(svg, parNom, agents) {
   for (const [s, liste] of parSys) {
     const n = parNom.get(s), w = cfLargeur(n), h = cfHauteur(n);
     sv("rect", { x: n.x - w / 2 - 9, y: n.y - h / 2 - 9, width: w + 18, height: h + 18, rx: h / 2 + 9, class: "ia-lueur" }, fond);
-    iaPilule(haut, n.x, n.y + h / 2 + 15, liste.map((a) => a.court).join(" · "), liste.map(iaTitre).join("\n"));
+    iaPilule(haut, n.x, n.y + h / 2 + 15, liste.map((a) => "IA" + a.court).join(" · "), liste.map(iaTitre).join("\n"));
+    if (choisir) choisir(haut.lastElementChild, n.montrer);   // RGI_02035 : la pilule violette choisit son systeme
   }
   svg.insertBefore(fond, svg.children[1]);   // apres les definitions, sous les liaisons
   svg.append(haut);
@@ -234,11 +254,24 @@ function cfDessin(g, detail, agents) {
   }
   const parNom = new Map(g.noeuds.map((n) => [n.nom, n]));
   const couchL = sv("g", {}, svg), couchN = sv("g", {}, svg);
+  // RGI_02035 (depot d'Antoine du 2026-11-24 a 11h02 : « quand on survole sur la carte ca ne fait rien, il faut cliquer
+  // sur un élément pour que ca s'affiche à droite, et quand on clique dans le vide, ca annule la sélection ») : le
+  // survol ne change rien ; un clic choisit, un clic dans le vide ou Echap rend la carte et l'aide
   const focus = (els) => {
     svg.classList.toggle("focus", Boolean(els));
     svg.querySelectorAll(".on").forEach((e) => e.classList.remove("on"));
     (els || []).forEach((e) => e.classList.add("on"));
   };
+  const annuler = () => { focus(null); detail.replaceChildren(el("p", "cf-aide", CF_AIDE)); };
+  const choisir = (cible, f) => {
+    cible.setAttribute("tabindex", "0");
+    cible.setAttribute("role", "button");
+    cible.addEventListener("click", (e) => { e.stopPropagation(); f(); });
+    cible.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(); } });
+  };
+  svg.addEventListener("click", annuler);
+  svg.addEventListener("keydown", (e) => { if (e.key === "Escape") annuler(); });
+  const agentsDe = (nom) => (agents || []).filter((x) => { const p = iaPlace(x); return p && p.type === "systeme" && p.sys === nom; });
   for (const l of g.liens) {
     const A = parNom.get(l.a), B = parNom.get(l.b);
     const dir = l.dirige.size === 1 && !l.controle ? [...l.dirige][0] : null;
@@ -251,28 +284,27 @@ function cfDessin(g, detail, agents) {
     const titre = `${D.nom} ${seul ? "↔" : dir ? "→" : "⇄"} ${F.nom} · ${pluriel(l.autos.length, "automatisation", "automatisations")}`;
     sv("title", {}, zone).textContent = titre;
     l.el = p;
-    const montrer = () => { focus([p, A.el, B.el]); cfDetail(titre, l.autos, detail); };
-    zone.addEventListener("mouseenter", montrer);
-    zone.addEventListener("click", montrer);
+    choisir(zone, () => { focus([p, A.el, B.el]); cfDetail(titre, l.autos, detail); });
   }
   for (const n of g.noeuds) {
     const w = cfLargeur(n), h = cfHauteur(n);
-    const a = sv("a", { href: "automatisations.html?" + new URLSearchParams({ sys: n.nom }), class: "cf-n" }, couchN);
+    const a = sv("g", { class: "cf-n" }, couchN);
     sv("rect", { x: n.x - w / 2, y: n.y - h / 2, width: w, height: h, rx: h / 2, style: `stroke:${CF_COUL[n.statut]}` }, a);
     sv("circle", { cx: n.x - w / 2 + 14, cy: n.y, r: 4, style: `fill:${CF_COUL[n.statut]}` }, a);
     sv("text", { x: n.x + 8, y: n.y + 4.5, "text-anchor": "middle", class: n.grand ? "g" : "" }, a).textContent = n.nom;
     sv("title", {}, a).textContent = `${n.nom} · ${pluriel(n.autos.length, "automatisation", "automatisations")}`;
     n.el = a;
-    const montrer = () => {
+    n.montrer = () => {
       const liens = g.liens.filter((l) => l.a === n.nom || l.b === n.nom);
+      const ags = agentsDe(n.nom);
       focus([a, ...liens.map((l) => l.el), ...[...n.voisins].map((v) => parNom.get(v).el)]);
-      cfDetail(`${n.nom} · ${pluriel(n.autos.length, "automatisation", "automatisations")}`, n.autos, detail);
+      cfDetail(`${n.nom} · ${pluriel(n.autos.length, "automatisation", "automatisations")}` +
+        (ags.length ? ` · ${pluriel(ags.length, "agent IA", "agents IA")}` : ""), n.autos, detail, ags,
+        "automatisations.html?" + new URLSearchParams({ sys: n.nom }));
     };
-    a.addEventListener("mouseenter", montrer);
-    a.addEventListener("focus", montrer);
+    choisir(a, n.montrer);
   }
-  svg.addEventListener("mouseleave", () => focus(null));
-  if (agents && agents.length) iaDessin(svg, parNom, agents);
+  if (agents && agents.length) iaDessin(svg, parNom, agents, choisir);
   return svg;
 }
 
@@ -305,29 +337,13 @@ function carteDesFlux(autosD, agents) {
     sec.append(ch, el("p", "cf-sous", "Aucun système n'est encore relié par une automatisation."));
     return sec;
   }
-  const n = { ok: 0, panne: 0, construction: 0 };
-  for (const l of g.liens) n[l.statut]++;
-  const sous = el("p", "cf-sous", `${pluriel(g.noeuds.length, "système", "systèmes")} · ${pluriel(g.liens.length, "liaison", "liaisons")} : ` +
-    `${n.ok} fonctionnelle${n.ok > 1 ? "s" : ""}, ${n.panne} interrompue${n.panne > 1 ? "s" : ""}` +
-    (n.construction ? `, ${n.construction} en construction` : "") +
-    (g.globaux.length ? ` · et ${pluriel(g.globaux.length, "contrôle", "contrôles")} sur tous les systèmes` : "") +
-    iaPhrase(places));
+  // RGI_02035 : plus de phrase sous le titre (depot d'Antoine du 2026-11-24 a 11h02 : « Supprime cette phrase »)
   const detail = el("div", "cf-d");
-  detail.append(el("p", "cf-aide", "Survolez ou touchez un système ou une liaison pour voir ses automatisations ; un clic sur un système ouvre ses automatisations."));
+  detail.append(el("p", "cf-aide", CF_AIDE));
   const corps = el("div", "cf-corps");
   corps.append(cfDessin(g, detail, agents), detail);
-  sec.append(ch, sous, corps);
+  sec.append(ch, corps);
   return sec;
-}
-
-// les agents places sur la carte, comptes par cas ; un agent sur toutes les automatisations ne se dessine pas, il se
-// compte ici, comme les controles sur tous les systemes (choix 1A)
-function iaPhrase(places) {
-  const k = (t) => places.filter((p) => p && p.type === t).length, n = places.filter(Boolean).length;
-  if (!n) return "";
-  const cas = [[k("systeme"), "dans un système"], [k("toutes"), "sur toutes les automatisations"]]
-    .filter(([c]) => c).map(([c, t]) => `${c} ${t}`);
-  return ` · ${pluriel(n, "agent IA", "agents IA")} : ${cas.join(", ")}`;
 }
 
 function vueAccueil([autosD, rapsD, agD]) {

@@ -23,6 +23,8 @@
   --clair: #cfe1e6;
   --ombre-fen: 0 18px 50px rgba(22, 21, 15, .25);
   --voile: rgba(22, 21, 15, .45);
+  --ombre-app: 0 10px 30px rgba(22, 21, 15, .14);   /* une application ouverte au premier plan (RGI_02033) */
+  --ombre-carte-app: 0 10px 30px rgba(22, 21, 15, .16);   /* la carte d'une application (RGI_02034, variante 4B) */
   --texte: Helvetica, Arial, sans-serif;   /* Helvetica partout, choisie par Antoine sur capture le 2026-11-11 (DEC_00855) : « celle qui me va » ; Arial a defaut */
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --hb: 4.6rem;
@@ -153,6 +155,11 @@ html.sans-journaux a[data-page="journaux"] { display: none !important; }
 
 .droite { display: flex; flex-direction: column; min-width: 0; min-height: calc(100vh - var(--hb)); }
 .droite > main { flex: 1; }
+/* RGI_02037 (Antoine a PCP049-1124-m : « Ok pour tout ca, c'est parfait », l'essai 7F de la fiche fond-bleu-partout/v3) :
+   le contraste de l'ecran ouvert (RGI_02033) sur toutes les pages, sans bleu : le menu blanc, le tour gris soutenu, la
+   tete figee du meme gris (« au detail pret de la partie superieure »), chaque bloc blanc souleve sur l'ombre douce */
+.droite, .droite .tete-fixe { background-color: var(--surface2); }
+.carte, .ke { box-shadow: var(--ombre-app); }
 .contenu { max-width: 110rem; width: 100%; margin: 0 auto; padding: var(--s4) var(--s5) var(--s6); min-width: 0; display: flex; flex-direction: column; gap: var(--s3); }
 .contenu h1 { font-size: var(--t-titre-page); letter-spacing: -.015em; }
 .sous-titre { margin: calc(-1 * var(--s2)) 0 0; color: var(--discret); }
@@ -696,9 +703,10 @@ a.ac-j:hover { border-color: var(--marque); }
 .ac-sur { font-size: var(--t-meta); color: var(--marque); font-weight: 500; letter-spacing: .04em; margin-bottom: var(--s00); }
 @media (max-width: 40rem) { .ac-deux { grid-template-columns: 1fr; } }
 /* la pastille d'un agent : blanche, qui rayonne en violet, son numero seul (DEC_01462) ; un agent arrete reste gris */
-.case.ag-case { background-color: var(--surface); color: var(--ia); box-shadow: 0 0 0 1px var(--ia-bord), 0 0 10px var(--ia-lueur); }
-.case.ag-case:hover { box-shadow: 0 0 0 1px var(--ia), 0 0 14px var(--ia-lueur-forte); }
-.case.ag-case.ia-arrete { background-color: var(--fond); box-shadow: none; color: var(--discret); }
+/* RGI_02036 : un agent IA sans carre autour, « IA02 » en violet sous son point qui rayonne ; arrete, en gris */
+.case.ag-case { background-color: transparent; color: var(--ia); box-shadow: none; }
+.case.ag-case:hover { background-color: var(--ia-f); }
+.case.ag-case.ia-arrete { background-color: transparent; color: var(--discret); }
 
 /* La carte des flux de l'accueil (DEC_00981, RGI_01823 ; Antoine, 2026-11-14, PCP049-1114-a : « je veux exactement cette
    version ») : chaque systeme une fois, chaque liaison une fois, aux couleurs des points ; un trait plein est un flux,
@@ -711,7 +719,11 @@ a.ac-j:hover { border-color: var(--marque); }
 .cf .cf-z { fill: none; stroke: transparent; stroke-width: 14; cursor: pointer; }
 .cf .cf-n { cursor: pointer; transition: opacity .15s; }
 .cf .cf-n rect { fill: var(--surface); stroke-width: 1.6; }
-.cf .cf-n:hover rect, .cf .cf-n:focus rect { fill: var(--survol); }
+/* RGI_02035 : le survol ne change rien ; l'element choisi au clavier se voit */
+.cf .cf-n:focus-visible rect { fill: var(--survol); }
+.cf .cf-n:focus, .cf .cf-z:focus, .cf .ia-agents g:focus { outline: none; }
+.cf .ia-agents g { cursor: pointer; }
+.cf svg { cursor: default; }
 .cf .cf-n text { font-size: 13px; font-weight: 500; fill: var(--encre); }
 .cf .cf-n text.g { font-size: 15px; }
 .cf svg.focus .cf-e:not(.on), .cf svg.focus .cf-n:not(.on) { opacity: .15; }
@@ -723,6 +735,10 @@ a.ac-j:hover { border-color: var(--marque); }
 .cf .cf-dl a { display: grid; grid-template-columns: auto auto 1fr; gap: .1rem .45rem; align-items: center; padding: .3rem 0;
   color: var(--encre); text-decoration: none; border-top: 1px solid var(--filet); font-size: 13px; }
 .cf .cf-dl a:hover { background: var(--survol); }
+.cf .cf-dl a.cf-ia { color: var(--ia); }
+.cf .cf-dl a.cf-ia .pt { width: 8px; height: 8px; border-radius: 50%; background: var(--ia); box-shadow: 0 0 6px var(--ia-lueur-forte); }
+.cf .cf-tout { display: inline-block; margin-top: var(--s2); color: var(--marque); font-size: var(--t-petit); font-weight: 500; text-decoration: none; }
+.cf .cf-tout:hover { text-decoration: underline; }
 .cf .cf-num { color: var(--discret); font-variant-numeric: tabular-nums; }
 .cf .cf-fl { grid-column: 3; font-size: 12px; color: var(--marque); }
 .cf .cf-lg { display: inline-flex; align-items: center; gap: .3rem; }
@@ -826,7 +842,9 @@ tr.dr-masque > th, tr.dr-masque > td { color: var(--pale); background-color: var
 /* L'onglet « Applications » (RGI_02014, option 1A de la fiche du 2026-11-23, PCP049-1123-p) : une carte par ecran de
    travail, sur le modele de la page Agents et des « Apps » de Notion */
 .ap-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: var(--s3); }
-.ap-c { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+/* RGI_02034 (Antoine a PCP049-1124-j : « que le bloc de l'application […] ressorte un peu, comme une application dans
+   l'app store […] au premier plan ») : la carte posee sur la meme ombre douce que l'ecran ouvert (RGI_02033) */
+.ap-c { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; box-shadow: var(--ombre-carte-app); }
 /* RGI_02024 : l'ecran ouvert dans le portail, sous son bandeau et son menu */
 /* RGI_02032 (Antoine a PCP049-1124-a, option C) : une barre fine d'un seul tenant avec le cadre, qui en fait l'en-tete ;
    RGI_02026 : rien ne s'intercale entre la tete et l'ecran, qui prend toute la hauteur */
@@ -844,11 +862,11 @@ tr.dr-masque > th, tr.dr-masque > td { color: var(--pale); background-color: var
 /* RGI_02033 (Antoine a PCP049-1124-c : « Je valide ce fond », l'option 2E de la fiche fond-de-l-ecran/v1, le cadre
    souleve) : la barre et l'ecran forment une seule carte blanche, sans trait, posee sur une ombre douce ; tout le tour de
    l'ecran ouvert passe au gris. L'interieur blanc de l'ecran se pose dans sa page, en mode cadre (PCP080). */
-.droite:has(.ap-app) { background-color: var(--surface2); }
-.ap-app { border-radius: 12px; box-shadow: 0 10px 30px rgba(22, 21, 15, .14); }
+/* et la liste des applications, comme l'ecran ouvert (RGI_02034, Antoine a PCP049-1124-l : la variante 4B, « le tour plus gris ») */
+.droite:has(.ap-app), .droite:has(.ap-liste) { background-color: var(--surface2); }
+.ap-app { border-radius: 12px; box-shadow: var(--ombre-app); }
 .ap-app .ap-tete { border: 0; border-bottom: 1px solid var(--filet); }
 .ap-app .ap-cadre { border: 0; }
-.ap-eq { margin: 0; color: var(--discret); font-size: var(--t-meta); }
 .ap-nom { margin: 0; font-size: var(--t-titre-section); }
 .ap-quoi { margin: 0; color: var(--encre2); }
 .ap-pied { display: flex; align-items: center; justify-content: flex-end; gap: var(--s2); margin-top: auto; padding-top: var(--s1); }
