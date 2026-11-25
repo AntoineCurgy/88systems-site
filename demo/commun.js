@@ -329,7 +329,8 @@ function versConnexion(motif) {
   const ecran = p === "applications.html" && n && n !== "applications" && !location.search ? "?" + new URLSearchParams({ ecran: n }) : "";
   // RGI_02080 : depuis une page reservee du menu, la connexion ramene a elle (la meme forme que la page reservee seule)
   const reservee = document.querySelector('script[src^="reservee.js"]');
-  const q = new URLSearchParams({ retour: reservee ? "page?nom=" + n : p + (location.search || ecran) });
+  const a = /^#[A-Za-z0-9_-]{1,40}$/.test(location.hash) ? "&ancre=" + location.hash.slice(1) : "";   // RGI_02116
+  const q = new URLSearchParams({ retour: reservee ? "page?nom=" + n + a : p + (location.search || ecran) });
   if (motif) q.set("motif", motif);
   location.replace("connexion.html?" + q.toString());
 }

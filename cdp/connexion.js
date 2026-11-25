@@ -34,9 +34,11 @@ function pageEcran(q) {
 
 // RGI_02076 : une page reservee (le plan d'action de Terres & Eaux) ramene, apres le code, a son adresse du site, a cote
 // de cette page ; le nom garde ses seuls caracteres sans danger
+// RGI_02116 : l'onglet demande (#etapes) traverse la connexion, ses seuls caracteres sans danger
 function pageReservee(q) {
-  const nom = q.get("nom") || "";
-  return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(nom) && nom.length <= 40 ? nom : "index.html";
+  const nom = q.get("nom") || "", ancre = q.get("ancre") || "";
+  if (!(/^[a-z0-9]+(-[a-z0-9]+)*$/.test(nom) && nom.length <= 40)) return "index.html";
+  return nom + (/^[A-Za-z0-9_-]{1,40}$/.test(ancre) ? "#" + ancre : "");
 }
 
 let adresseSaisie = "";

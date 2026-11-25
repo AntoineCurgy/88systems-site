@@ -13,11 +13,19 @@
 <iframe title="Plan d&#x27;action · Terres &amp; Eaux" hidden></iframe>
 <script>
 (function () {
-  var api = "https://api-portail-terres-et-eaux.88systems.io", nom = "plan-action";
-  if (/\.html$/.test(location.pathname)) history.replaceState(null, "", nom + location.search);
+  var api = "https://api-portail-terres-et-eaux.88systems.io", nom = "plan-action", sure = /^[A-Za-z0-9_-]{1,40}$/;
+  function ancre() { var a = location.hash.slice(1); return sure.test(a) ? a : ""; }
+  var a = ancre();
+  if (/\.html$/.test(location.pathname)) history.replaceState(null, "", nom + location.search + location.hash);
   fetch(api + "/api/moi", { credentials: "include" }).then(function (r) {
-    if (r.status === 401) { location.replace("connexion.html?" + new URLSearchParams({ retour: "page?nom=" + nom })); return; }
-    var f = document.querySelector("iframe"); f.src = api + "/api/pages/" + nom; f.hidden = false;
+    if (r.status === 401) { location.replace("connexion.html?" + new URLSearchParams({ retour: "page?nom=" + nom + (a ? "&ancre=" + a : "") })); return; }
+    var f = document.querySelector("iframe"), base = api + "/api/pages/" + nom;
+    f.src = base + (a ? "#" + a : ""); f.hidden = false;
+    window.addEventListener("hashchange", function () { var b = ancre(); if (b) f.src = base + "#" + b; });
+    window.addEventListener("message", function (e) {
+      var o = e.origin === api && e.data && e.data.plan_onglet;
+      if (typeof o === "string" && sure.test(o)) history.replaceState(null, "", "#" + o);
+    });
   }).catch(function () {
     var p = document.createElement("p"); p.textContent = "Le service ne répond pas pour l'instant. Réessayez dans quelques minutes.";
     document.body.replaceChildren(p);

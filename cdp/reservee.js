@@ -17,7 +17,15 @@ function vueReservee() {
   tete.append(fil, el("span", "ap-essai", "À l'essai"));
   const cadre = el("iframe", "ap-cadre");
   cadre.title = page.titre;
-  cadre.src = API + "/api/pages/" + encodeURIComponent(court);
+  // RGI_02116 : l'onglet de l'adresse (#etapes) passe au cadre, et l'adresse suit l'onglet que la page annonce
+  const base = API + "/api/pages/" + encodeURIComponent(court), sure = /^[A-Za-z0-9_-]{1,40}$/;
+  const ancre = () => (sure.test(location.hash.slice(1)) ? location.hash : "");
+  cadre.src = base + ancre();
+  window.addEventListener("hashchange", () => { if (ancre()) cadre.src = base + ancre(); });
+  window.addEventListener("message", (e) => {
+    const o = e.origin === API && e.data && e.data.plan_onglet;
+    if (typeof o === "string" && sure.test(o)) history.replaceState(null, "", "#" + o);
+  });
   const app = el("div", "ap-app");
   app.append(tete, cadre);
   return [app];
