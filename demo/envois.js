@@ -9,7 +9,8 @@
 const SOURCE_ENVOIS = { chemin: "/api/envois", verifier: (d) => Array.isArray(d.envois) };
 const RESULTATS = { parti: ["Parti", "t-vert"], partiel: ["Partiel", "t-ambre"], "en echec": ["En échec", "t-rouge"] };
 const estCode = (e) => /code de connexion$/.test(e.motif || "");
-const estSuivi = (e) => /^\[Statut Ticket Portail des Rapports\]/.test(e.objet || "");
+// RGI_02108 : l'ancien objet d'un email d'etape et le nouveau, la meme forme que OBJET_ETAPE d'api.py
+const estSuivi = (e) => /^(\[Statut Ticket Portail des Rapports\]|(Tickets? \d+(?:, \d+)* (?:reçus?|qualifiés?|cadrés?|chiffrés?|acceptés?|en construction|livrés?, à vérifier|résolus?|en attente de votre retour|bloqués?|refusés?|mis à jour)|Demande (?:reçue|qualifiée|cadrée|chiffrée|acceptée|en construction|livrée, à vérifier|résolue|en attente de votre retour|bloquée|refusée|mise à jour))(?: · .+)?$)/i.test(e.objet || "");
 const GROUPES_ENVOI = [["", "Tous", () => true],
                        ["rapports", "Rapports", (e) => / ?rapport /.test(" " + (e.motif || ""))],
                        // RGI_01882 : les emails de suivi d'une demande, a part (depot d'Antoine du 2026-11-19 : il ne les trouvait pas)
