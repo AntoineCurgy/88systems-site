@@ -327,7 +327,9 @@ function pageCourante() {
 function versConnexion(motif) {
   const p = pageCourante(), n = nomDeChemin().replace(/\.html$/, "");
   const ecran = p === "applications.html" && n && n !== "applications" && !location.search ? "?" + new URLSearchParams({ ecran: n }) : "";
-  const q = new URLSearchParams({ retour: p + (location.search || ecran) });
+  // RGI_02080 : depuis une page reservee du menu, la connexion ramene a elle (la meme forme que la page reservee seule)
+  const reservee = document.querySelector('script[src^="reservee.js"]');
+  const q = new URLSearchParams({ retour: reservee ? "page?nom=" + n : p + (location.search || ecran) });
   if (motif) q.set("motif", motif);
   location.replace("connexion.html?" + q.toString());
 }
@@ -472,6 +474,27 @@ function ongletsDuRail(m) {
   c.toggle("sans-retours", !m.onglet_retours);
   c.toggle("sans-envois", !m.onglet_envois);
   c.toggle("sans-journaux", !m.onglet_journaux);   // RGI_02020 : le Journal, pour l'administrateur seul
+  pagesDuRail(m.pages || []);
+}
+
+// RGI_02080 (choix A d'Antoine a PCP049-1125-a : « Un onglet « Direction » dans le menu du portail de CDP, montré à toi
+// seul : la page réservée existante, et le menu qui ajoute les pages qu'une personne peut lire ») : une ligne du menu par
+// page reservee que l'API dit lisible par cette personne, avant « Paramètres » ; rien pour les autres.
+function pagesDuRail(pages) {
+  const nav = document.querySelector(".rail nav");
+  if (!nav) return;
+  nav.querySelectorAll("a[data-reservee]").forEach((a) => a.remove());
+  const avant = nav.querySelector('a[data-page="parametres"]'), ici = nomDeChemin().replace(/\.html$/, "");
+  for (const p of pages) {
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(String(p.court))) continue;
+    const a = el("a");
+    a.href = p.court;
+    a.dataset.page = p.court;
+    a.dataset.reservee = "";
+    a.append(ico("prospection", 18), el("span", null, String(p.titre)));
+    if (ici === p.court) a.setAttribute("aria-current", "page");
+    nav.insertBefore(a, avant);
+  }
 }
 
 // Un onglet vide le dit, et dit ce qu'il pourrait porter (PCP049-1031-c, 2026-10-31).
