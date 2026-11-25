@@ -13,7 +13,7 @@
 <iframe title="Plan d&#x27;action · Terres &amp; Eaux" hidden></iframe>
 <script>
 (function () {
-  var api = "https://api-portail-terres-et-eaux.88systems.io", nom = "plan-d-action";
+  var api = "https://api-portail-terres-et-eaux.88systems.io", nom = "plan-action";
   if (/\.html$/.test(location.pathname)) history.replaceState(null, "", nom + location.search);
   fetch(api + "/api/moi", { credentials: "include" }).then(function (r) {
     if (r.status === 401) { location.replace("connexion.html?" + new URLSearchParams({ retour: "page?nom=" + nom })); return; }
